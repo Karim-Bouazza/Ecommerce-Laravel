@@ -17,12 +17,8 @@ class ProductsTable
     {
         return $table
             ->columns([
-                TextColumn::make('category_id')
-                    ->numeric()
-                    ->sortable(),
+                ImageColumn::make('image_1'),
                 TextColumn::make('name')
-                    ->searchable(),
-                TextColumn::make('description')
                     ->searchable(),
                 TextColumn::make('price')
                     ->money()
@@ -30,17 +26,12 @@ class ProductsTable
                 TextColumn::make('stock')
                     ->numeric()
                     ->sortable(),
-                ImageColumn::make('image_1'),
-                ImageColumn::make('image_2'),
-                ImageColumn::make('image_3'),
-                ImageColumn::make('image_4'),
                 IconColumn::make('is_active')
                     ->boolean(),
+                TextColumn::make('category.name')
+                    ->numeric()
+                    ->sortable(),
                 TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
