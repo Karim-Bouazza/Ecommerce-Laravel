@@ -21,7 +21,13 @@ class ProductsTable
                 TextColumn::make('name')
                     ->searchable(),
                 TextColumn::make('price')
-                    ->money()
+                    ->numeric(decimalPlaces: 0, thousandsSeparator: ' ')
+                    ->suffix(' DZ')
+                    ->sortable(),
+                TextColumn::make('compare_price')
+                    ->numeric(decimalPlaces: 0, thousandsSeparator: ' ')
+                    ->suffix(' DZ')
+                    ->placeholder('-')
                     ->sortable(),
                 TextColumn::make('stock')
                     ->numeric()

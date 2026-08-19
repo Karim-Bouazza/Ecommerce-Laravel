@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Categories\Schemas;
 
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
 
 class CategoryForm
@@ -13,6 +14,9 @@ class CategoryForm
             ->components([
                 TextInput::make('name')
                     ->required(),
+                Toggle::make('is_active')
+                    ->required()
+                    ->default(true),
             ]);
     }
 }

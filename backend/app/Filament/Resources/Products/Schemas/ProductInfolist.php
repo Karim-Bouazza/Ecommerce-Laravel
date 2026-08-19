@@ -13,13 +13,21 @@ class ProductInfolist
     {
         return $schema
             ->components([
-                TextEntry::make('category_id')
-                    ->numeric()
+                TextEntry::make('category.name')
+                    ->label('Category')
                     ->placeholder('-'),
                 TextEntry::make('name'),
-                TextEntry::make('description'),
+                TextEntry::make('description')
+                    ->html()
+                    ->prose()
+                    ->columnSpanFull(),
                 TextEntry::make('price')
-                    ->money(),
+                    ->numeric(decimalPlaces: 0, thousandsSeparator: ' ')
+                    ->suffix(' DZ'),
+                TextEntry::make('compare_price')
+                    ->numeric(decimalPlaces: 0, thousandsSeparator: ' ')
+                    ->suffix(' DZ')
+                    ->placeholder('-'),
                 TextEntry::make('stock')
                     ->numeric(),
                 ImageEntry::make('image_1'),
