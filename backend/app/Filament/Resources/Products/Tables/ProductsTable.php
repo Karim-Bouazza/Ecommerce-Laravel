@@ -24,6 +24,13 @@ class ProductsTable
                     ->numeric(decimalPlaces: 0, thousandsSeparator: ' ')
                     ->suffix(' DZ')
                     ->sortable(),
+                TextColumn::make('purchase_price')
+                    ->label('Prix d\'achat')
+                    ->numeric(decimalPlaces: 0, thousandsSeparator: ' ')
+                    ->suffix(' DZ')
+                    ->placeholder('-')
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->sortable(),
                 TextColumn::make('compare_price')
                     ->numeric(decimalPlaces: 0, thousandsSeparator: ' ')
                     ->suffix(' DZ')

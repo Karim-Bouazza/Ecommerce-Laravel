@@ -107,11 +107,20 @@ new class extends Component
             ? Communes::where('wilaya_id', $selectedWilaya->id)->orderBy('name')->get()
             : collect();
 
+        $recommendedProducts = Product::with('category')
+            ->where('is_active', true)
+            ->where('id', '!=', $this->product->id)
+            ->whereColumn('compare_price', '>', 'price')
+            ->orderByRaw('(compare_price - price) / compare_price DESC')
+            ->take(4)
+            ->get();
+
         return [
             'images' => $images,
             'wilayas' => $wilayas,
             'selectedWilaya' => $selectedWilaya,
             'communes' => $communes,
+            'recommendedProducts' => $recommendedProducts,
         ];
     }
 };
@@ -131,10 +140,12 @@ new class extends Component
         </div>
 
         <div class="flex flex-col gap-4">
-            <flux:heading size="xl" level="1">{{ $product->name }}</flux:heading>
+            <div class="text-center lg:text-left">
+                <flux:heading size="xl" level="1">{{ $product->name }}</flux:heading>
+            </div>
 
-            <div class="flex items-center gap-3">
-                <flux:text inline variant="strong" class="text-2xl font-bold">
+            <div class="flex items-center justify-center gap-3 lg:justify-start">
+                <flux:text inline variant="strong" class="text-2xl font-bold text-[#f6c530]!">
                     {{ number_format($product->price) }} DA
                 </flux:text>
 
@@ -365,6 +376,18 @@ new class extends Component
         <flux:card class="prose prose-zinc mt-10 max-w-none p-6 dark:prose-invert">
             {!! $product->description !!}
         </flux:card>
+    @endif
+
+    @if ($recommendedProducts->isNotEmpty())
+        <div class="mt-10">
+            <flux:heading size="xl" level="2" class="mb-6">Produits recommandés</flux:heading>
+
+            <div class="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
+                @foreach ($recommendedProducts as $recommendedProduct)
+                    <x-product-card :product="$recommendedProduct" promo-badge />
+                @endforeach
+            </div>
+        </div>
     @endif
     </flux:container>
 </div>

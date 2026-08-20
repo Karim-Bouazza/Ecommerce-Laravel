@@ -117,6 +117,6 @@ class CreateOrderService
 
         $sequence = Order::whereDate('created_at', $today->toDateString())->count() + 1;
 
-        return sprintf('%s/%06d', $today->format('Y/m/d'), $sequence);
+        return sprintf('%s/0%d', $today->format('Y/m/d'), $sequence);
     }
 }

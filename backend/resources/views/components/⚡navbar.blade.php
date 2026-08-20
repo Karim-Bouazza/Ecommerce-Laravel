@@ -38,34 +38,55 @@ new class extends Component {
         </div>
 
         <flux:modal name="mobile-menu" variant="flyout" position="left" class="w-64">
-            <div class="flex flex-col gap-4">
-                <flux:brand href="{{ url('/') }}" name="ProSecurity DZ" class="text-lg font-bold text-zinc-900" />
+            <div class="flex min-h-[calc(100dvh-4rem)] flex-col gap-4">
+                <flux:brand href="{{ url('/') }}" name="ProSecurity DZ" class="text-lg font-bold text-zinc-900 [&>div:last-child]:text-[18px]!" />
 
                 <flux:navlist>
                     <flux:navlist.item href="{{ url('/') }}">
                         Accueil
                     </flux:navlist.item>
 
+                    <flux:navlist.item href="{{ route('products.index') }}">
+                        Produits
+                    </flux:navlist.item>
+
                     @foreach ($categories as $category)
-                        <flux:navlist.item href="#">
+                        <flux:navlist.item href="{{ route('products.index', ['category_id' => $category->id]) }}">
                             {{ $category->name }}
                         </flux:navlist.item>
                     @endforeach
                 </flux:navlist>
+
+                <flux:spacer />
+
+                {{-- Login pinned to the bottom of the flyout --}}
+                <div class="-mx-8 -mb-2 border-t border-zinc-100 px-8 pt-4">
+                    <a
+                        href="{{ route('filament.admin.auth.login') }}"
+                        class="flex items-center justify-center gap-2 py-1 text-sm font-medium text-zinc-800 hover:text-zinc-950"
+                    >
+                        <flux:icon.user class="size-5" />
+                        Login
+                    </a>
+                </div>
             </div>
         </flux:modal>
 
         {{-- Desktop: brand + nav links + login --}}
         <div class="hidden w-full items-center gap-6 sm:flex">
-            <flux:brand href="{{ url('/') }}" name="ProSecurity DZ" class="text-lg font-bold text-zinc-900" />
+            <flux:brand href="{{ url('/') }}" name="ProSecurity DZ" class="text-lg font-bold text-zinc-900 [&>div:last-child]:text-[18px]!" />
 
             <flux:navbar>
                 <flux:navbar.item href="{{ url('/') }}">
                     Accueil
                 </flux:navbar.item>
 
+                <flux:navbar.item href="{{ route('products.index') }}">
+                    Produits
+                </flux:navbar.item>
+
                 @foreach ($categories as $category)
-                    <flux:navbar.item href="#">
+                    <flux:navbar.item href="{{ route('products.index', ['category_id' => $category->id]) }}">
                         {{ $category->name }}
                     </flux:navbar.item>
                 @endforeach
@@ -73,7 +94,7 @@ new class extends Component {
 
             <flux:spacer />
 
-            <flux:button href="#" variant="primary" class="shrink-0 rounded-full">
+            <flux:button href="{{ route('filament.admin.auth.login') }}" variant="primary" class="shrink-0 rounded-full mr-5">
                 Login
             </flux:button>
         </div>

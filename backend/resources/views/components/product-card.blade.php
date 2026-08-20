@@ -1,4 +1,4 @@
-@props(['product'])
+@props(['product', 'promoBadge' => false])
 
 @php
     $hasDiscount = $product->compare_price > $product->price;
@@ -12,10 +12,16 @@
     href="{{ route('products.show', $product->id) }}"
     class="group block h-full"
 >
-    <flux:card class="flex h-full flex-col gap-3 p-3 transition group-hover:shadow-lg">
+    <flux:card class="flex h-full flex-col gap-2 p-2 transition group-hover:shadow-lg sm:gap-3 sm:p-3">
 
         {{-- Product Image --}}
-        <div class="overflow-hidden rounded-lg bg-zinc-100 dark:bg-zinc-700">
+        <div class="relative overflow-hidden rounded-lg bg-zinc-100 dark:bg-zinc-700">
+            @if ($promoBadge && $hasDiscount)
+                <span class="absolute top-1.5 left-1.5 z-10 rounded-full bg-red-600 px-2 py-0.5 text-[10px] font-bold text-white sm:top-2 sm:left-2 sm:px-3 sm:py-1 sm:text-xs">
+                    Promo!
+                </span>
+            @endif
+
             <img
                 src="{{ Storage::url($product->image_1) }}"
                 alt="{{ $product->name }}"
@@ -24,7 +30,7 @@
         </div>
 
         {{-- Product Information --}}
-        <div class="flex flex-1 flex-col gap-1 px-1 pb-1">
+        <div class="flex flex-1 flex-col items-center gap-1 px-1 pb-1 text-center sm:items-start sm:text-left">
 
             <flux:heading class="truncate">
                 {{ $product->name }}
@@ -38,17 +44,17 @@
 
             <flux:spacer />
 
-            <div class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
-                <flux:text inline variant="strong" class="text-base font-bold">
+            <div class="mt-1 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 sm:justify-start">
+                <flux:text inline variant="strong" class="text-sm font-bold text-[#f6c530]! sm:text-base">
                     {{ number_format($product->price) }} DA
                 </flux:text>
 
                 @if ($hasDiscount)
-                    <flux:text inline variant="subtle" class="text-base line-through">
+                    <flux:text inline variant="subtle" class="text-xs line-through sm:text-base">
                         {{ number_format($product->compare_price) }} DA
                     </flux:text>
 
-                    <flux:badge size="sm" rounded class="ms-auto bg-accent/15! text-accent-content! dark:bg-accent/25! dark:text-accent!">
+                    <flux:badge size="sm" rounded class="sm:ms-auto bg-accent/15! text-accent-content! dark:bg-accent/25! dark:text-accent!">
                         -{{ $discountPercent }}%
                     </flux:badge>
                 @endif

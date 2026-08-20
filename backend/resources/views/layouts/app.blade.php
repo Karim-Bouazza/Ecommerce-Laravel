@@ -11,10 +11,12 @@
         @livewireStyles
         @fluxAppearance
     </head>
-    <body class="bg-zinc-50 text-zinc-900">
+    <body class="bg-zinc-50 text-zinc-900 flex min-h-screen flex-col">
         <livewire:navbar />
 
         {{ $slot }}
+
+        <x-footer />
 
         @livewireScripts
         @fluxScripts

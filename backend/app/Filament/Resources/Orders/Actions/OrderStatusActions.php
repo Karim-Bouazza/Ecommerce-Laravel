@@ -6,11 +6,13 @@ use App\Enums\OrderStatus;
 use App\Models\Order;
 use App\Models\OrderNote;
 use App\Models\OrderStatusHistory;
+use App\Models\Product;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Support\Facades\DB;
 
 class OrderStatusActions
 {
@@ -76,20 +78,33 @@ class OrderStatusActions
 
     private static function applyStatusChange(Order $record, OrderStatus $status, ?string $note = null): void
     {
-        $record->update(['status' => $status]);
+        DB::transaction(function () use ($record, $status, $note): void {
+            $record->update(['status' => $status]);
 
-        OrderStatusHistory::create([
-            'order_id' => $record->id,
-            'status' => $status,
-            'user_id' => auth()->id(),
-        ]);
+            if ($status === OrderStatus::Delivered) {
+                self::decrementStock($record);
+            }
 
-        if (filled($note)) {
-            OrderNote::create([
+            OrderStatusHistory::create([
                 'order_id' => $record->id,
+                'status' => $status,
                 'user_id' => auth()->id(),
-                'content' => $note,
             ]);
+
+            if (filled($note)) {
+                OrderNote::create([
+                    'order_id' => $record->id,
+                    'user_id' => auth()->id(),
+                    'content' => $note,
+                ]);
+            }
+        });
+    }
+
+    private static function decrementStock(Order $record): void
+    {
+        foreach ($record->items as $item) {
+            Product::whereKey($item->product_id)->decrement('stock', $item->quantity);
         }
     }
 }

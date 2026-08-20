@@ -34,6 +34,14 @@ class ProductForm
                     ->stripCharacters([' ', '.', ','])
                     ->dehydrateStateUsing(fn (?string $state) => filled($state) ? (int) str_replace([' ', '.', ','], '', $state) : $state)
                     ->suffix('DZ'),
+                TextInput::make('purchase_price')
+                    ->label('Prix d\'achat')
+                    ->helperText('Visible uniquement dans l\'administration, jamais affiché aux clients.')
+                    ->numeric()
+                    ->mask(RawJs::make("\$money(\$input, ' ', ',', 0)"))
+                    ->stripCharacters([' ', '.', ','])
+                    ->dehydrateStateUsing(fn (?string $state) => filled($state) ? (int) str_replace([' ', '.', ','], '', $state) : $state)
+                    ->suffix('DZ'),
                 TextInput::make('compare_price')
                     ->numeric()
                     ->mask(RawJs::make("\$money(\$input, ' ', ',', 0)"))

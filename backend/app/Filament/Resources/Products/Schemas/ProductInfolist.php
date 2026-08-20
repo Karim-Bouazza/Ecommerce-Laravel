@@ -24,6 +24,11 @@ class ProductInfolist
                 TextEntry::make('price')
                     ->numeric(decimalPlaces: 0, thousandsSeparator: ' ')
                     ->suffix(' DZ'),
+                TextEntry::make('purchase_price')
+                    ->label('Prix d\'achat')
+                    ->numeric(decimalPlaces: 0, thousandsSeparator: ' ')
+                    ->suffix(' DZ')
+                    ->placeholder('-'),
                 TextEntry::make('compare_price')
                     ->numeric(decimalPlaces: 0, thousandsSeparator: ' ')
                     ->suffix(' DZ')
