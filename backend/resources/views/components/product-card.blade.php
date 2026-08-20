@@ -1,48 +1,60 @@
 @props(['product'])
 
-<div>
+@php
+    $hasDiscount = $product->compare_price > $product->price;
+    $discountPercent = $hasDiscount
+        ? (int) round((($product->compare_price - $product->price) / $product->compare_price) * 100)
+        : null;
+    $formatPrice = fn ($amount) => number_format($amount, 0, '.', ' ');
+@endphp
+
 <a
-{{--    href="{{ route('products.show', $product->id) }}"--}}
-    class="relative block overflow-hidden rounded-se-3xl border border-gray-200 bg-white shadow-sm transition hover:shadow-lg"
+    href="{{ route('products.show', $product->id) }}"
+    class="group block h-full"
 >
+    <flux:card class="flex h-full flex-col gap-3 p-3 transition group-hover:shadow-lg">
 
-    {{-- Optional badge --}}
-    <span
-        class="absolute right-0 top-0 rounded-bl-2xl bg-rose-600 px-4 py-2 text-xs font-bold uppercase tracking-wider text-white"
-    >
-        New
-    </span>
+        {{-- Product Image --}}
+        <div class="overflow-hidden rounded-lg bg-zinc-100 dark:bg-zinc-700">
+            <img
+                src="{{ Storage::url($product->image_1) }}"
+                alt="{{ $product->name }}"
+                class="aspect-square w-full object-contain transition duration-300 group-hover:scale-105"
+            >
+        </div>
 
-    {{-- Product Image --}}
-    <img
-        src="{{ Storage::url($product->image_1) }}"
-        alt="{{ $product->name }}"
-        class="h-72 w-full object-cover"
-    >
+        {{-- Product Information --}}
+        <div class="flex flex-1 flex-col gap-1 px-1 pb-1">
 
-    {{-- Product Information --}}
-    <div class="p-5">
+            <flux:heading class="truncate">
+                {{ $product->name }}
+            </flux:heading>
 
-        <h2 class="text-lg font-bold text-gray-900">
-            {{ $product->name }}
-        </h2>
+            @if ($product->category)
+                <flux:text size="sm">
+                    {{ $product->category->name }}
+                </flux:text>
+            @endif
 
-        <p class="mt-2 text-sm text-gray-600">
-            {{ Str::limit($product->description, 80) }}
-        </p>
+            <flux:spacer />
 
-        <p class="mt-4 text-2xl font-bold text-indigo-700">
-            {{ number_format($product->price) }} DA
-        </p>
+            <div class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
+                <flux:text inline variant="strong" class="text-base font-bold">
+                    {{ number_format($product->price) }} DA
+                </flux:text>
 
-        <button
-            type="button"
-            class="mt-5 w-full rounded-lg bg-indigo-600 px-4 py-3 text-sm font-semibold uppercase tracking-wide text-white transition hover:bg-indigo-700"
-        >
-            View Product
-        </button>
+                @if ($hasDiscount)
+                    <flux:text inline variant="subtle" class="text-base line-through">
+                        {{ number_format($product->compare_price) }} DA
+                    </flux:text>
 
-    </div>
+                    <flux:badge size="sm" rounded class="ms-auto bg-accent/15! text-accent-content! dark:bg-accent/25! dark:text-accent!">
+                        -{{ $discountPercent }}%
+                    </flux:badge>
+                @endif
+            </div>
 
+        </div>
+
+    </flux:card>
 </a>
-</div>

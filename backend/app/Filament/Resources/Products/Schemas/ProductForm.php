@@ -25,17 +25,20 @@ class ProductForm
                     ->required(),
                 RichEditor::make('description')
                     ->required()
-                    ->columnSpanFull(),
+                    ->columnSpanFull()
+                    ->extraAttributes(['class' => 'fi-description-editor']),
                 TextInput::make('price')
                     ->required()
                     ->numeric()
-                    ->mask(RawJs::make("\$money(\$input, ' ', '.', 0)"))
-                    ->stripCharacters(' ')
+                    ->mask(RawJs::make("\$money(\$input, ' ', ',', 0)"))
+                    ->stripCharacters([' ', '.', ','])
+                    ->dehydrateStateUsing(fn (?string $state) => filled($state) ? (int) str_replace([' ', '.', ','], '', $state) : $state)
                     ->suffix('DZ'),
                 TextInput::make('compare_price')
                     ->numeric()
-                    ->mask(RawJs::make("\$money(\$input, ' ', '.', 0)"))
-                    ->stripCharacters(' ')
+                    ->mask(RawJs::make("\$money(\$input, ' ', ',', 0)"))
+                    ->stripCharacters([' ', '.', ','])
+                    ->dehydrateStateUsing(fn (?string $state) => filled($state) ? (int) str_replace([' ', '.', ','], '', $state) : $state)
                     ->suffix('DZ'),
                 TextInput::make('stock')
                     ->required()
@@ -54,7 +57,8 @@ class ProductForm
                     ->image()
                     ->directory('products'),
                 Toggle::make('is_active')
-                    ->required(),
+                    ->required()
+                    ->default(true),
             ]);
     }
 }

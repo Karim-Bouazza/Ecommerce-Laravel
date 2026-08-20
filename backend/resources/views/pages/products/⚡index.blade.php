@@ -10,13 +10,15 @@ new class extends Component {
     public function with(): array
     {
         return [
-            'products' => Product::paginate(20),
+            'products' => Product::with('category')->where('is_active', true)->paginate(20),
         ];
     }
 };
 ?>
 
-<div>
+<flux:container class="py-8">
+    <flux:heading size="xl" level="1" class="mb-6">Nos produits</flux:heading>
+
     <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
 
         @foreach ($products as $product)
@@ -28,6 +30,6 @@ new class extends Component {
     </div>
 
     <div class="mt-8">
-        {{ $products->links() }}
+        <flux:pagination :paginator="$products" />
     </div>
-</div>
+</flux:container>

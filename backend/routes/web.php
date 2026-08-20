@@ -6,4 +6,5 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::livewire('/products', 'pages::products');
+Route::livewire('/products', 'pages::products')->name('products.index');
+Route::livewire('/products/{product}', 'pages::products.show')->name('products.show');

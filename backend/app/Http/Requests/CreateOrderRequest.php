@@ -32,6 +32,10 @@ class CreateOrderRequest extends FormRequest
 
             'commune_id' => ['required', 'exists:communes,id'],
 
+            'delivery_price' => ['nullable', 'integer', 'min:0'],
+
+            'note' => ['nullable', 'string'],
+
             'items' => ['required', 'array', 'min:1'],
 
             'items.*.product_id' => ['required', 'exists:products,id'],

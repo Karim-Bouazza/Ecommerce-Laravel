@@ -2,32 +2,43 @@
 
 namespace App\Models;
 
+use App\Enums\OrderStatus;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Order extends Model
 {
     protected $fillable = [
-        'first_name',
-        'last_name',
-        'phone_number',
-        'wilaya_id',
-        'commune_id',
-        'total_price',
+        'client_id',
+        'reference',
         'status',
+        'subtotal',
+        'delivery_price',
+        'total_price',
     ];
 
-    public function items()
+    protected $casts = [
+        'status' => OrderStatus::class,
+    ];
+
+    public function client(): BelongsTo
+    {
+        return $this->belongsTo(Client::class);
+    }
+
+    public function items(): HasMany
     {
         return $this->hasMany(OrderItem::class);
     }
 
-    public function wilaya()
+    public function statusHistories(): HasMany
     {
-        return $this->belongsTo(Wilaya::class);
+        return $this->hasMany(OrderStatusHistory::class);
     }
 
-    public function commune()
+    public function notes(): HasMany
     {
-        return $this->belongsTo(Communes::class);
+        return $this->hasMany(OrderNote::class);
     }
 }

@@ -1,4 +1,6 @@
 @import 'tailwindcss';
+@import '../../vendor/livewire/flux/dist/flux.css';
+@plugin '@tailwindcss/typography';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
@@ -8,4 +10,32 @@
 @theme {
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
+
+    /* Brand accent used by Flux components (buttons, current-nav state, etc). */
+    --color-accent: #f0bb0d;
+    --color-accent-content: #a97c05;
+    --color-accent-foreground: #1b1b18;
+
+    --animate-shake-x: shake-x 3s ease-in-out infinite;
+}
+
+@keyframes shake-x {
+    0%, 86% {
+        transform: translateX(0);
+    }
+    89% {
+        transform: translateX(-6px);
+    }
+    92% {
+        transform: translateX(5px);
+    }
+    95% {
+        transform: translateX(-3px);
+    }
+    98% {
+        transform: translateX(2px);
+    }
+    100% {
+        transform: translateX(0);
+    }
 }

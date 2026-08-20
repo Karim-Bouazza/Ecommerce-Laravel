@@ -10,6 +10,8 @@ class Wilaya extends Model
     protected $fillable = [
         'code',
         'name',
+        'price_domicile',
+        'price_stop_desk',
     ];
 
     public function communes(): HasMany
