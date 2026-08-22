@@ -53,16 +53,24 @@ class ProductForm
                     ->numeric(),
                 FileUpload::make('image_1')
                     ->image()
+                    ->disk('public')
+                    ->visibility('public')
                     ->directory('products')
                     ->required(),
                 FileUpload::make('image_2')
                     ->image()
+                    ->disk('public')
+                    ->visibility('public')
                     ->directory('products'),
                 FileUpload::make('image_3')
                     ->image()
+                    ->disk('public')
+                    ->visibility('public')
                     ->directory('products'),
                 FileUpload::make('image_4')
                     ->image()
+                    ->disk('public')
+                    ->visibility('public')
                     ->directory('products'),
                 Toggle::make('is_active')
                     ->required()

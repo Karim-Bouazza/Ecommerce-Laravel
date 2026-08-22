@@ -35,12 +35,16 @@ class ProductInfolist
                     ->placeholder('-'),
                 TextEntry::make('stock')
                     ->numeric(),
-                ImageEntry::make('image_1'),
+                ImageEntry::make('image_1')
+                    ->disk('public'),
                 ImageEntry::make('image_2')
+                    ->disk('public')
                     ->placeholder('-'),
                 ImageEntry::make('image_3')
+                    ->disk('public')
                     ->placeholder('-'),
                 ImageEntry::make('image_4')
+                    ->disk('public')
                     ->placeholder('-'),
                 IconEntry::make('is_active')
                     ->boolean(),
