@@ -48,10 +48,13 @@ class OrderInfolist
                     ->schema([
                         RepeatableEntry::make('items')
                             ->hiddenLabel()
-                            ->columns(4)
+                            ->columns(5)
                             ->schema([
                                 TextEntry::make('product_name')
                                     ->label('Product'),
+                                TextEntry::make('variant')
+                                    ->label('Variant')
+                                    ->placeholder('—'),
                                 TextEntry::make('quantity'),
                                 TextEntry::make('price')
                                     ->label('Unit price')

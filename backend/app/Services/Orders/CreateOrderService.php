@@ -67,6 +67,7 @@ class CreateOrderService
                         $order->items()->create([
                             'product_id' => $product->id,
                             'product_name' => $product->name,
+                            'variant' => $item['variant'] ?? null,
                             'quantity' => $quantity,
                             'price' => $unitPrice,
                             'total_price' => $itemTotal,

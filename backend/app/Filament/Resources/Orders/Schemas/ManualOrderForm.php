@@ -9,6 +9,7 @@ use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
@@ -91,6 +92,16 @@ class ManualOrderForm
                                     ->prefixIcon('heroicon-o-lock-closed')
                                     ->mask(RawJs::make("\$money(\$input, ' ', ',', 0)"))
                                     ->suffix('DZ'),
+                                Toggle::make('has_variant')
+                                    ->label('Variante ?')
+                                    ->live()
+                                    ->dehydrated(false)
+                                    ->afterStateUpdated(fn (Set $set, bool $state) => $state ? null : $set('variant', null)),
+                                TextInput::make('variant')
+                                    ->label('Variante')
+                                    ->visible(fn (Get $get) => (bool) $get('has_variant'))
+                                    ->required(fn (Get $get) => (bool) $get('has_variant'))
+                                    ->columnSpan(2),
                             ])
                             ->columns(3)
                             ->minItems(1)
