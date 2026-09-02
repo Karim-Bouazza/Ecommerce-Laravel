@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Orders\Schemas;
 
+use App\Enums\DeliveryType;
 use App\Enums\OrderStatus;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
@@ -42,6 +43,13 @@ class OrderInfolist
                             ->label('Wilaya'),
                         TextEntry::make('client.commune.name')
                             ->label('Commune'),
+                        TextEntry::make('delivery_type')
+                            ->label('Type de livraison')
+                            ->formatStateUsing(fn (DeliveryType $state) => $state->label()),
+                        TextEntry::make('stop_desk_name')
+                            ->label('Nom du stop desk')
+                            ->placeholder('—')
+                            ->visible(fn ($record) => $record->delivery_type === DeliveryType::StopDesk),
                     ]),
 
                 Section::make('Items')

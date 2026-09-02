@@ -2,6 +2,7 @@
 
 namespace App\Services\Orders;
 
+use App\Enums\DeliveryType;
 use App\Enums\OrderStatus;
 use App\Enums\OrderType;
 use App\Models\Client;
@@ -52,6 +53,8 @@ class CreateOrderService
                         'type' => $data['type'] ?? OrderType::Ads,
                         'subtotal' => 0,
                         'delivery_price' => $data['delivery_price'] ?? 0,
+                        'delivery_type' => $data['delivery_type'] ?? DeliveryType::Domicile->value,
+                        'stop_desk_name' => $data['stop_desk_name'] ?? null,
                         'total_price' => 0,
                     ]);
 

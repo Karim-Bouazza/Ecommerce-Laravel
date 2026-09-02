@@ -2,9 +2,11 @@
 
 namespace App\Filament\Resources\Orders\Schemas;
 
+use App\Enums\DeliveryType;
 use App\Models\Communes;
 use App\Models\Product;
 use App\Models\Wilaya;
+use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -44,9 +46,12 @@ class ManualOrderForm
                             ->preload()
                             ->live()
                             ->required()
-                            ->afterStateUpdated(function (Set $set, ?string $state) {
+                            ->afterStateUpdated(function (Set $set, Get $get, ?string $state) {
                                 $set('commune_id', null);
-                                $set('delivery_price', Wilaya::find($state)?->price_domicile ?? 0);
+                                $wilaya = Wilaya::find($state);
+                                $set('delivery_price', $get('delivery_type') === DeliveryType::StopDesk->value
+                                    ? $wilaya?->price_stop_desk ?? 0
+                                    : $wilaya?->price_domicile ?? 0);
                             }),
                         Select::make('commune_id')
                             ->label('Commune')
@@ -55,6 +60,26 @@ class ManualOrderForm
                             ->preload()
                             ->required()
                             ->disabled(fn (Get $get) => blank($get('wilaya_id'))),
+                        Radio::make('delivery_type')
+                            ->label('Type de livraison')
+                            ->options(DeliveryType::options())
+                            ->default(DeliveryType::Domicile->value)
+                            ->inline()
+                            ->live()
+                            ->required()
+                            ->afterStateUpdated(function (Set $set, Get $get, ?string $state) {
+                                $wilaya = Wilaya::find($get('wilaya_id'));
+                                $set('delivery_price', $state === DeliveryType::StopDesk->value
+                                    ? $wilaya?->price_stop_desk ?? 0
+                                    : $wilaya?->price_domicile ?? 0);
+                                if ($state !== DeliveryType::StopDesk->value) {
+                                    $set('stop_desk_name', null);
+                                }
+                            }),
+                        TextInput::make('stop_desk_name')
+                            ->label('Nom du stop desk')
+                            ->visible(fn (Get $get) => $get('delivery_type') === DeliveryType::StopDesk->value)
+                            ->required(fn (Get $get) => $get('delivery_type') === DeliveryType::StopDesk->value),
                         TextInput::make('delivery_price')
                             ->numeric()
                             ->live()

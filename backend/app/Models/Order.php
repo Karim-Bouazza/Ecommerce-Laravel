@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\DeliveryType;
 use App\Enums\OrderStatus;
 use App\Enums\OrderType;
 use Illuminate\Database\Eloquent\Model;
@@ -17,12 +18,15 @@ class Order extends Model
         'type',
         'subtotal',
         'delivery_price',
+        'delivery_type',
+        'stop_desk_name',
         'total_price',
     ];
 
     protected $casts = [
         'status' => OrderStatus::class,
         'type' => OrderType::class,
+        'delivery_type' => DeliveryType::class,
     ];
 
     public function client(): BelongsTo
