@@ -47,7 +47,7 @@
                             type="button"
                             aria-label="Aller à la diapositive {{ $slideIndex + 1 }}"
                             @click="$refs.promoScroller.scrollTo({ left: {{ $slideIndex }} * $refs.promoScroller.clientWidth, behavior: 'smooth' })"
-                            :class="active === {{ $slideIndex }} ? 'w-6 bg-zinc-900' : 'w-2 bg-zinc-300'"
+                            :class="active === {{ $slideIndex }} ? 'w-6 bg-zinc-900 dark:bg-white' : 'w-2 bg-zinc-300 dark:bg-zinc-700'"
                             class="h-2 rounded-full transition-all"
                         ></button>
                     @endforeach

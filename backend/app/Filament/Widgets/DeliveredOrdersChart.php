@@ -15,6 +15,8 @@ class DeliveredOrdersChart extends ChartWidget
 
     protected ?string $heading = 'Sales Overview';
 
+    protected static ?int $sort = 3;
+
     protected int | string | array $columnSpan = 'full';
 
     protected function getType(): string

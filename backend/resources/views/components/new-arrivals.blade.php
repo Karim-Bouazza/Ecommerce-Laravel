@@ -45,7 +45,7 @@
         <div class="relative isolate mx-auto h-96 w-full overflow-hidden sm:h-128">
             @foreach ($newArrivals as $i => $product)
                 <div
-                    class="absolute top-0 left-1/2 w-52 rounded-xl border border-gray-400 transition-all duration-700 ease-out sm:w-72"
+                    class="absolute top-0 left-1/2 w-52 rounded-xl border border-gray-400 transition-all duration-700 ease-out sm:w-72 dark:border-zinc-700"
                     :style="cardStyle({{ $i }})"
                 >
                     <x-product-card :product="$product" />

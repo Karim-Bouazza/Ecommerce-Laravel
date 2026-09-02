@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\OrderStatus;
+use App\Enums\OrderType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -13,6 +14,7 @@ class Order extends Model
         'client_id',
         'reference',
         'status',
+        'type',
         'subtotal',
         'delivery_price',
         'total_price',
@@ -20,6 +22,7 @@ class Order extends Model
 
     protected $casts = [
         'status' => OrderStatus::class,
+        'type' => OrderType::class,
     ];
 
     public function client(): BelongsTo

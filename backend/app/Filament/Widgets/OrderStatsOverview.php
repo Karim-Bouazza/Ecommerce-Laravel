@@ -7,6 +7,7 @@ use App\Filament\Widgets\Concerns\InteractsWithDashboardPeriod;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
+use App\Models\ProductAdSpend;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Database\Eloquent\Builder;
@@ -15,6 +16,8 @@ use Illuminate\Support\Carbon;
 class OrderStatsOverview extends StatsOverviewWidget
 {
     use InteractsWithDashboardPeriod;
+
+    protected static ?int $sort = 1;
 
     protected function getStats(): array
     {
@@ -26,6 +29,7 @@ class OrderStatsOverview extends StatsOverviewWidget
         $cancelledOrders = $this->ordersInPeriod($from, $until)->where('status', OrderStatus::Cancelled)->count();
         $returnedOrders = $this->ordersInPeriod($from, $until)->where('status', OrderStatus::Returned)->count();
         $netProfit = $this->netProfit($from, $until);
+        $adSpendTotal = $this->adSpendTotalDzd($from, $until);
 
         $totalProducts = Product::query()
             ->when($from, fn (Builder $query) => $query->whereDate('created_at', '>=', $from))
@@ -44,6 +48,10 @@ class OrderStatsOverview extends StatsOverviewWidget
                 ->color('gray'),
             Stat::make('Total produits', $totalProducts),
             Stat::make('Bénéfice net (livrées)', number_format($netProfit, 0, ',', ' ').' DZ')
+                ->color('success'),
+            Stat::make('Dépenses pub', number_format($adSpendTotal, 0, ',', ' ').' DZ')
+                ->color('danger'),
+            Stat::make('Bénéfice net après pub', number_format($netProfit - $adSpendTotal, 0, ',', ' ').' DZ')
                 ->color('success'),
         ];
     }
@@ -72,5 +80,18 @@ class OrderStatsOverview extends StatsOverviewWidget
 
                 return $order->subtotal - $cost;
             });
+    }
+
+    /**
+     * Total ad spend, converted to DZD, for entries whose date falls within the period.
+     */
+    protected function adSpendTotalDzd(?Carbon $from, ?Carbon $until): float
+    {
+        $totalUsd = ProductAdSpend::query()
+            ->when($from, fn (Builder $query) => $query->whereDate('date', '>=', $from))
+            ->when($until, fn (Builder $query) => $query->whereDate('date', '<=', $until))
+            ->sum('amount_usd');
+
+        return (float) $totalUsd * config('ads.usd_to_dzd_rate');
     }
 }

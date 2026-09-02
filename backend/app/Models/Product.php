@@ -31,4 +31,9 @@ class Product extends Model
     {
         return $this->hasMany(OrderItem::class);
     }
+
+    public function adSpends(): HasMany
+    {
+        return $this->hasMany(ProductAdSpend::class);
+    }
 }

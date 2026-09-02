@@ -11,7 +11,7 @@
         @livewireStyles
         @fluxAppearance
     </head>
-    <body class="bg-zinc-50 text-zinc-900 flex min-h-screen flex-col">
+    <body class="bg-zinc-50 text-zinc-900 flex min-h-screen flex-col dark:bg-zinc-900 dark:text-zinc-100">
         <livewire:navbar />
 
         {{ $slot }}

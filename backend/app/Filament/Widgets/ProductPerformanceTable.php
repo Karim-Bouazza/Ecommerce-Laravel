@@ -4,7 +4,6 @@ namespace App\Filament\Widgets;
 
 use App\Enums\OrderStatus;
 use App\Filament\Widgets\Concerns\InteractsWithDashboardPeriod;
-use App\Models\OrderItem;
 use App\Models\Product;
 use Closure;
 use Filament\Tables\Columns\TextColumn;
@@ -19,15 +18,13 @@ class ProductPerformanceTable extends BaseWidget
 
     protected static ?string $heading = 'Performance des produits';
 
+    protected static ?int $sort = 2;
+
     protected int | string | array $columnSpan = 'full';
 
     public function table(Table $table): Table
     {
         [$from, $until] = $this->getPeriodRange();
-
-        $totalDelivered = $this->totalQtyForStatus(OrderStatus::Delivered, $from, $until);
-        $totalReturned = $this->totalQtyForStatus(OrderStatus::Returned, $from, $until);
-        $totalCancelled = $this->totalQtyForStatus(OrderStatus::Cancelled, $from, $until);
 
         return $table
             ->query($this->productsQuery($from, $until))
@@ -45,19 +42,29 @@ class ProductPerformanceTable extends BaseWidget
                     ->numeric()
                     ->default(0)
                     ->sortable(),
+                TextColumn::make('delivered_orders_count')
+                    ->label('Cmd livrées')
+                    ->numeric()
+                    ->default(0)
+                    ->sortable(),
+                TextColumn::make('returned_orders_count')
+                    ->label('Cmd retournées')
+                    ->numeric()
+                    ->default(0)
+                    ->sortable(),
                 TextColumn::make('delivered_percentage')
                     ->label('% Livré')
-                    ->state(fn(Product $record) => self::percentage($record->delivered_qty, $totalDelivered))
+                    ->state(fn(Product $record) => self::percentage($record->delivered_orders_count, self::totalOrders($record)))
                     ->suffix(' %')
                     ->color('success'),
                 TextColumn::make('returned_percentage')
                     ->label('% Retour')
-                    ->state(fn(Product $record) => self::percentage($record->returned_qty, $totalReturned))
+                    ->state(fn(Product $record) => self::percentage($record->returned_orders_count, self::totalOrders($record)))
                     ->suffix(' %')
                     ->color('gray'),
                 TextColumn::make('cancelled_percentage')
                     ->label('% Annulé')
-                    ->state(fn(Product $record) => self::percentage($record->cancelled_qty, $totalCancelled))
+                    ->state(fn(Product $record) => self::percentage($record->cancelled_orders_count, self::totalOrders($record)))
                     ->suffix(' %')
                     ->color('danger'),
                 TextColumn::make('revenue')
@@ -79,19 +86,14 @@ class ProductPerformanceTable extends BaseWidget
         return Product::query()
             ->withSum(['orderItems as delivered_qty' => $this->orderItemsScope($from, $until, OrderStatus::Delivered)], 'quantity')
             ->withSum(['orderItems as returned_qty' => $this->orderItemsScope($from, $until, OrderStatus::Returned)], 'quantity')
-            ->withSum(['orderItems as cancelled_qty' => $this->orderItemsScope($from, $until, OrderStatus::Cancelled)], 'quantity');
+            ->withCount(['orderItems as delivered_orders_count' => $this->orderItemsScope($from, $until, OrderStatus::Delivered)])
+            ->withCount(['orderItems as returned_orders_count' => $this->orderItemsScope($from, $until, OrderStatus::Returned)])
+            ->withCount(['orderItems as cancelled_orders_count' => $this->orderItemsScope($from, $until, OrderStatus::Cancelled)]);
     }
 
-    protected function totalQtyForStatus(OrderStatus $status, ?Carbon $from, ?Carbon $until): int
+    protected static function totalOrders(Product $record): int
     {
-        return (int) OrderItem::query()
-            ->whereHas('order', function (Builder $orderQuery) use ($status, $from, $until): void {
-                $orderQuery
-                    ->where('status', $status)
-                    ->when($from, fn(Builder $q) => $q->whereDate('created_at', '>=', $from))
-                    ->when($until, fn(Builder $q) => $q->whereDate('created_at', '<=', $until));
-            })
-            ->sum('quantity');
+        return ($record->delivered_orders_count ?? 0) + ($record->returned_orders_count ?? 0) + ($record->cancelled_orders_count ?? 0);
     }
 
     protected function orderItemsScope(?Carbon $from, ?Carbon $until, ?OrderStatus $status): Closure

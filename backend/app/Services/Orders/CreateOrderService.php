@@ -3,6 +3,7 @@
 namespace App\Services\Orders;
 
 use App\Enums\OrderStatus;
+use App\Enums\OrderType;
 use App\Models\Client;
 use App\Models\Order;
 use App\Models\OrderNote;
@@ -48,6 +49,7 @@ class CreateOrderService
                         'client_id' => $client->id,
                         'reference' => $this->generateReference(),
                         'status' => OrderStatus::Pending,
+                        'type' => $data['type'] ?? OrderType::Ads,
                         'subtotal' => 0,
                         'delivery_price' => $data['delivery_price'] ?? 0,
                         'total_price' => 0,

@@ -1,6 +1,6 @@
 <flux:container class="px-3! py-12 sm:px-6!">
     <div class="mx-auto max-w-2xl text-center">
-        <p class="text-sm font-semibold tracking-wide text-zinc-500 uppercase">
+        <p class="text-sm font-semibold tracking-wide text-zinc-500 uppercase dark:text-zinc-400">
             Tenues &amp; équipements
         </p>
 
@@ -10,19 +10,19 @@
     </div>
 
     <div class="mt-8 grid gap-4 sm:grid-cols-3">
-        <div class="rounded-xl border border-zinc-100 bg-white p-6 text-center">
+        <div class="rounded-xl border border-zinc-100 bg-white p-6 text-center dark:border-zinc-800 dark:bg-zinc-900">
             <flux:icon.tag class="mx-auto size-8 text-[#f6c530]" />
-            <p class="mt-4 font-semibold text-zinc-900">Visibilité de la marque</p>
+            <p class="mt-4 font-semibold text-zinc-900 dark:text-zinc-100">Visibilité de la marque</p>
         </div>
 
-        <div class="rounded-xl border border-zinc-100 bg-white p-6 text-center">
+        <div class="rounded-xl border border-zinc-100 bg-white p-6 text-center dark:border-zinc-800 dark:bg-zinc-900">
             <flux:icon.bolt class="mx-auto size-8 text-[#f6c530]" />
-            <p class="mt-4 font-semibold text-zinc-900">Identification rapide</p>
+            <p class="mt-4 font-semibold text-zinc-900 dark:text-zinc-100">Identification rapide</p>
         </div>
 
-        <div class="rounded-xl border border-zinc-100 bg-white p-6 text-center">
+        <div class="rounded-xl border border-zinc-100 bg-white p-6 text-center dark:border-zinc-800 dark:bg-zinc-900">
             <flux:icon.shield-check class="mx-auto size-8 text-[#f6c530]" />
-            <p class="mt-4 font-semibold text-zinc-900">Marquage durable et conforme</p>
+            <p class="mt-4 font-semibold text-zinc-900 dark:text-zinc-100">Marquage durable et conforme</p>
         </div>
     </div>
 </flux:container>

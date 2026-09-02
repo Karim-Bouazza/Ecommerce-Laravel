@@ -5,7 +5,7 @@
     class="flex flex-col gap-4"
 >
     @if ($bleed)
-        <div class="w-full overflow-hidden bg-white">
+        <div class="w-full overflow-hidden bg-white dark:bg-zinc-900">
             <template x-if="images.length">
                 <img
                     :src="images[active]"

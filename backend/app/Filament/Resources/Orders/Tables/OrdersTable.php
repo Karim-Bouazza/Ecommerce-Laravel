@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Orders\Tables;
 
 use App\Enums\OrderStatus;
+use App\Enums\OrderType;
 use App\Filament\Resources\Orders\Actions\OrderStatusActions;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
@@ -33,6 +34,10 @@ class OrdersTable
                     ->badge()
                     ->formatStateUsing(fn (OrderStatus $state) => $state->label())
                     ->color(fn (OrderStatus $state) => $state->color()),
+                TextColumn::make('type')
+                    ->badge()
+                    ->formatStateUsing(fn (OrderType $state) => $state->label())
+                    ->color(fn (OrderType $state) => $state->color()),
                 TextColumn::make('subtotal')
                     ->numeric(decimalPlaces: 0, thousandsSeparator: ' ')
                     ->suffix(' DZ')
@@ -55,6 +60,8 @@ class OrdersTable
             ->filters([
                 SelectFilter::make('status')
                     ->options(OrderStatus::options()),
+                SelectFilter::make('type')
+                    ->options(OrderType::options()),
                 Filter::make('created_at')
                     ->schema([
                         DatePicker::make('from')

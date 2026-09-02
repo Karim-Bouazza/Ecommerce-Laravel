@@ -16,8 +16,8 @@ new class extends Component {
 };
 ?>
 
-<div class="sticky top-0 z-50 border-b border-zinc-100 bg-white">
-    <div class="border-b border-zinc-100 bg-zinc-50 py-2 text-center text-sm font-bold text-zinc-800 sm:hidden" dir="rtl">
+<div class="sticky top-0 z-50 border-b border-zinc-100 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+    <div class="border-b border-zinc-100 bg-zinc-50 py-2 text-center text-sm font-bold text-zinc-800 sm:hidden dark:border-zinc-800 dark:bg-zinc-800 dark:text-zinc-200" dir="rtl">
         حماية أفضل تبدأ بمعدات موثوقة
     </div>
 
@@ -31,7 +31,7 @@ new class extends Component {
             </flux:modal.trigger>
 
             <div class="flex flex-1 justify-center">
-                <flux:brand href="{{ url('/') }}" name="ProSecurity DZ" class="me-0! [&>div:last-child]:text-[18px]! font-bold text-zinc-900" />
+                <flux:brand href="{{ url('/') }}" name="ProSecurity DZ" class="me-0! [&>div:last-child]:text-[18px]! font-bold text-zinc-900 dark:text-zinc-100" />
             </div>
 
             <div class="size-9 shrink-0" aria-hidden="true"></div>
@@ -39,7 +39,7 @@ new class extends Component {
 
         <flux:modal name="mobile-menu" variant="flyout" position="left" class="w-64">
             <div class="flex min-h-[calc(100dvh-4rem)] flex-col gap-4">
-                <flux:brand href="{{ url('/') }}" name="ProSecurity DZ" class="text-lg font-bold text-zinc-900 [&>div:last-child]:text-[18px]!" />
+                <flux:brand href="{{ url('/') }}" name="ProSecurity DZ" class="text-lg font-bold text-zinc-900 [&>div:last-child]:text-[18px]! dark:text-zinc-100" />
 
                 <flux:navlist>
                     <flux:navlist.item href="{{ url('/') }}">
@@ -60,10 +60,10 @@ new class extends Component {
                 <flux:spacer />
 
                 {{-- Login pinned to the bottom of the flyout --}}
-                <div class="-mx-8 -mb-2 border-t border-zinc-100 px-8 pt-4">
+                <div class="-mx-8 -mb-2 border-t border-zinc-100 px-8 pt-4 dark:border-zinc-800">
                     <a
                         href="{{ route('filament.admin.auth.login') }}"
-                        class="flex items-center justify-center gap-2 py-1 text-sm font-medium text-zinc-800 hover:text-zinc-950"
+                        class="flex items-center justify-center gap-2 py-1 text-sm font-medium text-zinc-800 hover:text-zinc-950 dark:text-zinc-300 dark:hover:text-white"
                     >
                         <flux:icon.user class="size-5" />
                         Login
@@ -74,7 +74,7 @@ new class extends Component {
 
         {{-- Desktop: brand + nav links + login --}}
         <div class="hidden w-full items-center gap-6 sm:flex">
-            <flux:brand href="{{ url('/') }}" name="ProSecurity DZ" class="text-lg font-bold text-zinc-900 [&>div:last-child]:text-[18px]!" />
+            <flux:brand href="{{ url('/') }}" name="ProSecurity DZ" class="text-lg font-bold text-zinc-900 [&>div:last-child]:text-[18px]! dark:text-zinc-100" />
 
             <flux:navbar>
                 <flux:navbar.item href="{{ url('/') }}">
