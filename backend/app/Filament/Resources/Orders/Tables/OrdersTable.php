@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Orders\Tables;
 
 use App\Enums\OrderStatus;
 use App\Enums\OrderType;
+use App\Filament\Resources\Orders\Actions\OrderDeleteAction;
 use App\Filament\Resources\Orders\Actions\OrderStatusActions;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
@@ -92,6 +93,7 @@ class OrdersTable
                 ViewAction::make(),
                 OrderStatusActions::changeStatus(),
                 OrderStatusActions::changeStatusWithNote(),
+                OrderDeleteAction::make(),
             ]);
     }
 }

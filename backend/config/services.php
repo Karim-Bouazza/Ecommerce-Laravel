@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'order_deletion_otp' => [
+        'recipient' => env('ORDER_DELETE_OTP_EMAIL'),
+    ],
+
 ];

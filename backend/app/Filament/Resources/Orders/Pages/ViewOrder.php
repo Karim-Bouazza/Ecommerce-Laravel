@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Orders\Pages;
 
+use App\Filament\Resources\Orders\Actions\OrderDeleteAction;
 use App\Filament\Resources\Orders\Actions\OrderStatusActions;
 use App\Filament\Resources\Orders\OrderResource;
 use Filament\Resources\Pages\ViewRecord;
@@ -15,6 +16,7 @@ class ViewOrder extends ViewRecord
         return [
             OrderStatusActions::changeStatus(),
             OrderStatusActions::changeStatusWithNote(),
+            OrderDeleteAction::make(),
         ];
     }
 }
