@@ -46,8 +46,8 @@ class OrderInfolist
                         TextEntry::make('delivery_type')
                             ->label('Type de livraison')
                             ->formatStateUsing(fn (DeliveryType $state) => $state->label()),
-                        TextEntry::make('stop_desk_name')
-                            ->label('Nom du stop desk')
+                        TextEntry::make('stopDeskCompany.name')
+                            ->label('Compagnie de livraison')
                             ->placeholder('—')
                             ->visible(fn ($record) => $record->delivery_type === DeliveryType::StopDesk),
                     ]),

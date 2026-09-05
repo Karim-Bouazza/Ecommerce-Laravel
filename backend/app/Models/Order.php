@@ -19,7 +19,7 @@ class Order extends Model
         'subtotal',
         'delivery_price',
         'delivery_type',
-        'stop_desk_name',
+        'stop_desk_company_id',
         'total_price',
     ];
 
@@ -32,6 +32,11 @@ class Order extends Model
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);
+    }
+
+    public function stopDeskCompany(): BelongsTo
+    {
+        return $this->belongsTo(DeliveryCompany::class, 'stop_desk_company_id');
     }
 
     public function items(): HasMany

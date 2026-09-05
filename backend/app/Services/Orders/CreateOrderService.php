@@ -54,7 +54,7 @@ class CreateOrderService
                         'subtotal' => 0,
                         'delivery_price' => $data['delivery_price'] ?? 0,
                         'delivery_type' => $data['delivery_type'] ?? DeliveryType::Domicile->value,
-                        'stop_desk_name' => $data['stop_desk_name'] ?? null,
+                        'stop_desk_company_id' => $data['stop_desk_company_id'] ?? null,
                         'total_price' => 0,
                     ]);
 
@@ -64,7 +64,9 @@ class CreateOrderService
                         $product = Product::findOrFail($item['product_id']);
 
                         $quantity = $item['quantity'];
-                        $unitPrice = $product->price;
+                        $unitPrice = isset($item['unit_price']) && $item['unit_price'] !== ''
+                            ? (int) $item['unit_price']
+                            : $product->price;
                         $itemTotal = $unitPrice * $quantity;
 
                         $order->items()->create([

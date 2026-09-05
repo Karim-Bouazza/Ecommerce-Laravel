@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Orders\Schemas;
 
 use App\Enums\DeliveryType;
 use App\Models\Communes;
+use App\Models\DeliveryCompany;
 use App\Models\Product;
 use App\Models\Wilaya;
 use Filament\Forms\Components\Radio;
@@ -73,11 +74,14 @@ class ManualOrderForm
                                     ? $wilaya?->price_stop_desk ?? 0
                                     : $wilaya?->price_domicile ?? 0);
                                 if ($state !== DeliveryType::StopDesk->value) {
-                                    $set('stop_desk_name', null);
+                                    $set('stop_desk_company_id', null);
                                 }
                             }),
-                        TextInput::make('stop_desk_name')
-                            ->label('Nom du stop desk')
+                        Select::make('stop_desk_company_id')
+                            ->label('Compagnie de livraison (stop desk)')
+                            ->options(DeliveryCompany::pluck('name', 'id'))
+                            ->searchable()
+                            ->preload()
                             ->visible(fn (Get $get) => $get('delivery_type') === DeliveryType::StopDesk->value)
                             ->required(fn (Get $get) => $get('delivery_type') === DeliveryType::StopDesk->value),
                         TextInput::make('delivery_price')
@@ -112,10 +116,12 @@ class ManualOrderForm
                                     ->required(),
                                 TextInput::make('unit_price')
                                     ->label('Prix')
-                                    ->disabled()
-                                    ->dehydrated(false)
-                                    ->prefixIcon('heroicon-o-lock-closed')
+                                    ->numeric()
+                                    ->live()
+                                    ->required()
                                     ->mask(RawJs::make("\$money(\$input, ' ', ',', 0)"))
+                                    ->stripCharacters([' ', '.', ','])
+                                    ->dehydrateStateUsing(fn (?string $state) => filled($state) ? (int) str_replace([' ', '.', ','], '', $state) : $state)
                                     ->suffix('DZ'),
                                 Toggle::make('has_variant')
                                     ->label('Variante ?')
@@ -162,7 +168,7 @@ class ManualOrderForm
     private static function calculateSubtotal(?array $items): int
     {
         return collect($items ?? [])
-            ->sum(fn (array $item) => ((int) ($item['quantity'] ?? 0)) * (Product::find($item['product_id'] ?? null)?->price ?? 0));
+            ->sum(fn (array $item) => ((int) ($item['quantity'] ?? 0)) * self::parsePrice($item['unit_price'] ?? 0));
     }
 
     private static function parsePrice(mixed $value): int
