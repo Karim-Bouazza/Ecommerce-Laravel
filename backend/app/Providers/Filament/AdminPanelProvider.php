@@ -29,6 +29,7 @@ class AdminPanelProvider extends PanelProvider
             ->login()
             ->colors([
                 'primary' => Color::Amber,
+                'purple' => Color::Purple,
             ])
             ->brandName('ProSecurity DZ')
             ->sidebarWidth('16rem')

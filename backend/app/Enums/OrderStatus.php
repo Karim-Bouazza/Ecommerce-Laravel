@@ -30,7 +30,7 @@ enum OrderStatus: string
         return match ($this) {
             self::Pending => 'warning',
             self::Confirmed => 'info',
-            self::Packed => 'info',
+            self::Packed => 'purple',
             self::Shipped => 'primary',
             self::Delivered => 'success',
             self::Returned => 'gray',
