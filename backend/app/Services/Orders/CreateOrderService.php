@@ -56,6 +56,7 @@ class CreateOrderService
                         'delivery_type' => $data['delivery_type'] ?? DeliveryType::Domicile->value,
                         'stop_desk_company_id' => $data['stop_desk_company_id'] ?? null,
                         'total_price' => 0,
+                        'created_at' => $data['created_at'] ?? now(),
                     ]);
 
                     $subtotal = 0;

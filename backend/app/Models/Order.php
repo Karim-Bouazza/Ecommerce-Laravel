@@ -21,6 +21,7 @@ class Order extends Model
         'delivery_type',
         'stop_desk_company_id',
         'total_price',
+        'created_at',
     ];
 
     protected $casts = [

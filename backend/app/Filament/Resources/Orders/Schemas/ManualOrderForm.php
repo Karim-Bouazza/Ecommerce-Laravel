@@ -7,6 +7,7 @@ use App\Models\Communes;
 use App\Models\DeliveryCompany;
 use App\Models\Product;
 use App\Models\Wilaya;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
@@ -29,6 +30,11 @@ class ManualOrderForm
         return $schema
             ->columns(1)
             ->components([
+                DateTimePicker::make('created_at')
+                    ->label('Date de la commande')
+                    ->default(now())
+                    ->seconds(false)
+                    ->required(),
                 Section::make('Client')
                     ->columns(2)
                     ->schema([
