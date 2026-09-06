@@ -39,7 +39,7 @@ class OrdersTable
                     ->color(fn (OrderStatus $state) => $state->color()),
                 TextColumn::make('scheduled_at')
                     ->label('Planifiée pour')
-                    ->dateTime()
+                    ->date()
                     ->placeholder('—')
                     ->toggleable()
                     ->sortable(),
