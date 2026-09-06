@@ -8,9 +8,11 @@ use App\Models\OrderNote;
 use App\Models\OrderStatusHistory;
 use App\Models\Product;
 use Filament\Actions\Action;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\DB;
 
@@ -27,10 +29,17 @@ class OrderStatusActions
                 Select::make('status')
                     ->label('Nouveau statut')
                     ->options(self::transitionOptions($record))
+                    ->live()
                     ->required(),
+                DateTimePicker::make('scheduled_at')
+                    ->label('Planifiée pour le')
+                    ->default(now())
+                    ->seconds(false)
+                    ->visible(fn (Get $get) => $get('status') === OrderStatus::Scheduled->value)
+                    ->required(fn (Get $get) => $get('status') === OrderStatus::Scheduled->value),
             ])
             ->action(function (Order $record, array $data): void {
-                self::applyStatusChange($record, OrderStatus::from($data['status']));
+                self::applyStatusChange($record, OrderStatus::from($data['status']), scheduledAt: $data['scheduled_at'] ?? null);
 
                 Notification::make()
                     ->title('Statut mis à jour')
@@ -50,14 +59,26 @@ class OrderStatusActions
                 Select::make('status')
                     ->label('Nouveau statut')
                     ->options(self::transitionOptions($record))
+                    ->live()
                     ->required(),
+                DateTimePicker::make('scheduled_at')
+                    ->label('Planifiée pour le')
+                    ->default(now())
+                    ->seconds(false)
+                    ->visible(fn (Get $get) => $get('status') === OrderStatus::Scheduled->value)
+                    ->required(fn (Get $get) => $get('status') === OrderStatus::Scheduled->value),
                 Textarea::make('note')
                     ->label('Note')
                     ->required()
                     ->columnSpanFull(),
             ])
             ->action(function (Order $record, array $data): void {
-                self::applyStatusChange($record, OrderStatus::from($data['status']), $data['note']);
+                self::applyStatusChange(
+                    $record,
+                    OrderStatus::from($data['status']),
+                    note: $data['note'],
+                    scheduledAt: $data['scheduled_at'] ?? null,
+                );
 
                 Notification::make()
                     ->title('Statut mis à jour')
@@ -76,10 +97,13 @@ class OrderStatusActions
             ->all();
     }
 
-    private static function applyStatusChange(Order $record, OrderStatus $status, ?string $note = null): void
+    private static function applyStatusChange(Order $record, OrderStatus $status, ?string $note = null, ?string $scheduledAt = null): void
     {
-        DB::transaction(function () use ($record, $status, $note): void {
-            $record->update(['status' => $status]);
+        DB::transaction(function () use ($record, $status, $note, $scheduledAt): void {
+            $record->update([
+                'status' => $status,
+                'scheduled_at' => $status === OrderStatus::Scheduled ? $scheduledAt : $record->scheduled_at,
+            ]);
 
             if ($status === OrderStatus::Delivered) {
                 self::decrementStock($record);

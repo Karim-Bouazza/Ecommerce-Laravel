@@ -24,6 +24,11 @@ class OrderInfolist
                             ->badge()
                             ->formatStateUsing(fn (OrderStatus $state) => $state->label())
                             ->color(fn (OrderStatus $state) => $state->color()),
+                        TextEntry::make('scheduled_at')
+                            ->label('Planifiée pour')
+                            ->dateTime()
+                            ->placeholder('—')
+                            ->visible(fn ($record) => filled($record->scheduled_at)),
                         TextEntry::make('created_at')
                             ->dateTime(),
                         TextEntry::make('updated_at')

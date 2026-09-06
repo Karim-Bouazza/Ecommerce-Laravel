@@ -35,6 +35,12 @@ class OrdersTable
                     ->badge()
                     ->formatStateUsing(fn (OrderStatus $state) => $state->label())
                     ->color(fn (OrderStatus $state) => $state->color()),
+                TextColumn::make('scheduled_at')
+                    ->label('Planifiée pour')
+                    ->dateTime()
+                    ->placeholder('—')
+                    ->toggleable()
+                    ->sortable(),
                 TextColumn::make('type')
                     ->badge()
                     ->formatStateUsing(fn (OrderType $state) => $state->label())

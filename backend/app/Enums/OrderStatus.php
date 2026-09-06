@@ -5,6 +5,7 @@ namespace App\Enums;
 enum OrderStatus: string
 {
     case Pending = 'pending';
+    case Scheduled = 'scheduled';
     case Confirmed = 'confirmed';
     case Packed = 'packed';
     case Shipped = 'shipped';
@@ -16,6 +17,7 @@ enum OrderStatus: string
     {
         return match ($this) {
             self::Pending => 'En attente de confirmation',
+            self::Scheduled => 'Planifiée',
             self::Confirmed => 'Confirmée',
             self::Packed => 'Emballée',
             self::Shipped => 'Expédiée',
@@ -29,6 +31,7 @@ enum OrderStatus: string
     {
         return match ($this) {
             self::Pending => 'warning',
+            self::Scheduled => 'indigo',
             self::Confirmed => 'info',
             self::Packed => 'purple',
             self::Shipped => 'primary',
@@ -46,7 +49,8 @@ enum OrderStatus: string
     public function allowedTransitions(): array
     {
         return match ($this) {
-            self::Pending => [self::Confirmed, self::Cancelled],
+            self::Pending => [self::Confirmed, self::Scheduled, self::Cancelled],
+            self::Scheduled => [self::Confirmed, self::Cancelled],
             self::Confirmed => [self::Packed, self::Cancelled],
             self::Packed => [self::Shipped, self::Cancelled],
             self::Shipped => [self::Delivered, self::Returned, self::Cancelled],

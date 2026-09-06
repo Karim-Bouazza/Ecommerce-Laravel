@@ -15,6 +15,7 @@ class Order extends Model
         'client_id',
         'reference',
         'status',
+        'scheduled_at',
         'type',
         'subtotal',
         'delivery_price',
@@ -26,6 +27,7 @@ class Order extends Model
 
     protected $casts = [
         'status' => OrderStatus::class,
+        'scheduled_at' => 'datetime',
         'type' => OrderType::class,
         'delivery_type' => DeliveryType::class,
     ];
