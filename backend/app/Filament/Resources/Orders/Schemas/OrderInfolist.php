@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Orders\Schemas;
 
 use App\Enums\DeliveryType;
 use App\Enums\OrderStatus;
+use App\Enums\PaymentStatus;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
@@ -29,6 +30,11 @@ class OrderInfolist
                             ->dateTime()
                             ->placeholder('—')
                             ->visible(fn ($record) => filled($record->scheduled_at)),
+                        TextEntry::make('payment_status')
+                            ->label('Paiement')
+                            ->badge()
+                            ->formatStateUsing(fn (PaymentStatus $state) => $state->label())
+                            ->color(fn (PaymentStatus $state) => $state->color()),
                         TextEntry::make('created_at')
                             ->dateTime(),
                         TextEntry::make('updated_at')

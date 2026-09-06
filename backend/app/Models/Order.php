@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\DeliveryType;
 use App\Enums\OrderStatus;
 use App\Enums\OrderType;
+use App\Enums\PaymentStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -16,6 +17,7 @@ class Order extends Model
         'reference',
         'status',
         'scheduled_at',
+        'payment_status',
         'type',
         'subtotal',
         'delivery_price',
@@ -28,6 +30,7 @@ class Order extends Model
     protected $casts = [
         'status' => OrderStatus::class,
         'scheduled_at' => 'datetime',
+        'payment_status' => PaymentStatus::class,
         'type' => OrderType::class,
         'delivery_type' => DeliveryType::class,
     ];

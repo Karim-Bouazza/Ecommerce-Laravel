@@ -4,7 +4,9 @@ namespace App\Filament\Resources\Orders\Tables;
 
 use App\Enums\OrderStatus;
 use App\Enums\OrderType;
+use App\Enums\PaymentStatus;
 use App\Filament\Resources\Orders\Actions\OrderDeleteAction;
+use App\Filament\Resources\Orders\Actions\OrderPaymentActions;
 use App\Filament\Resources\Orders\Actions\OrderStatusActions;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
@@ -41,6 +43,11 @@ class OrdersTable
                     ->placeholder('—')
                     ->toggleable()
                     ->sortable(),
+                TextColumn::make('payment_status')
+                    ->label('Paiement')
+                    ->badge()
+                    ->formatStateUsing(fn (PaymentStatus $state) => $state->label())
+                    ->color(fn (PaymentStatus $state) => $state->color()),
                 TextColumn::make('type')
                     ->badge()
                     ->formatStateUsing(fn (OrderType $state) => $state->label())
@@ -67,6 +74,9 @@ class OrdersTable
             ->filters([
                 SelectFilter::make('status')
                     ->options(OrderStatus::options()),
+                SelectFilter::make('payment_status')
+                    ->label('Paiement')
+                    ->options(PaymentStatus::options()),
                 SelectFilter::make('type')
                     ->options(OrderType::options()),
                 Filter::make('created_at')
@@ -99,6 +109,7 @@ class OrdersTable
                 ViewAction::make(),
                 OrderStatusActions::changeStatus(),
                 OrderStatusActions::changeStatusWithNote(),
+                OrderPaymentActions::markAsPaid(),
                 OrderDeleteAction::make(),
             ]);
     }
