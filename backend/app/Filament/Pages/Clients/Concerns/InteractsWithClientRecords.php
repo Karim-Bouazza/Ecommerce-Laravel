@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages\Clients\Concerns;
 
+use App\Filament\Resources\Orders\OrderResource;
 use App\Models\Client;
 use App\Models\Communes;
 use App\Models\Wilaya;
@@ -13,7 +14,6 @@ use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Support\Icons\Heroicon;
-use Illuminate\Contracts\View\View as ViewContract;
 
 trait InteractsWithClientRecords
 {
@@ -93,12 +93,8 @@ trait InteractsWithClientRecords
             ->icon(Heroicon::OutlinedClipboardDocumentList)
             ->color('info')
             ->iconButton()
-            ->modalHeading(fn (Client $record) => "Commandes de {$record->first_name} {$record->last_name}")
-            ->modalContent(fn (Client $record): ViewContract => view(
-                'filament.pages.clients.orders-modal',
-                ['orders' => $record->orders()->latest()->get()],
-            ))
-            ->modalSubmitAction(false)
-            ->modalCancelActionLabel('Fermer');
+            ->url(fn (Client $record) => OrderResource::getUrl('index', [
+                'filters' => ['client_id' => ['value' => $record->id]],
+            ]));
     }
 }

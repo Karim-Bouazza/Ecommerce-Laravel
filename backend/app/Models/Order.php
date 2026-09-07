@@ -6,6 +6,7 @@ use App\Enums\DeliveryType;
 use App\Enums\OrderStatus;
 use App\Enums\OrderType;
 use App\Enums\PaymentStatus;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -58,5 +59,10 @@ class Order extends Model
     public function notes(): HasMany
     {
         return $this->hasMany(OrderNote::class);
+    }
+
+    public function scopeForClient(Builder $query, ?int $clientId): Builder
+    {
+        return $query->when($clientId, fn (Builder $query, int $clientId) => $query->where('client_id', $clientId));
     }
 }

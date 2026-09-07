@@ -8,8 +8,10 @@ use App\Enums\PaymentStatus;
 use App\Filament\Resources\Orders\Actions\OrderDeleteAction;
 use App\Filament\Resources\Orders\Actions\OrderPaymentActions;
 use App\Filament\Resources\Orders\Actions\OrderStatusActions;
+use App\Models\Client;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Hidden;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
@@ -72,6 +74,20 @@ class OrdersTable
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([
+                Filter::make('client_id')
+                    ->schema([
+                        Hidden::make('value'),
+                    ])
+                    ->query(fn (Builder $query, array $data): Builder => $query->forClient($data['value'] ?? null))
+                    ->indicateUsing(function (array $data): array {
+                        $client = filled($data['value'] ?? null)
+                            ? Client::find($data['value'])
+                            : null;
+
+                        return $client
+                            ? ["Client : {$client->first_name} {$client->last_name}"]
+                            : [];
+                    }),
                 SelectFilter::make('status')
                     ->options(OrderStatus::options()),
                 SelectFilter::make('payment_status')

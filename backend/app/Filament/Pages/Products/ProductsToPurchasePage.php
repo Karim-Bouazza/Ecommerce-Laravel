@@ -57,6 +57,7 @@ class ProductsToPurchasePage extends Page implements HasTable
                 Group::make('product_id')
                     ->label('Produit')
                     ->getTitleFromRecordUsing(fn (OrderItem $record) => $record->product_name)
+                    ->collapsible()
             )
             ->groupingSettingsHidden()
             ->defaultSort('variant')
