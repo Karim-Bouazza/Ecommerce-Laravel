@@ -45,6 +45,8 @@ class AdminPanelProvider extends PanelProvider
             ->navigationGroups([
                 NavigationGroup::make('Clients')
                     ->icon(Heroicon::OutlinedUsers),
+                NavigationGroup::make('Finances')
+                    ->icon(Heroicon::OutlinedBanknotes),
             ])
             ->middleware([
                 EncryptCookies::class,
