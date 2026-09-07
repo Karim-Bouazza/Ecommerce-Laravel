@@ -106,11 +106,21 @@ class OrdersTable
                     }),
             ])
             ->recordActions([
-                ViewAction::make(),
-                OrderStatusActions::changeStatus(),
-                OrderStatusActions::changeStatusWithNote(),
-                OrderPaymentActions::markAsPaid(),
-                OrderDeleteAction::make(),
+                ViewAction::make()
+                    ->iconButton()
+                    ->tooltip('Voir'),
+                OrderStatusActions::changeStatus()
+                    ->iconButton()
+                    ->tooltip('Changer le statut'),
+                OrderStatusActions::changeStatusWithNote()
+                    ->iconButton()
+                    ->tooltip('Changer le statut + note'),
+                OrderPaymentActions::markAsPaid()
+                    ->iconButton()
+                    ->tooltip('Marquer comme payée'),
+                OrderDeleteAction::make()
+                    ->iconButton()
+                    ->tooltip('Supprimer'),
             ]);
     }
 }

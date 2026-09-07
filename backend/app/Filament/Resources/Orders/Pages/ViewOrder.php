@@ -6,7 +6,9 @@ use App\Filament\Resources\Orders\Actions\OrderDeleteAction;
 use App\Filament\Resources\Orders\Actions\OrderPaymentActions;
 use App\Filament\Resources\Orders\Actions\OrderStatusActions;
 use App\Filament\Resources\Orders\OrderResource;
+use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Support\Icons\Heroicon;
 
 class ViewOrder extends ViewRecord
 {
@@ -15,10 +17,22 @@ class ViewOrder extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            OrderStatusActions::changeStatus(),
-            OrderStatusActions::changeStatusWithNote(),
-            OrderPaymentActions::markAsPaid(),
-            OrderDeleteAction::make(),
+            EditAction::make()
+                ->icon(Heroicon::OutlinedPencilSquare)
+                ->iconButton()
+                ->tooltip('Modifier'),
+            OrderStatusActions::changeStatus()
+                ->iconButton()
+                ->tooltip('Changer le statut'),
+            OrderStatusActions::changeStatusWithNote()
+                ->iconButton()
+                ->tooltip('Changer le statut + note'),
+            OrderPaymentActions::markAsPaid()
+                ->iconButton()
+                ->tooltip('Marquer comme payée'),
+            OrderDeleteAction::make()
+                ->iconButton()
+                ->tooltip('Supprimer'),
         ];
     }
 }
