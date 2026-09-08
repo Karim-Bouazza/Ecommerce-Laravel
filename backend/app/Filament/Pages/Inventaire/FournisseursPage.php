@@ -50,6 +50,7 @@ class FournisseursPage extends Page implements HasTable
                     ->numeric(decimalPlaces: 0, thousandsSeparator: ' '),
                 TextColumn::make('total_paid')
                     ->label('Montant payé')
+                    ->state(fn (Fournisseur $record) => $record->totalPaid())
                     ->numeric(decimalPlaces: 0, thousandsSeparator: ' '),
                 TextColumn::make('remaining_amount')
                     ->label('Montant restant')

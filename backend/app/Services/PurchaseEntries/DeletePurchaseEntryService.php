@@ -12,8 +12,8 @@ class DeletePurchaseEntryService
 {
     public function execute(PurchaseEntry $entry): void
     {
-        if (! $entry->isPending() && $entry->payment_status === PurchaseEntryPaymentStatus::Paid) {
-            throw new RuntimeException('Une entrée déjà payée ne peut pas être supprimée.');
+        if (! $entry->isPending() && $entry->paymentStatus() !== PurchaseEntryPaymentStatus::Unpaid) {
+            throw new RuntimeException('Une entrée avec des versements ne peut pas être supprimée.');
         }
 
         DB::transaction(function () use ($entry): void {

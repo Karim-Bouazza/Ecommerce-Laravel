@@ -6,13 +6,16 @@ use App\Enums\PurchaseEntryPaymentStatus;
 use App\Models\Fournisseur;
 use App\Models\Product;
 use App\Models\PurchaseEntry;
+use App\Models\Wallet;
 use App\Models\Warehouse;
 use App\Services\PurchaseEntries\ConfirmPurchaseEntryService;
 use App\Services\PurchaseEntries\CreatePurchaseEntryService;
+use App\Services\PurchaseEntries\CreatePurchaseEntryVersementService;
 use App\Services\PurchaseEntries\DeletePurchaseEntryService;
 use App\Services\PurchaseEntries\UpdatePurchaseEntryService;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
@@ -21,7 +24,9 @@ use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\View;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Support\HtmlString;
 use Illuminate\Validation\Rule;
 use RuntimeException;
 
@@ -165,7 +170,7 @@ trait InteractsWithPurchaseEntryRecords
                 : 'Cette entrée d\'achat a été complétée et le stock a été ajouté. La supprimer annulera toutes les modifications de stock. Cette action est irréversible.')
             ->modalSubmitActionLabel('Supprimer')
             ->modalCancelActionLabel('Fermer')
-            ->visible(fn (PurchaseEntry $record) => $record->isPending() || $record->payment_status === PurchaseEntryPaymentStatus::Unpaid)
+            ->visible(fn (PurchaseEntry $record) => $record->isPending() || $record->paymentStatus() === PurchaseEntryPaymentStatus::Unpaid)
             ->action(function (PurchaseEntry $record): void {
                 try {
                     app(DeletePurchaseEntryService::class)->execute($record);
@@ -239,23 +244,109 @@ trait InteractsWithPurchaseEntryRecords
             ->modalSubmitAction(false)
             ->modalCancelActionLabel('Fermer')
             ->modalContent(fn (PurchaseEntry $record) => view('filament.pages.inventaire.partials.purchase-entry-info', [
-                'entry' => $record,
+                'entry' => $record->loadMissing('items.product'),
             ]));
     }
 
-    protected static function purchaseEntryItemsAction(): Action
+    protected static function purchaseEntryVersementsAction(): Action
     {
-        return Action::make('purchaseEntryItems')
-            ->label('Produits')
-            ->tooltip('Produits')
-            ->icon(Heroicon::OutlinedListBullet)
+        return Action::make('purchaseEntryVersements')
+            ->label('Versements')
+            ->tooltip('Versements')
+            ->icon(Heroicon::OutlinedBanknotes)
             ->color('gray')
             ->iconButton()
-            ->modalHeading('Produits')
+            ->modalHeading(fn (PurchaseEntry $record) => "Versements — {$record->reference}")
             ->modalSubmitAction(false)
             ->modalCancelActionLabel('Fermer')
-            ->modalContent(fn (PurchaseEntry $record) => view('filament.pages.inventaire.partials.purchase-entry-items', [
-                'entry' => $record->loadMissing('items.product'),
+            ->modalContent(fn (PurchaseEntry $record) => view('filament.pages.inventaire.partials.purchase-entry-versements', [
+                'entry' => $record->loadMissing('versements.wallet'),
             ]));
+    }
+
+    protected static function createPurchaseEntryVersementAction(): Action
+    {
+        return Action::make('createPurchaseEntryVersement')
+            ->label('Créer un versement')
+            ->tooltip('Créer un versement')
+            ->icon(Heroicon::OutlinedBuildingLibrary)
+            ->color('primary')
+            ->iconButton()
+            ->visible(fn (PurchaseEntry $record) => ! $record->isPending() && $record->remainingAmount() > 0)
+            ->modalWidth('2xl')
+            ->modalHeading(fn (PurchaseEntry $record) => "Créer un versement — {$record->reference}")
+            ->modalSubmitActionLabel('Créer')
+            ->modalCancelActionLabel('Fermer')
+            ->schema(function (PurchaseEntry $record) {
+                $record->loadMissing('versements.wallet', 'fournisseur');
+
+                return [
+                    View::make('filament.pages.inventaire.partials.purchase-entry-versements')
+                        ->viewData(['entry' => $record])
+                        ->columnSpanFull(),
+                    Grid::make(2)->schema([
+                        DatePicker::make('date')
+                            ->label('Date')
+                            ->default(now())
+                            ->required(),
+                        Select::make('wallet_id')
+                            ->label('Portefeuille')
+                            ->options(fn () => Wallet::query()->pluck('name', 'id'))
+                            ->searchable()
+                            ->preload()
+                            ->required(),
+                        TextInput::make('amount')
+                            ->label('Montant (DZD)')
+                            ->numeric()
+                            ->minValue(1)
+                            ->maxValue($record->remainingAmount())
+                            ->default($record->remainingAmount())
+                            ->live()
+                            ->required(),
+                        Textarea::make('remark')
+                            ->label('Remarque')
+                            ->rows(1),
+                        Placeholder::make('payment_hint')
+                            ->label('')
+                            ->content(function (Get $get) use ($record) {
+                                $amount = (int) ($get('amount') ?? 0);
+
+                                if ($amount <= 0) {
+                                    return '';
+                                }
+
+                                $remaining = $record->remainingAmount();
+
+                                if ($amount >= $remaining) {
+                                    return new HtmlString('<div class="pe-versement-hint pe-versement-hint--full">✓ <strong>Full payment</strong></div>');
+                                }
+
+                                return new HtmlString(
+                                    '<div class="pe-versement-hint pe-versement-hint--partial">⚠ Partial payment — <strong>'
+                                    .number_format($remaining - $amount, 0, ',', ' ')
+                                    .'</strong> will remain</div>'
+                                );
+                            })
+                            ->columnSpanFull(),
+                    ]),
+                ];
+            })
+            ->action(function (PurchaseEntry $record, array $data): void {
+                try {
+                    app(CreatePurchaseEntryVersementService::class)->execute($record, $data);
+                } catch (RuntimeException $e) {
+                    Notification::make()
+                        ->title($e->getMessage())
+                        ->danger()
+                        ->send();
+
+                    return;
+                }
+
+                Notification::make()
+                    ->title('Versement enregistré')
+                    ->success()
+                    ->send();
+            });
     }
 }

@@ -11,6 +11,7 @@ class WalletTransaction extends Model
 {
     protected $fillable = [
         'wallet_id',
+        'purchase_entry_id',
         'reference',
         'date',
         'type',
@@ -50,6 +51,11 @@ class WalletTransaction extends Model
     public function wallet(): BelongsTo
     {
         return $this->belongsTo(Wallet::class);
+    }
+
+    public function purchaseEntry(): BelongsTo
+    {
+        return $this->belongsTo(PurchaseEntry::class);
     }
 
     public function creator(): BelongsTo

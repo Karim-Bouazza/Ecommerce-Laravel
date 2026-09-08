@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Enums\PurchaseEntryPaymentStatus;
 use App\Enums\PurchaseEntryStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -14,11 +13,6 @@ class Fournisseur extends Model
         'phone',
         'remark',
         'address',
-        'total_paid',
-    ];
-
-    protected $casts = [
-        'total_paid' => 'integer',
     ];
 
     public function purchaseEntries(): HasMany
@@ -26,16 +20,25 @@ class Fournisseur extends Model
         return $this->hasMany(PurchaseEntry::class);
     }
 
+    protected function completedPurchaseEntries()
+    {
+        return $this->purchaseEntries()
+            ->where('status', PurchaseEntryStatus::Completed)
+            ->get();
+    }
+
     public function totalDues(): int
     {
-        return (int) $this->purchaseEntries()
-            ->where('status', PurchaseEntryStatus::Completed)
-            ->where('payment_status', PurchaseEntryPaymentStatus::Unpaid)
-            ->sum('total');
+        return (int) $this->completedPurchaseEntries()->sum('total');
+    }
+
+    public function totalPaid(): int
+    {
+        return (int) $this->completedPurchaseEntries()->sum(fn (PurchaseEntry $entry) => $entry->paidAmount());
     }
 
     public function remainingAmount(): int
     {
-        return $this->totalDues() - $this->total_paid;
+        return max(0, $this->totalDues() - $this->totalPaid());
     }
 }

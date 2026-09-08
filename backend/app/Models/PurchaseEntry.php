@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\PurchaseEntryPaymentStatus;
 use App\Enums\PurchaseEntryStatus;
+use App\Enums\WalletTransactionCategory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -16,7 +17,6 @@ class PurchaseEntry extends Model
         'fournisseur_id',
         'remark',
         'status',
-        'payment_status',
         'total',
         'confirmed_at',
         'created_by',
@@ -24,7 +24,6 @@ class PurchaseEntry extends Model
 
     protected $casts = [
         'status' => PurchaseEntryStatus::class,
-        'payment_status' => PurchaseEntryPaymentStatus::class,
         'total' => 'integer',
         'confirmed_at' => 'datetime',
     ];
@@ -56,8 +55,34 @@ class PurchaseEntry extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    public function versements(): HasMany
+    {
+        return $this->hasMany(WalletTransaction::class)->where('category', WalletTransactionCategory::Versement);
+    }
+
     public function isPending(): bool
     {
         return $this->status === PurchaseEntryStatus::Pending;
+    }
+
+    public function paidAmount(): int
+    {
+        return (int) $this->versements()->sum('amount');
+    }
+
+    public function remainingAmount(): int
+    {
+        return max(0, $this->total - $this->paidAmount());
+    }
+
+    public function paymentStatus(): PurchaseEntryPaymentStatus
+    {
+        $paid = $this->paidAmount();
+
+        return match (true) {
+            $paid <= 0 => PurchaseEntryPaymentStatus::Unpaid,
+            $paid >= $this->total => PurchaseEntryPaymentStatus::Paid,
+            default => PurchaseEntryPaymentStatus::Partial,
+        };
     }
 }

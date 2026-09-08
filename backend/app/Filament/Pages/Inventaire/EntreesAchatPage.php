@@ -53,6 +53,7 @@ class EntreesAchatPage extends Page implements HasTable
                     ->numeric(decimalPlaces: 0, thousandsSeparator: ' '),
                 TextColumn::make('payment_status')
                     ->label('Statut de paiement')
+                    ->state(fn (PurchaseEntry $record) => $record->paymentStatus())
                     ->badge()
                     ->formatStateUsing(fn ($state) => $state->label())
                     ->color(fn ($state) => $state->color()),
@@ -67,7 +68,8 @@ class EntreesAchatPage extends Page implements HasTable
             ])
             ->recordActions([
                 self::viewPurchaseEntryAction(),
-                self::purchaseEntryItemsAction(),
+                self::purchaseEntryVersementsAction(),
+                self::createPurchaseEntryVersementAction(),
                 self::confirmPurchaseEntryAction(),
                 self::editPurchaseEntryAction(),
                 self::deletePurchaseEntryAction(),
