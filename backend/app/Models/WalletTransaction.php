@@ -40,12 +40,13 @@ class WalletTransaction extends Model
     public static function generateReference(): string
     {
         $now = now();
+        $prefix = sprintf('R-%s-%s-', $now->format('m'), $now->format('y'));
 
-        $sequence = self::whereYear('created_at', $now->year)
-            ->whereMonth('created_at', $now->month)
-            ->count() + 1;
+        $lastSequence = self::where('reference', 'like', $prefix.'%')
+            ->selectRaw('MAX(CAST(SUBSTRING(reference, ?) AS UNSIGNED)) as max_sequence', [mb_strlen($prefix) + 1])
+            ->value('max_sequence');
 
-        return sprintf('R-%s-%s-%04d', $now->format('m'), $now->format('y'), $sequence);
+        return $prefix.sprintf('%04d', ($lastSequence ?? 0) + 1);
     }
 
     public function wallet(): BelongsTo
