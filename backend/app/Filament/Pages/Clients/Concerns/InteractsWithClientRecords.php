@@ -93,6 +93,7 @@ trait InteractsWithClientRecords
             ->icon(Heroicon::OutlinedClipboardDocumentList)
             ->color('info')
             ->iconButton()
+            ->visible(fn () => auth()->user()?->hasPermission('orders.view') ?? false)
             ->url(fn (Client $record) => OrderResource::getUrl('index', [
                 'filters' => ['client_id' => ['value' => $record->id]],
             ]));

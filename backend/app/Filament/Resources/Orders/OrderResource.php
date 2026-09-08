@@ -85,6 +85,11 @@ class OrderResource extends Resource
         ], true);
     }
 
+    public static function canView(Model $record): bool
+    {
+        return auth()->user()?->hasPermission('orders.view') ?? false;
+    }
+
     public static function canDelete(Model $record): bool
     {
         return auth()->user()?->hasPermission('orders.delete') ?? false;

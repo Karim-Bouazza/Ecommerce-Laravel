@@ -43,8 +43,6 @@ class EnCoursOrdersPage extends Page implements HasTable
             OrderStatus::ConfirmedBot,
             OrderStatus::ConfirmedNoStock,
             OrderStatus::Scheduled,
-            OrderStatus::Packed,
-            OrderStatus::Shipped,
         ];
     }
 }
