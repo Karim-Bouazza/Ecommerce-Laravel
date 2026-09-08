@@ -8,7 +8,9 @@ use App\Enums\PaymentStatus;
 use App\Filament\Resources\Orders\Actions\OrderDeleteAction;
 use App\Filament\Resources\Orders\Actions\OrderPaymentActions;
 use App\Filament\Resources\Orders\Actions\OrderStatusActions;
+use App\Filament\Resources\Orders\OrderResource;
 use App\Models\Client;
+use App\Models\Order;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Hidden;
@@ -123,6 +125,7 @@ class OrdersTable
             ])
             ->recordActions([
                 ViewAction::make()
+                    ->url(fn (Order $record) => OrderResource::getUrl('view', ['record' => $record]))
                     ->iconButton()
                     ->tooltip('Voir'),
                 OrderStatusActions::changeStatus()
