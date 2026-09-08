@@ -57,6 +57,24 @@ class ProductsToPurchasePage extends Page implements HasTable
                     ->alignCenter()
                     ->sortable()
                     ->summarize(Sum::make()->label('Total')),
+                TextColumn::make('purchase_price')
+                    ->label('Prix d\'achat')
+                    ->numeric(decimalPlaces: 0, thousandsSeparator: ' ')
+                    ->suffix(' DZ')
+                    ->alignEnd()
+                    ->sortable(),
+                TextColumn::make('total_cost')
+                    ->label('Total à payer')
+                    ->numeric(decimalPlaces: 0, thousandsSeparator: ' ')
+                    ->suffix(' DZ')
+                    ->weight('medium')
+                    ->alignEnd()
+                    ->sortable()
+                    ->summarize(
+                        Sum::make()
+                            ->label('Total')
+                            ->numeric(decimalPlaces: 0, thousandsSeparator: ' ')
+                    ),
             ])
             ->defaultGroup(
                 Group::make('product_id')
@@ -64,6 +82,7 @@ class ProductsToPurchasePage extends Page implements HasTable
                     ->getTitleFromRecordUsing(fn (OrderItem $record) => $record->product_name)
                     ->collapsible()
             )
+            ->collapsedGroupsByDefault()
             ->groupingSettingsHidden()
             ->defaultSort('variant')
             ->emptyStateHeading('Rien à commander')
@@ -87,6 +106,8 @@ class ProductsToPurchasePage extends Page implements HasTable
                 'order_items.variant',
                 DB::raw('sum(order_items.quantity) as total_quantity'),
                 DB::raw('count(distinct order_items.order_id) as orders_count'),
+                DB::raw('min(products.purchase_price) as purchase_price'),
+                DB::raw('min(products.purchase_price) * sum(order_items.quantity) as total_cost'),
             ]);
     }
 }
