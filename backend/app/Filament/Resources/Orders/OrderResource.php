@@ -17,6 +17,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
+use UnitEnum;
 
 class OrderResource extends Resource
 {
@@ -24,7 +25,20 @@ class OrderResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedShoppingBag;
 
+    protected static ?string $navigationLabel = 'Tous';
+
+    protected static string|UnitEnum|null $navigationGroup = 'Commandes';
+
+    protected static ?int $navigationSort = 6;
+
     protected static ?string $recordTitleAttribute = 'reference';
+
+    public static function getNavigationBadge(): ?string
+    {
+        $count = Order::query()->count();
+
+        return $count > 0 ? (string) $count : null;
+    }
 
     public static function form(Schema $schema): Schema
     {
@@ -45,8 +59,15 @@ class OrderResource extends Resource
     {
         return in_array($record->status, [
             OrderStatus::Pending,
+            OrderStatus::Call1,
+            OrderStatus::Call2,
+            OrderStatus::Call3,
+            OrderStatus::Unreachable,
+            OrderStatus::ToCheck,
+            OrderStatus::ConfirmedNoStock,
             OrderStatus::Scheduled,
             OrderStatus::Confirmed,
+            OrderStatus::ConfirmedBot,
         ], true);
     }
 
