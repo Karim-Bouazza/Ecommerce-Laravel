@@ -22,4 +22,9 @@ class EntreesRetourPage extends Page
     protected static ?string $slug = 'inventaire/entrees-retour';
 
     protected string $view = 'filament.pages.inventaire.entrees-retour';
+
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->hasPermission('entrees_retour.view') ?? false;
+    }
 }

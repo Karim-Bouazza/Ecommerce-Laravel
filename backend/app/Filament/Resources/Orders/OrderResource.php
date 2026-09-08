@@ -55,8 +55,22 @@ class OrderResource extends Resource
         return OrdersTable::configure($table);
     }
 
+    public static function canViewAny(): bool
+    {
+        return auth()->user()?->hasPermission('orders.view') ?? false;
+    }
+
+    public static function canCreate(): bool
+    {
+        return auth()->user()?->hasPermission('orders.create') ?? false;
+    }
+
     public static function canEdit(Model $record): bool
     {
+        if (! (auth()->user()?->hasPermission('orders.edit') ?? false)) {
+            return false;
+        }
+
         return in_array($record->status, [
             OrderStatus::Pending,
             OrderStatus::Call1,
@@ -69,6 +83,11 @@ class OrderResource extends Resource
             OrderStatus::Confirmed,
             OrderStatus::ConfirmedBot,
         ], true);
+    }
+
+    public static function canDelete(Model $record): bool
+    {
+        return auth()->user()?->hasPermission('orders.delete') ?? false;
     }
 
     public static function getRelations(): array

@@ -22,6 +22,11 @@ class WilayaResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    public static function canViewAny(): bool
+    {
+        return auth()->user()?->hasPermission('wilayas.view') ?? false;
+    }
+
     public static function infolist(Schema $schema): Schema
     {
         return WilayaInfolist::configure($schema);

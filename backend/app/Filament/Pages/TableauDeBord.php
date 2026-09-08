@@ -24,6 +24,11 @@ class TableauDeBord extends BaseDashboard
 
     protected static ?int $navigationSort = -1;
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->hasPermission('tableau_de_bord.view') ?? false;
+    }
+
     public function filtersForm(Schema $schema): Schema
     {
         return $schema

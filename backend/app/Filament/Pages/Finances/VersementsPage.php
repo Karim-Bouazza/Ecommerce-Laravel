@@ -22,4 +22,9 @@ class VersementsPage extends Page
     protected static ?string $slug = 'finances/versements';
 
     protected string $view = 'filament.pages.finances.versements';
+
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->hasPermission('versements.view') ?? false;
+    }
 }

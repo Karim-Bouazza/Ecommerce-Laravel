@@ -30,6 +30,11 @@ class ProductsToPurchasePage extends Page implements HasTable
 
     protected string $view = 'filament.pages.products-to-purchase';
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->hasPermission('products_to_purchase.view') ?? false;
+    }
+
     public function table(Table $table): Table
     {
         return $table

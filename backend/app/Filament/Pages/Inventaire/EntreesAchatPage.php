@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages\Inventaire;
 
+use App\Enums\PurchaseEntryPaymentStatus;
 use App\Filament\Pages\Inventaire\Concerns\InteractsWithPurchaseEntryRecords;
 use App\Models\PurchaseEntry;
 use BackedEnum;
@@ -31,6 +32,11 @@ class EntreesAchatPage extends Page implements HasTable
     protected static ?string $slug = 'inventaire/entrees-achat';
 
     protected string $view = 'filament.pages.inventaire.entrees-achat';
+
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->hasPermission('entrees_achat.view') ?? false;
+    }
 
     public function table(Table $table): Table
     {
@@ -64,15 +70,15 @@ class EntreesAchatPage extends Page implements HasTable
                     ->color(fn ($state) => $state->color()),
             ])
             ->headerActions([
-                self::createPurchaseEntryAction(),
+                self::createPurchaseEntryAction()->visible(fn () => auth()->user()->hasPermission('entrees_achat.create')),
             ])
             ->recordActions([
                 self::viewPurchaseEntryAction(),
                 self::purchaseEntryVersementsAction(),
-                self::createPurchaseEntryVersementAction(),
-                self::confirmPurchaseEntryAction(),
-                self::editPurchaseEntryAction(),
-                self::deletePurchaseEntryAction(),
+                self::createPurchaseEntryVersementAction()->visible(fn (PurchaseEntry $record) => (! $record->isPending() && $record->remainingAmount() > 0) && auth()->user()->hasPermission('entrees_achat.edit')),
+                self::confirmPurchaseEntryAction()->visible(fn (PurchaseEntry $record) => $record->isPending() && auth()->user()->hasPermission('entrees_achat.edit')),
+                self::editPurchaseEntryAction()->visible(fn (PurchaseEntry $record) => $record->isPending() && auth()->user()->hasPermission('entrees_achat.edit')),
+                self::deletePurchaseEntryAction()->visible(fn (PurchaseEntry $record) => ($record->isPending() || $record->paymentStatus() === PurchaseEntryPaymentStatus::Unpaid) && auth()->user()->hasPermission('entrees_achat.delete')),
             ])
             ->defaultSort('created_at', 'desc');
     }

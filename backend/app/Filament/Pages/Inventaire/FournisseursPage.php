@@ -32,6 +32,11 @@ class FournisseursPage extends Page implements HasTable
 
     protected string $view = 'filament.pages.inventaire.fournisseurs';
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->hasPermission('fournisseurs.view') ?? false;
+    }
+
     public function table(Table $table): Table
     {
         return $table
@@ -61,11 +66,11 @@ class FournisseursPage extends Page implements HasTable
                     ->placeholder('—'),
             ])
             ->headerActions([
-                self::createFournisseurAction(),
+                self::createFournisseurAction()->visible(fn () => auth()->user()->hasPermission('fournisseurs.create')),
             ])
             ->recordActions([
-                self::editFournisseurAction(),
-                self::deleteFournisseurAction(),
+                self::editFournisseurAction()->visible(fn () => auth()->user()->hasPermission('fournisseurs.edit')),
+                self::deleteFournisseurAction()->visible(fn () => auth()->user()->hasPermission('fournisseurs.delete')),
             ])
             ->defaultSort('created_at', 'desc');
     }

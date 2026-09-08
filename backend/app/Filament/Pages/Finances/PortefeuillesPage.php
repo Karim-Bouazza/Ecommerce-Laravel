@@ -34,6 +34,11 @@ class PortefeuillesPage extends Page implements HasTable
 
     protected string $view = 'filament.pages.finances.portefeuilles';
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->hasPermission('portefeuilles.view') ?? false;
+    }
+
     protected function getHeaderWidgets(): array
     {
         return [
@@ -76,15 +81,15 @@ class PortefeuillesPage extends Page implements HasTable
                     ->placeholder('—'),
             ])
             ->headerActions([
-                self::createWalletAction(),
-                self::transferAction(),
+                self::createWalletAction()->visible(fn () => auth()->user()->hasPermission('portefeuilles.create')),
+                self::transferAction()->visible(fn () => auth()->user()->hasPermission('portefeuilles.create')),
             ])
             ->recordActions([
-                self::editWalletAction(),
-                self::depositAction(),
-                self::withdrawAction(),
+                self::editWalletAction()->visible(fn () => auth()->user()->hasPermission('portefeuilles.edit')),
+                self::depositAction()->visible(fn () => auth()->user()->hasPermission('portefeuilles.edit')),
+                self::withdrawAction()->visible(fn () => auth()->user()->hasPermission('portefeuilles.edit')),
                 self::viewTransactionsAction(),
-                self::deleteWalletAction(),
+                self::deleteWalletAction()->visible(fn () => auth()->user()->hasPermission('portefeuilles.delete')),
             ])
             ->defaultSort('created_at', 'desc');
     }

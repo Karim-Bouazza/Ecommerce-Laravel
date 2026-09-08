@@ -34,6 +34,11 @@ class EntrepotsPage extends Page implements HasTable
 
     protected string $view = 'filament.pages.inventaire.entrepots';
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->hasPermission('entrepots.view') ?? false;
+    }
+
     public function table(Table $table): Table
     {
         return $table
@@ -65,14 +70,15 @@ class EntrepotsPage extends Page implements HasTable
                     ->placeholder('—'),
                 ToggleColumn::make('active')
                     ->label('Actif')
+                    ->visible(fn () => auth()->user()->hasPermission('entrepots.edit'))
                     ->afterStateUpdated(fn (Warehouse $record, bool $state) => app(UpdateWarehouseService::class)->execute($record, ['active' => $state])),
             ])
             ->headerActions([
-                self::createWarehouseAction(),
+                self::createWarehouseAction()->visible(fn () => auth()->user()->hasPermission('entrepots.create')),
             ])
             ->recordActions([
-                self::editWarehouseAction(),
-                self::deleteWarehouseAction(),
+                self::editWarehouseAction()->visible(fn () => auth()->user()->hasPermission('entrepots.edit')),
+                self::deleteWarehouseAction()->visible(fn () => auth()->user()->hasPermission('entrepots.delete')),
             ])
             ->defaultSort('created_at', 'desc');
     }

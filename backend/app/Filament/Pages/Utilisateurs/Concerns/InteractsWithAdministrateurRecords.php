@@ -2,12 +2,14 @@
 
 namespace App\Filament\Pages\Utilisateurs\Concerns;
 
+use App\Models\Role;
 use App\Models\User;
 use App\Services\Administrateurs\CreateAdministrateurService;
 use App\Services\Administrateurs\DeleteAdministrateurService;
 use App\Services\Administrateurs\UpdateAdministrateurService;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
@@ -35,6 +37,11 @@ trait InteractsWithAdministrateurRecords
                 ->required()
                 ->unique(table: 'users', column: 'email', ignoreRecord: true)
                 ->maxLength(255),
+            Select::make('role_id')
+                ->label('Rôle')
+                ->relationship('role', 'name')
+                ->required()
+                ->disabled(fn () => $record !== null && $record->is(auth()->user())),
             TextInput::make('password')
                 ->label('Mot de passe')
                 ->password()

@@ -33,6 +33,11 @@ class BlacklistPage extends Page implements HasTable
 
     protected string $view = 'filament.pages.blacklist';
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->hasPermission('clients_blacklist.view') ?? false;
+    }
+
     public function table(Table $table): Table
     {
         return $table
@@ -79,14 +84,15 @@ class BlacklistPage extends Page implements HasTable
                     ->alignCenter(),
             ])
             ->recordActions([
-                self::toggleBlacklistAction(),
+                self::toggleBlacklistAction()->visible(fn () => auth()->user()->hasPermission('clients.edit')),
                 self::viewOrdersAction(),
                 DeleteAction::make()
                     ->modalHeading('Supprimer le Client')
                     ->modalSubmitActionLabel('Supprimer')
                     ->modalCancelActionLabel('Fermer')
                     ->iconButton()
-                    ->tooltip('Supprimer'),
+                    ->tooltip('Supprimer')
+                    ->visible(fn () => auth()->user()->hasPermission('clients.delete')),
             ])
             ->defaultSort('blacklisted_at', 'desc')
             ->emptyStateHeading('Aucun client sur liste noire')

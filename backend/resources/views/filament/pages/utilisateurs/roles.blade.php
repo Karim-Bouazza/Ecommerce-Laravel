@@ -1,5 +1,3 @@
 <x-filament-panels::page>
-    <x-filament::section>
-        Page en cours de construction.
-    </x-filament::section>
+    {{ $this->table }}
 </x-filament-panels::page>

@@ -28,6 +28,11 @@ class EnCoursOrdersPage extends Page implements HasTable
 
     protected string $view = 'filament.pages.orders.status-group';
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->hasPermission('orders_en_cours.view') ?? false;
+    }
+
     protected static function statuses(): array
     {
         return [

@@ -16,6 +16,11 @@ class Dashboard extends BaseDashboard
 
     protected static ?string $title = 'Dashboard';
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->hasPermission('dashboard.view') ?? false;
+    }
+
     public string $period = 'all';
 
     public string $mode = 'numbers';

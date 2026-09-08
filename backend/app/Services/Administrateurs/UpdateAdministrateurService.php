@@ -13,6 +13,7 @@ class UpdateAdministrateurService
             'name',
             'email',
             'phone',
+            'role_id',
             'password',
             'is_active',
         ]));

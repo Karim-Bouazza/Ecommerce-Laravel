@@ -28,6 +28,11 @@ class NouvellesOrdersPage extends Page implements HasTable
 
     protected string $view = 'filament.pages.orders.status-group';
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->hasPermission('orders_nouvelles.view') ?? false;
+    }
+
     protected static function statuses(): array
     {
         return [OrderStatus::Pending, OrderStatus::ToCheck];

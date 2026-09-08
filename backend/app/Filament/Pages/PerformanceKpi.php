@@ -29,6 +29,11 @@ class PerformanceKpi extends Page
 
     protected string $view = 'filament.pages.performance-kpi';
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->hasPermission('performance_kpi.view') ?? false;
+    }
+
     public string $period = 'all';
 
     public string $evolutionMode = 'montant';

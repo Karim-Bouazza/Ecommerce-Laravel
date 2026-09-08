@@ -32,6 +32,11 @@ class AdministrateursPage extends Page implements HasTable
 
     protected string $view = 'filament.pages.utilisateurs.administrateurs';
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->hasPermission('administrateurs.view') ?? false;
+    }
+
     public function table(Table $table): Table
     {
         return $table
@@ -47,6 +52,10 @@ class AdministrateursPage extends Page implements HasTable
                 TextColumn::make('phone')
                     ->label('Téléphone')
                     ->placeholder('—'),
+                TextColumn::make('role.name')
+                    ->label('Rôle')
+                    ->badge()
+                    ->placeholder('—'),
                 TextColumn::make('is_active')
                     ->label('Actif')
                     ->badge()
@@ -54,11 +63,11 @@ class AdministrateursPage extends Page implements HasTable
                     ->color(fn (bool $state) => $state ? 'success' : 'danger'),
             ])
             ->headerActions([
-                self::createAdministrateurAction(),
+                self::createAdministrateurAction()->visible(fn () => auth()->user()->hasPermission('administrateurs.create')),
             ])
             ->recordActions([
-                self::editAdministrateurAction(),
-                self::deleteAdministrateurAction(),
+                self::editAdministrateurAction()->visible(fn () => auth()->user()->hasPermission('administrateurs.edit')),
+                self::deleteAdministrateurAction()->visible(fn () => auth()->user()->hasPermission('administrateurs.delete')),
             ])
             ->defaultSort('created_at', 'desc');
     }

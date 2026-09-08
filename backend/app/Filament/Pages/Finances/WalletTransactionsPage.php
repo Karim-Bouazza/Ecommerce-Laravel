@@ -34,6 +34,11 @@ class WalletTransactionsPage extends Page implements HasTable
 
     public Wallet $wallet;
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->hasPermission('portefeuilles.view') ?? false;
+    }
+
     public function mount(Wallet $wallet): void
     {
         $this->wallet = $wallet;

@@ -36,6 +36,11 @@ class StockPage extends Page implements HasTable
 
     protected string $view = 'filament.pages.inventaire.stock';
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->hasPermission('stock.view') ?? false;
+    }
+
     public function table(Table $table): Table
     {
         $warehouse = $this->getActiveWarehouse();

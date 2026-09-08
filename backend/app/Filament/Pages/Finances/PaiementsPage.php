@@ -22,4 +22,9 @@ class PaiementsPage extends Page
     protected static ?string $slug = 'finances/paiements';
 
     protected string $view = 'filament.pages.finances.paiements';
+
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->hasPermission('paiements.view') ?? false;
+    }
 }

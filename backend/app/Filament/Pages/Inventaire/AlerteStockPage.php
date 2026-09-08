@@ -37,6 +37,11 @@ class AlerteStockPage extends Page implements HasTable
 
     protected string $view = 'filament.pages.inventaire.alerte-stock';
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->hasPermission('alerte_stock.view') ?? false;
+    }
+
     public function table(Table $table): Table
     {
         $warehouse = $this->getActiveWarehouse();

@@ -34,6 +34,11 @@ class ClientsPage extends Page implements HasTable
 
     protected string $view = 'filament.pages.clients';
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->hasPermission('clients.view') ?? false;
+    }
+
     public function table(Table $table): Table
     {
         return $table
@@ -78,14 +83,16 @@ class ClientsPage extends Page implements HasTable
                     ->modalCancelActionLabel('Fermer')
                     ->modalWidth('md')
                     ->iconButton()
-                    ->tooltip('Modifier'),
-                self::toggleBlacklistAction(),
+                    ->tooltip('Modifier')
+                    ->visible(fn () => auth()->user()->hasPermission('clients.edit')),
+                self::toggleBlacklistAction()->visible(fn () => auth()->user()->hasPermission('clients.edit')),
                 DeleteAction::make()
                     ->modalHeading('Supprimer le Client')
                     ->modalSubmitActionLabel('Supprimer')
                     ->modalCancelActionLabel('Fermer')
                     ->iconButton()
-                    ->tooltip('Supprimer'),
+                    ->tooltip('Supprimer')
+                    ->visible(fn () => auth()->user()->hasPermission('clients.delete')),
                 self::viewOrdersAction(),
             ])
             ->defaultSort('created_at', 'desc');
