@@ -3,12 +3,15 @@
 namespace App\Services\Wallets;
 
 use App\Models\Wallet;
-use RuntimeException;
+use Illuminate\Support\Facades\DB;
 
 class DeleteWalletService
 {
     public function execute(Wallet $wallet): void
     {
-        $wallet->delete();
+        DB::transaction(function () use ($wallet): void {
+            $wallet->transactions()->delete();
+            $wallet->delete();
+        });
     }
 }
