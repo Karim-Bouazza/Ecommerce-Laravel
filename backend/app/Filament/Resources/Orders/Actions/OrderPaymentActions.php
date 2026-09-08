@@ -2,11 +2,14 @@
 
 namespace App\Filament\Resources\Orders\Actions;
 
+use App\Enums\OrderStatus;
 use App\Enums\PaymentStatus;
 use App\Models\Order;
+use App\Services\Orders\MarkOrderAsPaidService;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
+use RuntimeException;
 
 class OrderPaymentActions
 {
@@ -17,9 +20,19 @@ class OrderPaymentActions
             ->icon(Heroicon::OutlinedBanknotes)
             ->color('success')
             ->requiresConfirmation()
-            ->visible(fn (Order $record) => $record->payment_status === PaymentStatus::Unpaid)
+            ->visible(fn (Order $record) => $record->payment_status === PaymentStatus::Unpaid
+                && $record->status === OrderStatus::Delivered)
             ->action(function (Order $record): void {
-                $record->update(['payment_status' => PaymentStatus::Paid]);
+                try {
+                    app(MarkOrderAsPaidService::class)->execute($record);
+                } catch (RuntimeException $exception) {
+                    Notification::make()
+                        ->title($exception->getMessage())
+                        ->danger()
+                        ->send();
+
+                    return;
+                }
 
                 Notification::make()
                     ->title('Commande marquée comme payée')
