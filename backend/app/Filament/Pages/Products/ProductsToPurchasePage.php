@@ -39,7 +39,7 @@ class ProductsToPurchasePage extends Page implements HasTable
     {
         return $table
             ->query($this->getRestockQuery())
-            ->description('Quantités à racheter pour les produits en rupture de stock ayant des commandes confirmées, détaillées par variante.')
+            ->description('Quantités à racheter pour les produits en rupture de stock ayant des commandes confirmées sans stock, détaillées par variante.')
             ->columns([
                 TextColumn::make('variant')
                     ->label('Variante')
@@ -67,7 +67,7 @@ class ProductsToPurchasePage extends Page implements HasTable
             ->groupingSettingsHidden()
             ->defaultSort('variant')
             ->emptyStateHeading('Rien à commander')
-            ->emptyStateDescription('Aucun produit en rupture de stock n\'a de commande confirmée en attente.')
+            ->emptyStateDescription('Aucun produit en rupture de stock n\'a de commande confirmée sans stock en attente.')
             ->emptyStateIcon(Heroicon::OutlinedShoppingCart);
     }
 
@@ -76,7 +76,7 @@ class ProductsToPurchasePage extends Page implements HasTable
         return OrderItem::query()
             ->join('orders', 'orders.id', '=', 'order_items.order_id')
             ->join('products', 'products.id', '=', 'order_items.product_id')
-            ->where('orders.status', OrderStatus::Confirmed->value)
+            ->where('orders.status', OrderStatus::ConfirmedNoStock->value)
             ->where('products.stock', 0)
             ->groupBy('products.id', 'order_items.variant')
             ->orderBy('product_name')
