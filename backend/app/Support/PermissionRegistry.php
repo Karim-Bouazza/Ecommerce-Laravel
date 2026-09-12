@@ -75,6 +75,8 @@ class PermissionRegistry
                 'portefeuilles.create' => 'Créer des portefeuilles',
                 'portefeuilles.edit' => 'Modifier les portefeuilles',
                 'portefeuilles.delete' => 'Supprimer les portefeuilles',
+                'portefeuilles.deposit' => 'Effectuer une entrée sur un portefeuille',
+                'portefeuilles.withdraw' => 'Effectuer une sortie sur un portefeuille',
                 'paiements.view' => 'Voir les paiements',
                 'versements.view' => 'Voir les versements',
             ],

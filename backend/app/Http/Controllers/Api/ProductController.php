@@ -10,9 +10,14 @@ use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $products = Product::paginate(20);
+        $perPage = (int) $request->input('per_page', 20);
+        $search = trim((string) $request->input('search', ''));
+
+        $products = Product::query()
+            ->when($search !== '', fn ($query) => $query->where('name', 'like', "%{$search}%"))
+            ->paginate($perPage);
 
         return ProductResource::collection($products);
     }
