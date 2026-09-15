@@ -1,0 +1,6 @@
+1:"$Sreact.fragment"
+2:I[87826,["/_next/static/chunks/b1a62cdc8e61d682.js","/_next/static/chunks/e6c0ffa6ba1c9d2e.js","/_next/static/chunks/4572bddf3fa424d1.js","/_next/static/chunks/d1bc10bec8fcdd53.js","/_next/static/chunks/cec469d6210d203f.js","/_next/static/chunks/75d81dfc85ee10dd.js","/_next/static/chunks/f4d87c7cd0e388b5.js","/_next/static/chunks/c796fcc53b4dbe43.js","/_next/static/chunks/87fa469d562578b5.js","/_next/static/chunks/e8d4541fde4ce919.js"],"OrdersTable"]
+3:I[97367,["/_next/static/chunks/ff1a16fafef87110.js","/_next/static/chunks/247eb132b7f7b574.js"],"OutletBoundary"]
+4:"$Sreact.suspense"
+0:{"buildId":"a10xKjOIGBh3ftbiKQGwK","rsc":["$","$1","c",{"children":[["$","div",null,{"className":"flex flex-col gap-4","children":["$","$L2",null,{"statusGroup":"suivi"}]}],[["$","script","script-0",{"src":"/_next/static/chunks/f4d87c7cd0e388b5.js","async":true}],["$","script","script-1",{"src":"/_next/static/chunks/c796fcc53b4dbe43.js","async":true}],["$","script","script-2",{"src":"/_next/static/chunks/87fa469d562578b5.js","async":true}],["$","script","script-3",{"src":"/_next/static/chunks/e8d4541fde4ce919.js","async":true}]],["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"loading":null,"isPartial":false}
+5:null
