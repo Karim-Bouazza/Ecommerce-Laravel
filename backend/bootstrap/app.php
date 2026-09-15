@@ -13,6 +13,11 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->statefulApi();
+
+        // The app only ever receives traffic from the edge nginx container on the
+        // Docker network, so trusting all proxies is safe here and is required for
+        // correct scheme/IP detection (HTTPS links, client IPs, rate limiting).
+        $middleware->trustProxies(at: '*');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

@@ -1,0 +1,193 @@
+# Rendered by the nginx image's entrypoint: every ${DOMAIN} below is replaced
+# with the value from .env.prod before nginx starts. nginx's own $variables
+# ($host, $remote_addr, ...) are left untouched — only the ${...} brace form is
+# substituted.
+#
+#   ${DOMAIN}      ->  frontend  (Next.js standalone server)
+#   api.${DOMAIN}  ->  backend   (Laravel Octane/FrankenPHP, incl. Filament
+#                       admin at /admin and product images at /storage)
+#
+# The API deliberately lives on its own subdomain rather than a /api path so
+# Sanctum's SPA cookie auth has a stable, single-level parent domain to scope
+# the session cookie to (SESSION_DOMAIN=.${DOMAIN}).
+
+map $http_upgrade $connection_upgrade {
+    default upgrade;
+    ''      close;
+}
+
+# Docker's embedded DNS. Resolving upstreams at request time (rather than once
+# at startup) means a restarted container that comes back on a new IP is picked
+# up without reloading nginx.
+resolver 127.0.0.11 valid=10s ipv6=off;
+
+log_format main_timed '$remote_addr - $remote_user [$time_local] "$request" '
+                      '$status $body_bytes_sent "$http_referer" '
+                      '"$http_user_agent" "$http_x_forwarded_for" '
+                      'rt=$request_time urt=$upstream_response_time '
+                      'rid=$request_id';
+
+access_log /var/log/nginx/access.log main_timed;
+error_log  /var/log/nginx/error.log warn;
+
+# Don't advertise the nginx version on error pages and in the Server header.
+server_tokens off;
+
+# Edge rate limiting. Laravel has no equivalent throttling of its own here
+# (RouteServiceProvider's default `api` limiter isn't applied to these routes),
+# so this is the only defence, not just a backstop — dropping a flood before it
+# reaches Octane.
+#
+# `auth` is deliberately scoped to the credential endpoint only — see the note
+# on that location. Product images are excluded from both zones entirely.
+limit_req_zone $binary_remote_addr zone=api:10m  rate=30r/s;
+limit_req_zone $binary_remote_addr zone=auth:10m rate=1r/s;
+# The default 503 is indistinguishable from a real outage in monitoring.
+limit_req_status 429;
+
+# Anything arriving on the raw IP, or with a Host nginx doesn't serve, is a
+# scanner: no name matches, so it lands here instead of falling through to the
+# first server block (which would otherwise be the default and would proxy the
+# app to it). ssl_reject_handshake drops the TLS connection without presenting
+# the certificate at all, so this block needs no cert of its own.
+server {
+    listen 80  default_server;
+    listen [::]:80 default_server;
+    listen 443 ssl default_server;
+    listen [::]:443 ssl default_server;
+    server_name _;
+
+    ssl_reject_handshake on;
+
+    return 444;
+}
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name ${DOMAIN} api.${DOMAIN};
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    http2 on;
+    server_name ${DOMAIN};
+
+    ssl_certificate     /etc/letsencrypt/live/${DOMAIN}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/${DOMAIN}/privkey.pem;
+    ssl_protocols       TLSv1.2 TLSv1.3;
+    ssl_session_cache   shared:SSL:10m;
+    ssl_session_timeout 1d;
+    ssl_prefer_server_ciphers off;
+
+    # Next.js already sets X-Frame-Options / nosniff / HSTS in next.config.ts.
+
+    location / {
+        set $frontend_upstream http://frontend:3000;
+        proxy_pass $frontend_upstream$request_uri;
+
+        proxy_http_version 1.1;
+        proxy_set_header Host              $host;
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host  $host;
+        proxy_set_header Upgrade           $http_upgrade;
+        proxy_set_header Connection        $connection_upgrade;
+    }
+
+    # Immutable build assets: let the browser cache them hard.
+    location /_next/static/ {
+        set $frontend_upstream http://frontend:3000;
+        proxy_pass $frontend_upstream$request_uri;
+
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        add_header Cache-Control "public, max-age=31536000, immutable";
+    }
+
+    location ~ /\.(?!well-known) {
+    deny all;
+    log_not_found off;
+    }
+}
+
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    http2 on;
+    server_name api.${DOMAIN};
+
+    ssl_certificate     /etc/letsencrypt/live/${DOMAIN}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/${DOMAIN}/privkey.pem;
+    ssl_protocols       TLSv1.2 TLSv1.3;
+    ssl_session_cache   shared:SSL:10m;
+    ssl_session_timeout 1d;
+    ssl_prefer_server_ciphers off;
+
+    # Product images are uploaded through this host.
+    client_max_body_size 25m;
+
+    # Deliberately NOT rate limited. Product images are fetched by the Next.js
+    # image optimizer (next/image + the remotePatterns entry in next.config.ts),
+    # which means they arrive from the frontend *container*, not from the
+    # browser: every user's thumbnails share one source IP. A per-IP limit here
+    # would throttle images for everyone at once as soon as two people load a
+    # product list.
+    location /storage/ {
+        set $backend_upstream http://backend:8000;
+        proxy_pass $backend_upstream$request_uri;
+
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+    }
+
+    # Credential endpoint only. /api/v1/me and /api/v1/logout run on every page
+    # load and reconnect, so limiting the whole /api/v1 prefix at 1r/s would
+    # lock out normal use.
+    location = /api/v1/login {
+        limit_req zone=auth burst=5 nodelay;
+
+        set $backend_upstream http://backend:8000;
+        proxy_pass $backend_upstream$request_uri;
+
+        proxy_http_version 1.1;
+        proxy_set_header Host              $host;
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        proxy_read_timeout 120s;
+    }
+
+    location / {
+        # burst is generous: a single screen fans out into many parallel XHRs,
+        # and those legitimately come from one browser.
+        limit_req zone=api burst=60 nodelay;
+
+        set $backend_upstream http://backend:8000;
+        proxy_pass $backend_upstream$request_uri;
+
+        proxy_http_version 1.1;
+        proxy_set_header Host              $host;
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        proxy_read_timeout 120s;
+    }
+
+    location ~ /\.(?!well-known) {
+        deny all;
+        log_not_found off;
+    }
+}

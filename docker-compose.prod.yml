@@ -1,0 +1,130 @@
+# Production stack — single VPS.
+#
+# Always pass the env file explicitly, it is what fills ${DOMAIN} and friends:
+#   docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --build
+#
+# Only nginx publishes ports. mysql has no `ports:` mapping, so it is reachable
+# from the backend container and from nowhere else.
+
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  nginx:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN:?DOMAIN is required}
+    volumes:
+      # The official image runs envsubst over /etc/nginx/templates/*.template
+      # into /etc/nginx/conf.d/ at startup, which is how ${DOMAIN} gets filled.
+      - ./nginx/templates:/etc/nginx/templates:ro
+      - certbot_conf:/etc/letsencrypt:ro
+      - certbot_www:/var/www/certbot:ro
+      - ./logs/nginx:/var/log/nginx
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - frontend
+    logging: *default-logging
+
+  certbot:
+    image: certbot/certbot:v5.7.0
+    restart: unless-stopped
+    volumes:
+      - certbot_conf:/etc/letsencrypt
+      - certbot_www:/var/www/certbot
+    # Renewal attempt twice a day; certbot only acts within 30 days of expiry.
+    entrypoint: >
+      /bin/sh -c "trap exit TERM;
+      while :; do certbot renew --webroot -w /var/www/certbot --quiet;
+      sleep 12h & wait $${!}; done"
+    logging: *default-logging
+
+  frontend:
+    build:
+      context: ./frontend
+      target: production
+      args:
+        # Baked into the client bundle at build time — changing it requires a
+        # rebuild, not just a restart.
+        NEXT_PUBLIC_API_URL: https://api.${DOMAIN}
+    restart: unless-stopped
+    init: true
+    environment:
+      NODE_ENV: production
+    expose:
+      - "3000"
+    networks:
+      - frontend
+    logging: *default-logging
+
+  backend:
+    build:
+      context: ./backend
+      target: production
+    restart: unless-stopped
+    env_file:
+      - .env.prod
+    environment:
+      # Derived from DOMAIN so it can't drift from the nginx server_names below.
+      APP_URL: https://api.${DOMAIN}
+      FRONTEND_URLS: https://${DOMAIN}
+      SANCTUM_STATEFUL_DOMAINS: ${DOMAIN}
+      SESSION_DOMAIN: .${DOMAIN}
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: ${MYSQL_DATABASE:?MYSQL_DATABASE is required}
+      DB_USERNAME: ${MYSQL_USER:?MYSQL_USER is required}
+      DB_PASSWORD: ${MYSQL_PASSWORD:?MYSQL_PASSWORD is required}
+    expose:
+      - "8000"
+    volumes:
+      # Product images land under storage/app/public via the `public` disk.
+      # Without this volume every rebuild would destroy them.
+      - backend_storage:/app/storage/app/public
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - frontend
+      - backend
+    logging: *default-logging
+
+  mysql:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+      MYSQL_DATABASE: ${MYSQL_DATABASE:?MYSQL_DATABASE is required}
+      MYSQL_USER: ${MYSQL_USER:?MYSQL_USER is required}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?MYSQL_PASSWORD is required}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u $$MYSQL_USER -p$$MYSQL_PASSWORD"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - backend
+    logging: *default-logging
+
+volumes:
+  mysql_data:
+  backend_storage:
+  certbot_conf:
+  certbot_www:
+
+networks:
+  frontend:
+  backend:
