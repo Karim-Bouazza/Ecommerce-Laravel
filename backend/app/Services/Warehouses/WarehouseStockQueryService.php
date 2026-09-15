@@ -3,6 +3,7 @@
 namespace App\Services\Warehouses;
 
 use App\Models\Product;
+use App\Models\Stock;
 use App\Models\Warehouse;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\JoinClause;
@@ -10,7 +11,8 @@ use Illuminate\Database\Query\JoinClause;
 class WarehouseStockQueryService
 {
     /**
-     * All products stocked in the given warehouse, with their warehouse-specific quantity and minimum.
+     * All products stocked in the given warehouse, with their depot quantity (from the
+     * stock movement ledger) and their (product-level) minimum threshold.
      */
     public function productsQuery(Warehouse $warehouse): Builder
     {
@@ -24,8 +26,8 @@ class WarehouseStockQueryService
     public function lowStockQuery(Warehouse $warehouse): Builder
     {
         return $this->baseQuery($warehouse)
-            ->where('warehouse_product.stock_minimum', '>', 0)
-            ->whereColumn('warehouse_product.quantity', '<=', 'warehouse_product.stock_minimum')
+            ->where('products.stock_minimum', '>', 0)
+            ->whereRaw('coalesce(stock_ledger.available_quantity, 0) <= products.stock_minimum')
             ->orderBy('products.name');
     }
 
@@ -51,8 +53,12 @@ class WarehouseStockQueryService
                 $join->on('warehouse_product.product_id', '=', 'products.id')
                     ->where('warehouse_product.warehouse_id', '=', $warehouse->id);
             })
+            ->leftJoinSub(Stock::inDepotSubquery(), 'stock_ledger', function (JoinClause $join) use ($warehouse) {
+                $join->on('stock_ledger.product_id', '=', 'products.id')
+                    ->where('stock_ledger.warehouse_id', '=', $warehouse->id);
+            })
             ->select('products.*')
-            ->selectRaw('coalesce(warehouse_product.quantity, 0) as warehouse_quantity')
-            ->selectRaw('coalesce(warehouse_product.stock_minimum, 0) as warehouse_stock_minimum');
+            ->selectRaw('coalesce(stock_ledger.available_quantity, 0) as warehouse_quantity')
+            ->selectRaw('coalesce(products.stock_minimum, 0) as warehouse_stock_minimum');
     }
 }

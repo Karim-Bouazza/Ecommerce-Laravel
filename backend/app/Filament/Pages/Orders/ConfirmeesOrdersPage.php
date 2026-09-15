@@ -35,6 +35,6 @@ class ConfirmeesOrdersPage extends Page implements HasTable
 
     protected static function statuses(): array
     {
-        return [OrderStatus::Confirmed, OrderStatus::Packed, OrderStatus::Shipped];
+        return [OrderStatus::Confirmed, OrderStatus::Assigned];
     }
 }

@@ -60,6 +60,11 @@ class PurchaseEntry extends Model
         return $this->hasMany(WalletTransaction::class)->where('category', WalletTransactionCategory::Versement);
     }
 
+    public function returnEntries(): HasMany
+    {
+        return $this->hasMany(ReturnEntry::class);
+    }
+
     public function isPending(): bool
     {
         return $this->status === PurchaseEntryStatus::Pending;

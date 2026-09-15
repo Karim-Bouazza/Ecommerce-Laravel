@@ -11,11 +11,13 @@ class OrderStatusHistory extends Model
     protected $fillable = [
         'order_id',
         'status',
+        'previous_status',
         'user_id',
     ];
 
     protected $casts = [
         'status' => OrderStatus::class,
+        'previous_status' => OrderStatus::class,
     ];
 
     public function order(): BelongsTo

@@ -3,10 +3,12 @@
 namespace App\Filament\Resources\Orders\Actions;
 
 use App\Enums\OrderStatus;
+use App\Enums\StockMovementType;
 use App\Models\Order;
 use App\Models\OrderNote;
 use App\Models\OrderStatusHistory;
-use App\Models\Product;
+use App\Models\Stock;
+use App\Models\Warehouse;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
@@ -127,8 +129,22 @@ class OrderStatusActions
 
     private static function decrementStock(Order $record): void
     {
+        $warehouse = Warehouse::default();
+
+        if (! $warehouse) {
+            return;
+        }
+
         foreach ($record->items as $item) {
-            Product::whereKey($item->product_id)->decrement('stock', $item->quantity);
+            $current = Stock::lockAndGetInDepot($warehouse->id, $item->product_id);
+            $newQuantity = max(0, $current - $item->quantity);
+
+            $warehouse->stockMovements()->create([
+                'product_id' => $item->product_id,
+                'type' => StockMovementType::Out,
+                'quantity' => $item->quantity,
+                'resulting_quantity' => $newQuantity,
+            ]);
         }
     }
 }

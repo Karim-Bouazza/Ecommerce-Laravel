@@ -42,7 +42,6 @@ class EnCoursOrdersPage extends Page implements HasTable
             OrderStatus::Unreachable,
             OrderStatus::ConfirmedBot,
             OrderStatus::ConfirmedNoStock,
-            OrderStatus::Scheduled,
         ];
     }
 }

@@ -14,12 +14,17 @@ class Product extends Model
         'price',
         'purchase_price',
         'compare_price',
-        'stock',
+        'stock_minimum',
         'image_1',
         'image_2',
         'image_3',
         'image_4',
         'is_active',
+    ];
+
+    protected $casts = [
+        'is_active' => 'boolean',
+        'stock_minimum' => 'integer',
     ];
 
     public function category()
@@ -35,5 +40,18 @@ class Product extends Model
     public function adSpends(): HasMany
     {
         return $this->hasMany(ProductAdSpend::class);
+    }
+
+    public function stockMovements(): HasMany
+    {
+        return $this->hasMany(WarehouseStockMovement::class);
+    }
+
+    /**
+     * Total quantity of this product across every depot (warehouse).
+     */
+    public function totalStock(): int
+    {
+        return Stock::total($this->id);
     }
 }

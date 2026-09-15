@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Products\Schemas;
 
+use App\Models\Product;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
@@ -33,7 +34,9 @@ class ProductInfolist
                     ->numeric(decimalPlaces: 0, thousandsSeparator: ' ')
                     ->suffix(' DZ')
                     ->placeholder('-'),
-                TextEntry::make('stock')
+                TextEntry::make('total_stock')
+                    ->label('Stock total')
+                    ->state(fn (Product $record) => $record->totalStock())
                     ->numeric(),
                 ImageEntry::make('image_1')
                     ->disk('public'),

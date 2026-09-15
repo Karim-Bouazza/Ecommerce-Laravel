@@ -35,6 +35,6 @@ class AnnuleesOrdersPage extends Page implements HasTable
 
     protected static function statuses(): array
     {
-        return [OrderStatus::Cancelled, OrderStatus::Duplicated, OrderStatus::FakeOrder];
+        return [OrderStatus::Cancelled, OrderStatus::Duplicated, OrderStatus::FakeOrder, OrderStatus::Returned, OrderStatus::ReturnInProgress];
     }
 }

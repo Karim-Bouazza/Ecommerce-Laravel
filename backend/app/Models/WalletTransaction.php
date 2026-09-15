@@ -12,6 +12,9 @@ class WalletTransaction extends Model
     protected $fillable = [
         'wallet_id',
         'purchase_entry_id',
+        'return_entry_id',
+        'fournisseur_id',
+        'delivery_company_integration_id',
         'reference',
         'date',
         'type',
@@ -57,6 +60,21 @@ class WalletTransaction extends Model
     public function purchaseEntry(): BelongsTo
     {
         return $this->belongsTo(PurchaseEntry::class);
+    }
+
+    public function returnEntry(): BelongsTo
+    {
+        return $this->belongsTo(ReturnEntry::class);
+    }
+
+    public function fournisseur(): BelongsTo
+    {
+        return $this->belongsTo(Fournisseur::class);
+    }
+
+    public function deliveryCompanyIntegration(): BelongsTo
+    {
+        return $this->belongsTo(DeliveryCompanyIntegration::class);
     }
 
     public function creator(): BelongsTo

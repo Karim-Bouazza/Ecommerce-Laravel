@@ -4,6 +4,7 @@ namespace App\Filament\Pages\Products;
 
 use App\Enums\OrderStatus;
 use App\Models\OrderItem;
+use App\Models\Stock;
 use BackedEnum;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
@@ -95,8 +96,11 @@ class ProductsToPurchasePage extends Page implements HasTable
         return OrderItem::query()
             ->join('orders', 'orders.id', '=', 'order_items.order_id')
             ->join('products', 'products.id', '=', 'order_items.product_id')
+            ->leftJoinSub(Stock::totalSubquery(), 'stock_totals', function ($join) {
+                $join->on('stock_totals.product_id', '=', 'products.id');
+            })
             ->where('orders.status', OrderStatus::ConfirmedNoStock->value)
-            ->where('products.stock', 0)
+            ->whereRaw('coalesce(stock_totals.total_quantity, 0) <= 0')
             ->groupBy('products.id', 'order_items.variant')
             ->orderBy('product_name')
             ->select([

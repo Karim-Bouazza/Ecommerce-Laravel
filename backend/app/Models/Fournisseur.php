@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\PurchaseEntryStatus;
+use App\Enums\WalletTransactionCategory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -20,6 +21,16 @@ class Fournisseur extends Model
         return $this->hasMany(PurchaseEntry::class);
     }
 
+    /**
+     * Versements paid directly to this fournisseur, not tied to a specific purchase entry.
+     */
+    public function versements(): HasMany
+    {
+        return $this->hasMany(WalletTransaction::class)
+            ->whereNull('purchase_entry_id')
+            ->where('category', WalletTransactionCategory::Versement);
+    }
+
     protected function completedPurchaseEntries()
     {
         return $this->purchaseEntries()
@@ -34,7 +45,9 @@ class Fournisseur extends Model
 
     public function totalPaid(): int
     {
-        return (int) $this->completedPurchaseEntries()->sum(fn (PurchaseEntry $entry) => $entry->paidAmount());
+        $entriesPaid = (int) $this->completedPurchaseEntries()->sum(fn (PurchaseEntry $entry) => $entry->paidAmount());
+
+        return $entriesPaid + (int) $this->versements()->sum('amount');
     }
 
     public function remainingAmount(): int

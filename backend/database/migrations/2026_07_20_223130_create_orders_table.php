@@ -21,7 +21,7 @@ return new class extends Migration {
 
             $table->integer('total_price');
 
-            $table->enum('status', array_column(\App\Enums\OrderStatus::cases(), 'value'))->default(\App\Enums\OrderStatus::Pending->value);
+            $table->enum('status', array_column(\App\Enums\OrderStatus::cases(), 'value'))->default(\App\Enums\OrderStatus::New->value);
 
             $table->timestamps();
         });

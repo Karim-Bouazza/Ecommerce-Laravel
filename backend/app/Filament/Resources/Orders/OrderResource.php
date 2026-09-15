@@ -72,7 +72,7 @@ class OrderResource extends Resource
         }
 
         return in_array($record->status, [
-            OrderStatus::Pending,
+            OrderStatus::New,
             OrderStatus::Call1,
             OrderStatus::Call2,
             OrderStatus::Call3,

@@ -15,7 +15,7 @@ return new class extends Migration
             ->map(fn (OrderStatus $status) => "'{$status->value}'")
             ->implode(',');
 
-        DB::statement("ALTER TABLE orders MODIFY status ENUM($values) NOT NULL DEFAULT '".OrderStatus::Pending->value."'");
+        DB::statement("ALTER TABLE orders MODIFY status ENUM($values) NOT NULL DEFAULT '".OrderStatus::New->value."'");
     }
 
     /**
@@ -28,7 +28,7 @@ return new class extends Migration
             ->map(fn (OrderStatus $status) => "'{$status->value}'")
             ->implode(',');
 
-        DB::statement("UPDATE orders SET status = '".OrderStatus::Pending->value."' WHERE status = '".OrderStatus::Scheduled->value."'");
-        DB::statement("ALTER TABLE orders MODIFY status ENUM($values) NOT NULL DEFAULT '".OrderStatus::Pending->value."'");
+        DB::statement("UPDATE orders SET status = '".OrderStatus::New->value."' WHERE status = '".OrderStatus::Scheduled->value."'");
+        DB::statement("ALTER TABLE orders MODIFY status ENUM($values) NOT NULL DEFAULT '".OrderStatus::New->value."'");
     }
 };

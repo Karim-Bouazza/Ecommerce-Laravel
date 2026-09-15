@@ -35,6 +35,6 @@ class TermineesOrdersPage extends Page implements HasTable
 
     protected static function statuses(): array
     {
-        return [OrderStatus::Delivered, OrderStatus::Returned];
+        return [OrderStatus::Delivered];
     }
 }

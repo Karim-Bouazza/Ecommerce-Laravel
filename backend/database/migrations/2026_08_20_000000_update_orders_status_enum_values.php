@@ -31,7 +31,7 @@ return new class extends Migration
             ->map(fn (OrderStatus $status) => "'{$status->value}'")
             ->implode(',');
 
-        DB::statement("ALTER TABLE orders MODIFY status ENUM($values) NOT NULL DEFAULT '".OrderStatus::Pending->value."'");
+        DB::statement("ALTER TABLE orders MODIFY status ENUM($values) NOT NULL DEFAULT '".OrderStatus::New->value."'");
     }
 
     public function down(): void

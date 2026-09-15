@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Order extends Model
 {
@@ -24,6 +25,8 @@ class Order extends Model
         'delivery_price',
         'delivery_type',
         'stop_desk_company_id',
+        'address',
+        'delivery_note',
         'total_price',
         'created_at',
     ];
@@ -54,6 +57,11 @@ class Order extends Model
     public function statusHistories(): HasMany
     {
         return $this->hasMany(OrderStatusHistory::class);
+    }
+
+    public function latestStatusHistory(): HasOne
+    {
+        return $this->hasOne(OrderStatusHistory::class)->latestOfMany();
     }
 
     public function notes(): HasMany

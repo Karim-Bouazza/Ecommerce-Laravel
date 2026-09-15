@@ -38,6 +38,7 @@ class UpdateOrderService
 
                 $attributes = [
                     'product_id' => $product->id,
+                    'warehouse_id' => $item['warehouse_id'] ?? null,
                     'product_name' => $product->name,
                     'variant' => $item['variant'] ?? null,
                     'quantity' => $quantity,
@@ -65,11 +66,13 @@ class UpdateOrderService
                 'delivery_price' => $deliveryPrice,
                 'delivery_type' => $data['delivery_type'] ?? DeliveryType::Domicile->value,
                 'stop_desk_company_id' => $data['stop_desk_company_id'] ?? null,
+                'address' => $data['address'] ?? $order->address,
+                'delivery_note' => $data['delivery_note'] ?? $order->delivery_note,
                 'subtotal' => $subtotal,
                 'total_price' => $subtotal + $deliveryPrice,
             ]);
 
-            return $order->fresh(['client.wilaya', 'client.commune', 'items']);
+            return $order->fresh(['client.wilaya', 'client.commune', 'items.warehouse']);
         });
     }
 }

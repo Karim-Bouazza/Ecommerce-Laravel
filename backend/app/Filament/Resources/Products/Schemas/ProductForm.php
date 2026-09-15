@@ -48,9 +48,6 @@ class ProductForm
                     ->stripCharacters([' ', '.', ','])
                     ->dehydrateStateUsing(fn (?string $state) => filled($state) ? (int) str_replace([' ', '.', ','], '', $state) : $state)
                     ->suffix('DZ'),
-                TextInput::make('stock')
-                    ->required()
-                    ->numeric(),
                 FileUpload::make('image_1')
                     ->image()
                     ->disk('public')

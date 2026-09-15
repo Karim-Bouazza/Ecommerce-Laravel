@@ -48,6 +48,6 @@ class NouvellesOrdersPage extends Page implements HasTable
 
     protected static function statuses(): array
     {
-        return [OrderStatus::Pending, OrderStatus::ToCheck];
+        return [OrderStatus::New, OrderStatus::ToCheck];
     }
 }

@@ -49,12 +49,14 @@ class CreateOrderService
                     $order = Order::create([
                         'client_id' => $client->id,
                         'reference' => $this->generateReference(),
-                        'status' => OrderStatus::Pending,
+                        'status' => OrderStatus::New,
                         'type' => $data['type'] ?? OrderType::Ads,
                         'subtotal' => 0,
                         'delivery_price' => $data['delivery_price'] ?? 0,
                         'delivery_type' => $data['delivery_type'] ?? DeliveryType::Domicile->value,
                         'stop_desk_company_id' => $data['stop_desk_company_id'] ?? null,
+                        'address' => $data['address'] ?? null,
+                        'delivery_note' => $data['delivery_note'] ?? null,
                         'total_price' => 0,
                         'created_at' => $data['created_at'] ?? now(),
                     ]);
@@ -72,6 +74,7 @@ class CreateOrderService
 
                         $order->items()->create([
                             'product_id' => $product->id,
+                            'warehouse_id' => $item['warehouse_id'] ?? null,
                             'product_name' => $product->name,
                             'variant' => $item['variant'] ?? null,
                             'quantity' => $quantity,
@@ -104,7 +107,7 @@ class CreateOrderService
                     return $order->load([
                         'client.wilaya',
                         'client.commune',
-                        'items',
+                        'items.warehouse',
                         'statusHistories',
                         'notes',
                     ]);

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Products\Tables;
 
+use App\Models\Product;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -37,9 +38,10 @@ class ProductsTable
                     ->suffix(' DZ')
                     ->placeholder('-')
                     ->sortable(),
-                TextColumn::make('stock')
-                    ->numeric()
-                    ->sortable(),
+                TextColumn::make('total_stock')
+                    ->label('Stock')
+                    ->state(fn (Product $record) => $record->totalStock())
+                    ->numeric(),
                 IconColumn::make('is_active')
                     ->boolean(),
                 TextColumn::make('category.name')

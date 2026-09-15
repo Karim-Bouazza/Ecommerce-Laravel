@@ -18,8 +18,14 @@ class ProductResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
+            'description' => $this->description,
+            'category_id' => $this->category_id,
+            'category' => $this->whenLoaded('category', fn () => $this->category?->name),
+            'purchase_price' => $this->purchase_price,
             'price' => $this->price,
-            'image_01' => Storage::url($this->image_01),
+            'total_stock' => $this->totalStock(),
+            'is_active' => $this->is_active,
+            'image' => $this->image_1 ? Storage::url($this->image_1) : null,
         ];
     }
 }
