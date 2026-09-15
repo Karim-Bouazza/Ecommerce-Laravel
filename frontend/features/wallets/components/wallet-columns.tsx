@@ -62,7 +62,7 @@ export const walletColumns: ColumnDef<Wallet>[] = [
           aria-label="Transactions"
           className="text-blue-600 hover:text-blue-600 dark:text-blue-400"
           nativeButton={false}
-          render={<Link href={`/admin/finances/wallets/${row.original.id}/transactions`} />}
+          render={<Link href={`/admin/finances/wallets/transactions?walletId=${row.original.id}`} />}
         >
           <List className="size-4" />
         </Button>
