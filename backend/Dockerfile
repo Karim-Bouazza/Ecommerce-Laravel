@@ -49,6 +49,10 @@ RUN install-php-extensions \
 
 COPY docker/php.ini /usr/local/etc/php/conf.d/99-app.ini
 
+# FrankenPHP's image has no composer of its own; borrow the binary from the
+# vendor stage just to regenerate the autoloader below.
+COPY --from=vendor /usr/bin/composer /usr/bin/composer
+
 COPY --from=vendor /app/vendor ./vendor
 COPY . .
 COPY --from=assets /app/public/build ./public/build
