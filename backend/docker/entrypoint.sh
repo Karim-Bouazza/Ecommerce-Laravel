@@ -14,4 +14,8 @@ su-exec octane php artisan view:cache
 # instance/container, so scaling backend replicas doesn't race the schema.
 su-exec octane php artisan migrate --force --isolated
 
+# Idempotent (keyed on ADMIN_EMAIL): guarantees a way into /admin after every
+# deploy without an interactive `make:filament-user` step.
+su-exec octane php artisan db:seed --class="Database\\Seeders\\AdminUserSeeder" --force
+
 exec su-exec octane "$@"

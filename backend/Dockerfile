@@ -4,12 +4,16 @@
 FROM composer:2 AS vendor
 WORKDIR /app
 COPY composer.json composer.lock ./
+# --ignore-platform-reqs: this stage only resolves/downloads packages, it never
+# executes app code, so the composer image's own PHP version/extensions (which
+# won't match the runtime image) don't matter here.
 RUN composer install \
     --no-dev \
     --no-interaction \
     --no-scripts \
     --no-autoloader \
-    --prefer-dist
+    --prefer-dist \
+    --ignore-platform-reqs
 
 # --- assets: Vite build for resources/{css,js}/app.* consumed by Blade/Filament ---
 FROM node:22-alpine AS assets

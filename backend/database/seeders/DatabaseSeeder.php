@@ -14,6 +14,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             WilayaSeeder::class,
             CommunesSeeder::class,
+            AdminUserSeeder::class,
         ]);
     }
 }
