@@ -23,6 +23,9 @@ RUN npm ci
 COPY vite.config.js ./
 COPY resources ./resources
 COPY public ./public
+# app.css imports vendor/livewire/flux's own CSS directly, so Vite needs
+# composer's output present at build time too, not just npm's.
+COPY --from=vendor /app/vendor ./vendor
 RUN npm run build
 
 # --- production: FrankenPHP + Laravel Octane, single process, no separate nginx/php-fpm ---
