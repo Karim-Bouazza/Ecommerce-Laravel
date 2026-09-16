@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\PaiementController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\PurchaseEntryController;
 use App\Http\Controllers\Api\ReturnEntryController;
+use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\StockAlertController;
 use App\Http\Controllers\Api\StockController;
 use App\Http\Controllers\Api\StockMovementController;
@@ -68,6 +69,7 @@ Route::prefix('v1')->group(function () {
         Route::put('/warehouses/{warehouse}', [WarehouseController::class, 'update']);
         Route::delete('/warehouses/{warehouse}', [WarehouseController::class, 'destroy']);
         Route::post('/warehouses/{warehouse}/toggle-active', [WarehouseController::class, 'toggleActive']);
+        Route::get('/roles', [RoleController::class, 'index']);
         Route::get('/fournisseurs', [FournisseurController::class, 'index']);
         Route::post('/fournisseurs', [FournisseurController::class, 'store']);
         Route::put('/fournisseurs/{fournisseur}', [FournisseurController::class, 'update']);

@@ -1,5 +1,5 @@
-import { ComingSoon } from "@/components/shared/coming-soon"
+import { RolesPage } from "@/features/roles/pages/roles-page"
 
-export default function RolesPage() {
-  return <ComingSoon />
+export default function Page() {
+  return <RolesPage />
 }

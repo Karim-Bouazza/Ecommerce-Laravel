@@ -116,4 +116,17 @@ class PermissionRegistry
             ->values()
             ->all();
     }
+
+    /**
+     * @return array<string, string>
+     */
+    public static function labels(): array
+    {
+        return collect(static::grouped())->flatMap(fn (array $permissions) => $permissions)->all();
+    }
+
+    public static function label(string $key): string
+    {
+        return static::labels()[$key] ?? $key;
+    }
 }
