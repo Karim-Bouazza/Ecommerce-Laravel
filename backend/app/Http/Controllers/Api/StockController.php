@@ -13,7 +13,6 @@ use App\Services\Warehouses\UpdateWarehouseStockService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
-use Illuminate\Support\Facades\DB;
 
 class StockController extends Controller
 {
@@ -64,17 +63,11 @@ class StockController extends Controller
     {
         $warehouse = Warehouse::findOrFail($request->validated('warehouse_id'));
 
-        $stockMinimum = (int) (DB::table('warehouse_product')
-            ->where('warehouse_id', $warehouse->id)
-            ->where('product_id', $product->id)
-            ->value('stock_minimum') ?? 0);
-
         app(UpdateWarehouseStockService::class)->execute(
             $warehouse,
             $product,
             (int) $request->validated('adjustment'),
             (float) $request->validated('purchase_price'),
-            $stockMinimum,
         );
 
         $updated = $this->withStockSums(Product::query()->whereKey($product->id), $warehouse->id)->firstOrFail();

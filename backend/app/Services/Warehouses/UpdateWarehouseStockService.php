@@ -10,16 +10,15 @@ use Illuminate\Support\Facades\DB;
 
 class UpdateWarehouseStockService
 {
-    public function execute(Warehouse $warehouse, Product $product, int $adjustment, float $purchasePrice, int $stockMinimum): void
+    public function execute(Warehouse $warehouse, Product $product, int $adjustment, float $purchasePrice): void
     {
-        DB::transaction(function () use ($warehouse, $product, $adjustment, $purchasePrice, $stockMinimum): void {
+        DB::transaction(function () use ($warehouse, $product, $adjustment, $purchasePrice): void {
             $current = Stock::lockAndGetInDepot($warehouse->id, $product->id);
 
             $newQuantity = max(0, $current + $adjustment);
 
             $product->update([
                 'purchase_price' => $purchasePrice,
-                'stock_minimum' => max(0, $stockMinimum),
             ]);
 
             $delta = $newQuantity - $current;
