@@ -2,6 +2,7 @@
 
 import type { ColumnDef } from "@tanstack/react-table"
 
+import { ViewRoleDialog } from "@/features/roles/components/view-role-dialog"
 import type { Role } from "@/features/roles/types"
 
 export const roleColumns: ColumnDef<Role>[] = [
@@ -23,6 +24,15 @@ export const roleColumns: ColumnDef<Role>[] = [
             {permission}
           </span>
         ))}
+      </div>
+    ),
+  },
+  {
+    id: "actions",
+    header: "Action",
+    cell: ({ row }) => (
+      <div className="flex items-center justify-center gap-1">
+        <ViewRoleDialog role={row.original} />
       </div>
     ),
   },

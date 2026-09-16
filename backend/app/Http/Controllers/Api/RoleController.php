@@ -3,7 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\RoleResource;
+use App\Http\Resources\Role\RoleDetailResource;
+use App\Http\Resources\Role\RoleResource;
 use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -26,5 +27,12 @@ class RoleController extends Controller
             ->withQueryString();
 
         return RoleResource::collection($roles);
+    }
+
+    public function show(Role $role): RoleDetailResource
+    {
+        abort_unless(auth()->user()->hasPermission('roles.view'), 403);
+
+        return new RoleDetailResource($role);
     }
 }
