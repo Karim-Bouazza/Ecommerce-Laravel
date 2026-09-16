@@ -12,7 +12,7 @@ su-exec octane php artisan view:cache
 
 # --isolated skips the run if a migration is already in progress on another
 # instance/container, so scaling backend replicas doesn't race the schema.
-su-exec octane php artisan migrate --force --isolated
+su-exec octane php artisan migrate --force
 
 # Idempotent (keyed on ADMIN_EMAIL): guarantees a way into /admin after every
 # deploy without an interactive `make:filament-user` step.
