@@ -35,12 +35,18 @@ export type CreateOrderPayload = {
   last_name: string
   phone_number: string
   wilaya_id: number
-  commune_id: number
+  commune_id?: number | null
   address?: string
-  delivery_type: "domicile" | "stop_desk"
+  provider_wilaya_id?: number | null
+  provider_commune_id?: number | null
+  delivery_type: "express" | "point_relais"
   stop_desk_company_id?: number
   delivery_price?: number
   delivery_note?: string
+  name?: string
+  provider_order_id?: string
+  free_delivery?: boolean
+  can_be_opened?: boolean
   items: OrderItemPayload[]
 }
 
@@ -91,6 +97,20 @@ export async function getOrderStatusHistory(id: number): Promise<OrderStatusHist
   try {
     const { data } = await api.get<OrderStatusHistoryEntry[]>(`/api/v1/orders/${id}/status-history`)
     return data
+  } catch (error) {
+    throw toApiError(error)
+  }
+}
+
+export type GenerateOrderNameParams = {
+  product_id: number
+  variant?: string
+}
+
+export async function generateOrderName(params: GenerateOrderNameParams): Promise<string> {
+  try {
+    const { data } = await api.get<{ name: string }>("/api/v1/orders/generate-name", { params })
+    return data.name
   } catch (error) {
     throw toApiError(error)
   }

@@ -4,6 +4,7 @@ namespace App\Services\Orders\StatusTransitions;
 
 use App\Enums\OrderStatus;
 use App\Exceptions\InvalidOrderTransitionException;
+use App\Services\Orders\StatusTransitions\Handlers\AssignedOrderTransitionHandler;
 use App\Services\Orders\StatusTransitions\Handlers\DefaultOrderTransitionHandler;
 
 final class OrderStatusTransition
@@ -15,6 +16,7 @@ final class OrderStatusTransition
         }
 
         return match ($to) {
+            OrderStatus::Assigned => app(AssignedOrderTransitionHandler::class),
             default => app(DefaultOrderTransitionHandler::class),
         };
     }

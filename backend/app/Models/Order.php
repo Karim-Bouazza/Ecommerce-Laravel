@@ -26,7 +26,13 @@ class Order extends Model
         'delivery_type',
         'stop_desk_company_id',
         'address',
+        'provider_wilaya_id',
+        'provider_commune_id',
         'delivery_note',
+        'name',
+        'provider_order_id',
+        'free_delivery',
+        'can_be_opened',
         'total_price',
         'created_at',
     ];
@@ -36,6 +42,8 @@ class Order extends Model
         'scheduled_at' => 'datetime',
         'payment_status' => PaymentStatus::class,
         'type' => OrderType::class,
+        'free_delivery' => 'boolean',
+        'can_be_opened' => 'boolean',
         'delivery_type' => DeliveryType::class,
     ];
 

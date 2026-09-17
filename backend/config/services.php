@@ -39,4 +39,8 @@ return [
         'recipient' => env('ORDER_DELETE_OTP_EMAIL'),
     ],
 
+    'zimou' => [
+        'base_url' => env('ZIMOU_API_BASE_URL', 'https://zimou.express/api/v3'),
+    ],
+
 ];

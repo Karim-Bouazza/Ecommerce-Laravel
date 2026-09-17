@@ -34,7 +34,7 @@ export function WilayaSelect({
 
   return (
     <Select
-      value={value !== null ? String(value) : undefined}
+      value={value !== null ? String(value) : null}
       onValueChange={(next) => onChange(Number(next))}
       disabled={disabled}
     >

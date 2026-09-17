@@ -47,7 +47,13 @@ class OrderResource extends JsonResource
             'commune_id' => $this->client?->commune_id,
             'commune_name' => $this->client?->commune?->name,
             'address' => $this->address,
+            'provider_wilaya_id' => $this->provider_wilaya_id,
+            'provider_commune_id' => $this->provider_commune_id,
             'delivery_note' => $this->delivery_note,
+            'name' => $this->name,
+            'provider_order_id' => $this->provider_order_id,
+            'free_delivery' => (bool) $this->free_delivery,
+            'can_be_opened' => (bool) $this->can_be_opened,
 
             'subtotal' => (int) $this->subtotal,
             'delivery_price' => (int) $this->delivery_price,

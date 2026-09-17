@@ -9,34 +9,37 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { useWilayaCommunes } from "@/features/wilayas/hooks/use-wilaya-communes"
+import { useProviderCommunes } from "@/features/wilayas/hooks/use-provider-communes"
 
-type CommuneSelectProps = {
-  wilayaId: number | null
+type ProviderCommuneSelectProps = {
+  providerWilayaId: number | null
   value: number | null
-  onChange: (value: number) => void
+  onChange: (providerCommuneId: number) => void
   placeholder?: string
   invalid?: boolean
 }
 
-export function CommuneSelect({
-  wilayaId,
+export function ProviderCommuneSelect({
+  providerWilayaId,
   value,
   onChange,
   placeholder = "Commune",
   invalid,
-}: CommuneSelectProps) {
-  const { data: communes = [] } = useWilayaCommunes(wilayaId)
+}: ProviderCommuneSelectProps) {
+  const { data: providerCommunes = [] } = useProviderCommunes(providerWilayaId)
   const nameById = React.useMemo(
-    () => new Map(communes.map((commune) => [String(commune.id), commune.name])),
-    [communes]
+    () => new Map(providerCommunes.map((commune) => [String(commune.id), commune.name])),
+    [providerCommunes]
   )
 
   return (
     <Select
       value={value !== null ? String(value) : null}
-      onValueChange={(next) => onChange(Number(next))}
-      disabled={wilayaId === null}
+      onValueChange={(next) => {
+        if (next === null) return
+        onChange(Number(next))
+      }}
+      disabled={providerWilayaId === null}
     >
       <SelectTrigger className="w-full" aria-invalid={invalid}>
         <SelectValue placeholder={placeholder}>
@@ -44,7 +47,7 @@ export function CommuneSelect({
         </SelectValue>
       </SelectTrigger>
       <SelectContent>
-        {communes.map((commune) => (
+        {providerCommunes.map((commune) => (
           <SelectItem key={commune.id} value={String(commune.id)}>
             {commune.name}
           </SelectItem>

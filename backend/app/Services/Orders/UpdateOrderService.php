@@ -6,10 +6,15 @@ use App\Enums\DeliveryType;
 use App\Models\Client;
 use App\Models\Order;
 use App\Models\Product;
+use App\Services\Providers\ZimouWilayaService;
 use Illuminate\Support\Facades\DB;
 
 class UpdateOrderService
 {
+    public function __construct(private readonly ZimouWilayaService $zimouWilayaService)
+    {
+    }
+
     public function execute(Order $order, array $data): Order
     {
         return DB::transaction(function () use ($order, $data) {
@@ -19,7 +24,7 @@ class UpdateOrderService
                     'first_name' => $data['first_name'],
                     'last_name' => $data['last_name'],
                     'wilaya_id' => $data['wilaya_id'],
-                    'commune_id' => $data['commune_id'],
+                    'commune_id' => $data['commune_id'] ?? null,
                 ]
             );
 
@@ -64,15 +69,45 @@ class UpdateOrderService
                 'client_id' => $client->id,
                 'scheduled_at' => $data['scheduled_at'] ?? $order->scheduled_at,
                 'delivery_price' => $deliveryPrice,
-                'delivery_type' => $data['delivery_type'] ?? DeliveryType::Domicile->value,
+                'delivery_type' => $data['delivery_type'] ?? DeliveryType::Express->value,
                 'stop_desk_company_id' => $data['stop_desk_company_id'] ?? null,
-                'address' => $data['address'] ?? $order->address,
+                'address' => $this->resolveAddress($data, $client) ?? $order->address,
+                'provider_wilaya_id' => $data['provider_wilaya_id'] ?? $order->provider_wilaya_id,
+                'provider_commune_id' => $data['provider_commune_id'] ?? $order->provider_commune_id,
                 'delivery_note' => $data['delivery_note'] ?? $order->delivery_note,
+                'name' => $data['name'] ?? $order->name,
+                'provider_order_id' => $data['provider_order_id'] ?? $order->provider_order_id,
+                'free_delivery' => $data['free_delivery'] ?? $order->free_delivery,
+                'can_be_opened' => $data['can_be_opened'] ?? $order->can_be_opened,
                 'subtotal' => $subtotal,
                 'total_price' => $subtotal + $deliveryPrice,
             ]);
 
             return $order->fresh(['client.wilaya', 'client.commune', 'items.warehouse']);
         });
+    }
+
+    private function resolveAddress(array $data, Client $client): ?string
+    {
+        $address = trim((string) ($data['address'] ?? ''));
+
+        if ($address !== '') {
+            return $address;
+        }
+
+        return $this->resolveProviderWilayaName($data['provider_wilaya_id'] ?? null)
+            ?? $client->loadMissing('wilaya')->wilaya?->name;
+    }
+
+    private function resolveProviderWilayaName(?int $providerWilayaId): ?string
+    {
+        if (! $providerWilayaId) {
+            return null;
+        }
+
+        $wilaya = collect($this->zimouWilayaService->fetchWilayas())
+            ->firstWhere('id', $providerWilayaId);
+
+        return $wilaya['name'] ?? null;
     }
 }

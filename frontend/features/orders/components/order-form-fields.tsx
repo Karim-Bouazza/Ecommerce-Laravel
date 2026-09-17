@@ -2,17 +2,20 @@
 
 import * as React from "react"
 import { Controller, useFieldArray, type UseFormReturn } from "react-hook-form"
+import { useMutation } from "@tanstack/react-query"
 import { Plus } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
+import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "cn"
-import { CommuneSelect } from "@/features/wilayas/components/commune-select"
-import { WilayaSelect } from "@/features/wilayas/components/wilaya-select"
+import { ProviderCommuneSelect } from "@/features/wilayas/components/provider-commune-select"
+import { ProviderWilayaSelect } from "@/features/wilayas/components/provider-wilaya-select"
 import { EntitySelect } from "@/features/orders/components/entity-select"
 import { OrderItemRow } from "@/features/orders/components/order-item-row"
+import { generateOrderName } from "@/features/orders/api/order-api"
 import { useDeliveryCompanyOptions } from "@/features/orders/hooks/use-delivery-company-options"
 import { useWarehouseOptions } from "@/features/orders/hooks/use-warehouse-options"
 import type { CreateOrderSchema } from "@/features/orders/schemas/order-schema"
@@ -41,12 +44,68 @@ export function OrderFormFields({ form, idPrefix }: OrderFormFieldsProps) {
   const items = watch("items")
   const deliveryPrice = watch("delivery_price") ?? 0
 
-  const total = React.useMemo(() => {
-    const subtotal = items.reduce((sum, item) => sum + (item.unit_price ?? 0) * (item.quantity ?? 0), 0)
-    return subtotal + deliveryPrice
-  }, [items, deliveryPrice])
+  const subtotal = React.useMemo(
+    () => items.reduce((sum, item) => sum + (item.unit_price ?? 0) * (item.quantity ?? 0), 0),
+    [items]
+  )
+  const total = subtotal + deliveryPrice
 
-  const wilayaId = watch("wilaya_id")
+  const providerWilayaId = watch("provider_wilaya_id")
+
+  const nameManuallyEdited = React.useRef(false)
+  const skipNextNameSync = React.useRef(true)
+  const generateNameMutation = useMutation({ mutationFn: generateOrderName })
+
+  const firstItemProductId = watch("items.0.product_id")
+  const firstItemVariant = watch("items.0.variant")
+
+  React.useEffect(() => {
+    if (skipNextNameSync.current) {
+      skipNextNameSync.current = false
+      return
+    }
+
+    if (nameManuallyEdited.current) return
+
+    if (!firstItemProductId) {
+      setValue("name", "")
+      return
+    }
+
+    const timeout = setTimeout(() => {
+      generateNameMutation.mutate(
+        { product_id: firstItemProductId, variant: firstItemVariant || undefined },
+        { onSuccess: (generatedName) => setValue("name", generatedName) }
+      )
+    }, 400)
+
+    return () => clearTimeout(timeout)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [firstItemProductId, firstItemVariant])
+
+  const providerOrderIdManuallyEdited = React.useRef(false)
+  const skipNextProviderOrderIdSync = React.useRef(true)
+  const generateProviderOrderIdMutation = useMutation({ mutationFn: generateOrderName })
+
+  React.useEffect(() => {
+    if (skipNextProviderOrderIdSync.current) {
+      skipNextProviderOrderIdSync.current = false
+      return
+    }
+
+    if (providerOrderIdManuallyEdited.current) return
+
+    if (!firstItemProductId) {
+      setValue("provider_order_id", "")
+      return
+    }
+
+    generateProviderOrderIdMutation.mutate(
+      { product_id: firstItemProductId },
+      { onSuccess: (generatedName) => setValue("provider_order_id", generatedName) }
+    )
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [firstItemProductId])
 
   return (
     <div className="flex flex-col gap-4 py-4">
@@ -88,13 +147,14 @@ export function OrderFormFields({ form, idPrefix }: OrderFormFieldsProps) {
             <FieldLabel>Wilaya</FieldLabel>
             <Controller
               control={control}
-              name="wilaya_id"
+              name="provider_wilaya_id"
               render={({ field }) => (
-                <WilayaSelect
+                <ProviderWilayaSelect
                   value={field.value}
-                  onChange={(value) => {
-                    field.onChange(value)
-                    setValue("commune_id", null)
+                  onChange={(providerWilayaId, matchedWilayaId) => {
+                    field.onChange(providerWilayaId)
+                    setValue("wilaya_id", matchedWilayaId)
+                    setValue("provider_commune_id", null)
                   }}
                   invalid={!!errors.wilaya_id}
                 />
@@ -103,21 +163,21 @@ export function OrderFormFields({ form, idPrefix }: OrderFormFieldsProps) {
             <FieldError errors={errors.wilaya_id ? [errors.wilaya_id] : undefined} />
           </Field>
 
-          <Field data-invalid={!!errors.commune_id}>
+          <Field data-invalid={!!errors.provider_commune_id}>
             <FieldLabel>Commune</FieldLabel>
             <Controller
               control={control}
-              name="commune_id"
+              name="provider_commune_id"
               render={({ field }) => (
-                <CommuneSelect
-                  wilayaId={wilayaId}
+                <ProviderCommuneSelect
+                  providerWilayaId={providerWilayaId}
                   value={field.value}
                   onChange={field.onChange}
-                  invalid={!!errors.commune_id}
+                  invalid={!!errors.provider_commune_id}
                 />
               )}
             />
-            <FieldError errors={errors.commune_id ? [errors.commune_id] : undefined} />
+            <FieldError errors={errors.provider_commune_id ? [errors.provider_commune_id] : undefined} />
           </Field>
         </div>
 
@@ -176,24 +236,24 @@ export function OrderFormFields({ form, idPrefix }: OrderFormFieldsProps) {
         <div className="flex gap-2">
           <Button
             type="button"
-            variant={deliveryType === "domicile" ? "default" : "outline"}
+            variant={deliveryType === "express" ? "default" : "outline"}
             className="flex-1"
-            onClick={() => setValue("delivery_type", "domicile")}
+            onClick={() => setValue("delivery_type", "express")}
           >
-            Domicile
+            Express
           </Button>
           <Button
             type="button"
-            variant={deliveryType === "stop_desk" ? "default" : "outline"}
+            variant={deliveryType === "point_relais" ? "default" : "outline"}
             className="flex-1"
-            onClick={() => setValue("delivery_type", "stop_desk")}
+            onClick={() => setValue("delivery_type", "point_relais")}
           >
-            Stop desk
+            Point relais
           </Button>
         </div>
 
-        <div className={cn("grid gap-3", deliveryType === "stop_desk" ? "sm:grid-cols-2" : "sm:grid-cols-1")}>
-          {deliveryType === "stop_desk" && (
+        <div className={cn("grid gap-3", deliveryType === "point_relais" ? "sm:grid-cols-2" : "sm:grid-cols-1")}>
+          {deliveryType === "point_relais" && (
             <Field data-invalid={!!errors.stop_desk_company_id}>
               <FieldLabel>Société stop desk</FieldLabel>
               <Controller
@@ -235,10 +295,108 @@ export function OrderFormFields({ form, idPrefix }: OrderFormFieldsProps) {
             <FieldError errors={errors.delivery_price ? [errors.delivery_price] : undefined} />
           </Field>
         </div>
+      </div>
 
-        <div className="flex items-center justify-end gap-2 border-t pt-3">
-          <span className="text-sm text-muted-foreground">Total</span>
-          <span className="text-base font-semibold">{amountFormatter.format(total)} DZD</span>
+      <div className="flex flex-col gap-3 rounded-lg border p-3">
+        <span className="text-sm font-medium">Informations Commande</span>
+
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Field data-invalid={!!errors.name}>
+            <FieldLabel htmlFor={`${idPrefix}-name`}>Nom de la commande</FieldLabel>
+            <Controller
+              control={control}
+              name="name"
+              render={({ field }) => (
+                <Input
+                  id={`${idPrefix}-name`}
+                  value={field.value ?? ""}
+                  onChange={(event) => {
+                    nameManuallyEdited.current = true
+                    field.onChange(event)
+                  }}
+                  placeholder="Généré depuis le premier produit"
+                  aria-invalid={!!errors.name}
+                />
+              )}
+            />
+            <FieldError errors={errors.name ? [errors.name] : undefined} />
+          </Field>
+
+          <Field data-invalid={!!errors.provider_order_id}>
+            <FieldLabel htmlFor={`${idPrefix}-provider-order-id`}>N° de commande prestataire</FieldLabel>
+            <Controller
+              control={control}
+              name="provider_order_id"
+              render={({ field }) => (
+                <Input
+                  id={`${idPrefix}-provider-order-id`}
+                  value={field.value ?? ""}
+                  onChange={(event) => {
+                    providerOrderIdManuallyEdited.current = true
+                    field.onChange(event)
+                  }}
+                  placeholder="Généré depuis le premier produit"
+                  aria-invalid={!!errors.provider_order_id}
+                />
+              )}
+            />
+            <FieldError errors={errors.provider_order_id ? [errors.provider_order_id] : undefined} />
+          </Field>
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Field>
+            <FieldLabel htmlFor={`${idPrefix}-free-delivery`}>Livraison gratuite</FieldLabel>
+            <Controller
+              control={control}
+              name="free_delivery"
+              render={({ field }) => (
+                <div>
+                  <Switch
+                    id={`${idPrefix}-free-delivery`}
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </div>
+              )}
+            />
+          </Field>
+
+          <Field>
+            <FieldLabel htmlFor={`${idPrefix}-can-be-opened`}>Peut être ouvert</FieldLabel>
+            <Controller
+              control={control}
+              name="can_be_opened"
+              render={({ field }) => (
+                <div>
+                  <Switch
+                    id={`${idPrefix}-can-be-opened`}
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </div>
+              )}
+            />
+          </Field>
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-3 rounded-lg border p-3">
+        <span className="text-sm font-medium">Commander</span>
+
+        <div className="grid gap-3 text-sm sm:grid-cols-3">
+          <div className="flex flex-col gap-1">
+            <span className="text-muted-foreground">Sous-total</span>
+            <span className="font-medium">{amountFormatter.format(subtotal)} DZD</span>
+          </div>
+          <div className="flex flex-col gap-1">
+            <span className="text-muted-foreground">Livraison</span>
+            <span className="font-medium">{amountFormatter.format(deliveryPrice)} DZD</span>
+          </div>
+          <div className="flex flex-col gap-1">
+            <span className="text-muted-foreground">Total</span>
+            <span className="text-base font-semibold">{amountFormatter.format(total)} DZD</span>
+          </div>
         </div>
       </div>
     </div>

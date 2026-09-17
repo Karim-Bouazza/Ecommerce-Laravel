@@ -63,7 +63,13 @@ export type Order = {
   commune_id: number | null
   commune_name: string | null
   address: string | null
+  provider_wilaya_id: number | null
+  provider_commune_id: number | null
   delivery_note: string | null
+  name: string | null
+  provider_order_id: string | null
+  free_delivery: boolean
+  can_be_opened: boolean
   subtotal: number
   delivery_price: number
   total_price: number

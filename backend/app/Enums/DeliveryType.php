@@ -4,14 +4,14 @@ namespace App\Enums;
 
 enum DeliveryType: string
 {
-    case Domicile = 'domicile';
-    case StopDesk = 'stop_desk';
+    case Express = 'express';
+    case PointRelais = 'point_relais';
 
     public function label(): string
     {
         return match ($this) {
-            self::Domicile => 'Domicile',
-            self::StopDesk => 'Stop desk',
+            self::Express => 'Express',
+            self::PointRelais => 'Point relais',
         };
     }
 

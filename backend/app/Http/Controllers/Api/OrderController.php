@@ -13,6 +13,7 @@ use App\Http\Resources\OrderResource;
 use App\Http\Resources\OrderStatusHistoryResource;
 use App\Models\Order;
 use App\Models\OrderStatusHistory;
+use App\Models\Product;
 use App\Services\Orders\CreateOrderService;
 use App\Services\Orders\OrderStatusService;
 use App\Services\Orders\UpdateOrderService;
@@ -89,6 +90,27 @@ class OrderController extends Controller
             ->withQueryString();
 
         return OrderResource::collection($orders);
+    }
+
+    public function generateName(Request $request): \Illuminate\Http\JsonResponse
+    {
+        abort_unless(
+            auth()->user()->hasPermission('orders.create')
+                || auth()->user()->hasPermission('orders.edit'),
+            403
+        );
+
+        $validated = $request->validate([
+            'product_id' => ['required', 'integer', 'exists:products,id'],
+            'variant' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $product = Product::findOrFail($validated['product_id']);
+        $variant = trim((string) ($validated['variant'] ?? ''));
+
+        $name = $variant !== '' ? "{$product->name}-{$variant}" : $product->name;
+
+        return response()->json(['name' => $name]);
     }
 
     public function storeManual(StoreManualOrderRequest $request): OrderResource

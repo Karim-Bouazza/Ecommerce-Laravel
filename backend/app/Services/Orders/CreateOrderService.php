@@ -12,12 +12,17 @@ use App\Models\OrderStatusHistory;
 use App\Models\Product;
 use App\Models\User;
 use App\Notifications\NewOrderPlaced;
+use App\Services\Providers\ZimouWilayaService;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 
 class CreateOrderService
 {
+    public function __construct(private readonly ZimouWilayaService $zimouWilayaService)
+    {
+    }
+
     public function execute(array $data): Order
     {
         $order = $this->createOrder($data);
@@ -42,7 +47,7 @@ class CreateOrderService
                             'first_name' => $data['first_name'],
                             'last_name' => $data['last_name'],
                             'wilaya_id' => $data['wilaya_id'],
-                            'commune_id' => $data['commune_id'],
+                            'commune_id' => $data['commune_id'] ?? null,
                         ]
                     );
 
@@ -53,10 +58,16 @@ class CreateOrderService
                         'type' => $data['type'] ?? OrderType::Ads,
                         'subtotal' => 0,
                         'delivery_price' => $data['delivery_price'] ?? 0,
-                        'delivery_type' => $data['delivery_type'] ?? DeliveryType::Domicile->value,
+                        'delivery_type' => $data['delivery_type'] ?? DeliveryType::Express->value,
                         'stop_desk_company_id' => $data['stop_desk_company_id'] ?? null,
-                        'address' => $data['address'] ?? null,
+                        'address' => $this->resolveAddress($data, $client),
+                        'provider_wilaya_id' => $data['provider_wilaya_id'] ?? null,
+                        'provider_commune_id' => $data['provider_commune_id'] ?? null,
                         'delivery_note' => $data['delivery_note'] ?? null,
+                        'name' => $data['name'] ?? null,
+                        'provider_order_id' => $data['provider_order_id'] ?? null,
+                        'free_delivery' => $data['free_delivery'] ?? false,
+                        'can_be_opened' => $data['can_be_opened'] ?? false,
                         'total_price' => 0,
                         'created_at' => $data['created_at'] ?? now(),
                     ]);
@@ -121,6 +132,32 @@ class CreateOrderService
                 }
             }
         }
+    }
+
+    private function resolveAddress(array $data, Client $client): ?string
+    {
+        $address = trim((string) ($data['address'] ?? ''));
+
+        if ($address !== '') {
+            return $address;
+        }
+
+        $wilayaName = $this->resolveProviderWilayaName($data['provider_wilaya_id'] ?? null)
+            ?? $client->loadMissing('wilaya')->wilaya?->name;
+
+        return $wilayaName;
+    }
+
+    private function resolveProviderWilayaName(?int $providerWilayaId): ?string
+    {
+        if (! $providerWilayaId) {
+            return null;
+        }
+
+        $wilaya = collect($this->zimouWilayaService->fetchWilayas())
+            ->firstWhere('id', $providerWilayaId);
+
+        return $wilaya['name'] ?? null;
     }
 
     private function generateReference(): string
