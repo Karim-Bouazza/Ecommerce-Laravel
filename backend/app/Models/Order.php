@@ -28,6 +28,7 @@ class Order extends Model
         'address',
         'provider_wilaya_id',
         'provider_commune_id',
+        'provider_office_id',
         'delivery_note',
         'name',
         'provider_order_id',

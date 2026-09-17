@@ -20,7 +20,7 @@ export const createOrderSchema = z
     provider_wilaya_id: z.number().nullable(),
     provider_commune_id: z.number().nullable(),
     delivery_type: z.enum(["express", "point_relais"]),
-    stop_desk_company_id: z.number().nullable(),
+    provider_office_id: z.string().nullable(),
     delivery_price: z.number().min(0).optional(),
     delivery_note: z.string().max(1000).optional(),
     name: z.string().max(255).optional(),
@@ -33,9 +33,9 @@ export const createOrderSchema = z
     message: "La wilaya est requise.",
     path: ["wilaya_id"],
   })
-  .refine((data) => data.delivery_type !== "point_relais" || data.stop_desk_company_id !== null, {
-    message: "Sélectionnez une société stop desk.",
-    path: ["stop_desk_company_id"],
+  .refine((data) => data.delivery_type !== "point_relais" || data.provider_office_id !== null, {
+    message: "Sélectionnez un stop desk.",
+    path: ["provider_office_id"],
   })
 
 export type CreateOrderSchema = z.infer<typeof createOrderSchema>

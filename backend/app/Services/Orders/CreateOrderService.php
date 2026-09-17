@@ -63,6 +63,7 @@ class CreateOrderService
                         'address' => $this->resolveAddress($data, $client),
                         'provider_wilaya_id' => $data['provider_wilaya_id'] ?? null,
                         'provider_commune_id' => $data['provider_commune_id'] ?? null,
+                        'provider_office_id' => $data['provider_office_id'] ?? null,
                         'delivery_note' => $data['delivery_note'] ?? null,
                         'name' => $data['name'] ?? null,
                         'provider_order_id' => $data['provider_order_id'] ?? null,

@@ -74,6 +74,7 @@ class UpdateOrderService
                 'address' => $this->resolveAddress($data, $client) ?? $order->address,
                 'provider_wilaya_id' => $data['provider_wilaya_id'] ?? $order->provider_wilaya_id,
                 'provider_commune_id' => $data['provider_commune_id'] ?? $order->provider_commune_id,
+                'provider_office_id' => $data['provider_office_id'] ?? $order->provider_office_id,
                 'delivery_note' => $data['delivery_note'] ?? $order->delivery_note,
                 'name' => $data['name'] ?? $order->name,
                 'provider_order_id' => $data['provider_order_id'] ?? $order->provider_order_id,

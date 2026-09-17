@@ -31,10 +31,11 @@ class UpdateManualOrderRequest extends FormRequest
             'provider_commune_id' => ['nullable', 'integer'],
 
             'delivery_type' => ['nullable', Rule::in(array_column(DeliveryType::cases(), 'value'))],
-            'stop_desk_company_id' => [
+            'stop_desk_company_id' => ['nullable', 'integer', 'exists:delivery_companies,id'],
+            'provider_office_id' => [
                 'nullable',
-                'integer',
-                'exists:delivery_companies,id',
+                'string',
+                'max:255',
                 Rule::requiredIf(fn () => $this->input('delivery_type') === DeliveryType::PointRelais->value),
             ],
             'delivery_price' => ['nullable', 'integer', 'min:0'],

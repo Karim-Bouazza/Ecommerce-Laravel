@@ -40,7 +40,7 @@ export type CreateOrderPayload = {
   provider_wilaya_id?: number | null
   provider_commune_id?: number | null
   delivery_type: "express" | "point_relais"
-  stop_desk_company_id?: number
+  provider_office_id?: string | null
   delivery_price?: number
   delivery_note?: string
   name?: string

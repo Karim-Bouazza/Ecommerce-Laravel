@@ -49,6 +49,7 @@ class OrderResource extends JsonResource
             'address' => $this->address,
             'provider_wilaya_id' => $this->provider_wilaya_id,
             'provider_commune_id' => $this->provider_commune_id,
+            'provider_office_id' => $this->provider_office_id,
             'delivery_note' => $this->delivery_note,
             'name' => $this->name,
             'provider_order_id' => $this->provider_order_id,

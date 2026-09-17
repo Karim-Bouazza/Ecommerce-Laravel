@@ -53,6 +53,7 @@ export type Order = {
   delivery_type_label: string
   stop_desk_company_id: number | null
   stop_desk_company_name: string | null
+  provider_office_id: string | null
   client_id: number | null
   first_name: string | null
   last_name: string | null

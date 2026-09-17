@@ -49,3 +49,24 @@ export async function getProviderCommunes(providerWilayaId: number): Promise<Pro
     throw toApiError(error)
   }
 }
+
+export type ProviderStopDesk = {
+  office_id: string
+  name: string
+  address: string | null
+  price: number
+}
+
+export async function getProviderStopDesks(
+  providerWilayaId: number,
+  providerCommuneId: number
+): Promise<ProviderStopDesk[]> {
+  try {
+    const { data } = await api.get<{ data: ProviderStopDesk[] }>("/api/v1/provider-stopdesks", {
+      params: { provider_wilaya_id: providerWilayaId, provider_commune_id: providerCommuneId },
+    })
+    return data.data
+  } catch (error) {
+    throw toApiError(error)
+  }
+}

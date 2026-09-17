@@ -12,11 +12,10 @@ import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "cn"
 import { ProviderCommuneSelect } from "@/features/wilayas/components/provider-commune-select"
+import { ProviderStopDeskSelect } from "@/features/wilayas/components/provider-stopdesk-select"
 import { ProviderWilayaSelect } from "@/features/wilayas/components/provider-wilaya-select"
-import { EntitySelect } from "@/features/orders/components/entity-select"
 import { OrderItemRow } from "@/features/orders/components/order-item-row"
 import { generateOrderName } from "@/features/orders/api/order-api"
-import { useDeliveryCompanyOptions } from "@/features/orders/hooks/use-delivery-company-options"
 import { useWarehouseOptions } from "@/features/orders/hooks/use-warehouse-options"
 import type { CreateOrderSchema } from "@/features/orders/schemas/order-schema"
 
@@ -38,7 +37,6 @@ export function OrderFormFields({ form, idPrefix }: OrderFormFieldsProps) {
 
   const { fields, append, remove } = useFieldArray({ control, name: "items" })
   const { data: warehouses = [] } = useWarehouseOptions()
-  const { data: deliveryCompanies = [] } = useDeliveryCompanyOptions()
 
   const deliveryType = watch("delivery_type")
   const items = watch("items")
@@ -51,6 +49,7 @@ export function OrderFormFields({ form, idPrefix }: OrderFormFieldsProps) {
   const total = subtotal + deliveryPrice
 
   const providerWilayaId = watch("provider_wilaya_id")
+  const providerCommuneId = watch("provider_commune_id")
 
   const nameManuallyEdited = React.useRef(false)
   const skipNextNameSync = React.useRef(true)
@@ -254,23 +253,23 @@ export function OrderFormFields({ form, idPrefix }: OrderFormFieldsProps) {
 
         <div className={cn("grid gap-3", deliveryType === "point_relais" ? "sm:grid-cols-2" : "sm:grid-cols-1")}>
           {deliveryType === "point_relais" && (
-            <Field data-invalid={!!errors.stop_desk_company_id}>
-              <FieldLabel>Société stop desk</FieldLabel>
+            <Field data-invalid={!!errors.provider_office_id}>
+              <FieldLabel>Stop desk</FieldLabel>
               <Controller
                 control={control}
-                name="stop_desk_company_id"
+                name="provider_office_id"
                 render={({ field }) => (
-                  <EntitySelect
+                  <ProviderStopDeskSelect
+                    providerWilayaId={providerWilayaId}
+                    providerCommuneId={providerCommuneId}
                     value={field.value}
                     onChange={field.onChange}
-                    options={deliveryCompanies}
-                    placeholder="Sélectionner une société"
-                    invalid={!!errors.stop_desk_company_id}
+                    invalid={!!errors.provider_office_id}
                   />
                 )}
               />
               <FieldError
-                errors={errors.stop_desk_company_id ? [errors.stop_desk_company_id] : undefined}
+                errors={errors.provider_office_id ? [errors.provider_office_id] : undefined}
               />
             </Field>
           )}

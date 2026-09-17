@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\PaiementController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ProviderCommuneController;
+use App\Http\Controllers\Api\ProviderStopDeskController;
 use App\Http\Controllers\Api\ProviderWilayaController;
 use App\Http\Controllers\Api\PurchaseEntryController;
 use App\Http\Controllers\Api\ReturnEntryController;
@@ -105,6 +106,7 @@ Route::prefix('v1')->group(function () {
         Route::delete('/transfers/{transfer}', [TransferController::class, 'destroy']);
         Route::get('/provider-wilayas', [ProviderWilayaController::class, 'index']);
         Route::get('/provider-communes', [ProviderCommuneController::class, 'index']);
+        Route::get('/provider-stopdesks', [ProviderStopDeskController::class, 'index']);
         Route::get('/orders', [OrderController::class, 'index']);
         Route::get('/orders/generate-name', [OrderController::class, 'generateName']);
         Route::post('/orders/manual', [OrderController::class, 'storeManual']);
