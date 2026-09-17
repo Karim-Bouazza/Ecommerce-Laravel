@@ -24,3 +24,11 @@ export async function getRoleDetail(id: number): Promise<RoleDetail> {
     throw toApiError(error)
   }
 }
+
+export async function deleteRole(id: number): Promise<void> {
+  try {
+    await api.delete(`/api/v1/roles/${id}`)
+  } catch (error) {
+    throw toApiError(error)
+  }
+}

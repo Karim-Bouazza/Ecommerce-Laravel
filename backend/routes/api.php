@@ -74,6 +74,7 @@ Route::prefix('v1')->group(function () {
         Route::post('/warehouses/{warehouse}/toggle-active', [WarehouseController::class, 'toggleActive']);
         Route::get('/roles', [RoleController::class, 'index']);
         Route::get('/roles/{role}', [RoleController::class, 'show']);
+        Route::delete('/roles/{role}', [RoleController::class, 'destroy']);
         Route::get('/fournisseurs', [FournisseurController::class, 'index']);
         Route::post('/fournisseurs', [FournisseurController::class, 'store']);
         Route::put('/fournisseurs/{fournisseur}', [FournisseurController::class, 'update']);

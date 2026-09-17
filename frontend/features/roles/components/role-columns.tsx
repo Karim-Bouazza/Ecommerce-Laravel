@@ -2,6 +2,7 @@
 
 import type { ColumnDef } from "@tanstack/react-table"
 
+import { DeleteRoleDialog } from "@/features/roles/components/delete-role-dialog"
 import { ViewRoleDialog } from "@/features/roles/components/view-role-dialog"
 import type { Role } from "@/features/roles/types"
 
@@ -33,6 +34,7 @@ export const roleColumns: ColumnDef<Role>[] = [
     cell: ({ row }) => (
       <div className="flex items-center justify-center gap-1">
         <ViewRoleDialog role={row.original} />
+        <DeleteRoleDialog role={row.original} />
       </div>
     ),
   },

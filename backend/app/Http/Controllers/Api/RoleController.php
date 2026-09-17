@@ -6,8 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\Role\RoleDetailResource;
 use App\Http\Resources\Role\RoleResource;
 use App\Models\Role;
+use App\Services\Roles\DeleteRoleService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use RuntimeException;
 
 class RoleController extends Controller
 {
@@ -34,5 +37,18 @@ class RoleController extends Controller
         abort_unless(auth()->user()->hasPermission('roles.view'), 403);
 
         return new RoleDetailResource($role);
+    }
+
+    public function destroy(Role $role): JsonResponse
+    {
+        abort_unless(auth()->user()->hasPermission('roles.delete'), 403);
+
+        try {
+            app(DeleteRoleService::class)->execute($role);
+        } catch (RuntimeException $exception) {
+            return response()->json(['message' => $exception->getMessage()], 422);
+        }
+
+        return response()->json(['message' => 'Rôle supprimé.']);
     }
 }
