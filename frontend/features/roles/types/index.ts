@@ -25,6 +25,16 @@ export type RoleDetail = {
   permission_groups: PermissionGroup[]
 }
 
+export type PermissionCatalogueItem = {
+  key: string
+  label: string
+}
+
+export type PermissionCatalogueGroup = {
+  group: string
+  permissions: PermissionCatalogueItem[]
+}
+
 export type PaginatedResponse<T> = {
   data: T[]
   meta: {

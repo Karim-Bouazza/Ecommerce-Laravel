@@ -4,6 +4,7 @@ import * as React from "react"
 
 import { DataTable } from "@/components/data-table/data-table"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
+import { CreateRoleDialog } from "@/features/roles/components/create-role-dialog"
 import { roleColumns } from "@/features/roles/components/role-columns"
 import { useRoles } from "@/features/roles/hooks/use-roles"
 
@@ -36,6 +37,7 @@ export function RolesTable() {
         placeholder: "Rechercher le nom",
       }}
       onRefresh={() => refetch()}
+      toolbarActions={<CreateRoleDialog />}
       pagination={{
         pageIndex: data?.meta.current_page ?? page,
         pageCount: data?.meta.last_page ?? 1,
