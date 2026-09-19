@@ -70,3 +70,20 @@ export async function createRole(
     throw toApiError(error);
   }
 }
+
+export type UpdateRolePayload = {
+  name: string;
+  permissions: string[];
+};
+
+export async function updateRole(
+  id: number,
+  payload: UpdateRolePayload,
+): Promise<RoleDetail> {
+  try {
+    const { data } = await api.put<RoleDetail>(`/api/v1/roles/${id}`, payload);
+    return data;
+  } catch (error) {
+    throw toApiError(error);
+  }
+}

@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreRoleRequest;
+use App\Http\Requests\Roles\StoreRoleRequest;
+use App\Http\Requests\Roles\UpdateRoleRequest;
 use App\Http\Resources\Role\RoleDetailResource;
 use App\Http\Resources\Role\RoleResource;
 use App\Models\Role;
 use App\Services\Roles\CreateRoleService;
 use App\Services\Roles\DeleteRoleService;
+use App\Services\Roles\UpdateRoleService;
 use App\Support\PermissionRegistry;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -37,7 +39,10 @@ class RoleController extends Controller
 
     public function permissions(): JsonResponse
     {
-        abort_unless(auth()->user()->hasPermission('roles.create'), 403);
+        abort_unless(
+            auth()->user()->hasPermission('roles.create') || auth()->user()->hasPermission('roles.edit'),
+            403
+        );
 
         $groups = collect(PermissionRegistry::grouped())
             ->map(fn (array $permissions, string $group) => [
@@ -63,6 +68,17 @@ class RoleController extends Controller
     public function show(Role $role): RoleDetailResource
     {
         abort_unless(auth()->user()->hasPermission('roles.view'), 403);
+
+        return new RoleDetailResource($role);
+    }
+
+    public function update(UpdateRoleRequest $request, Role $role): RoleDetailResource|JsonResponse
+    {
+        try {
+            $role = app(UpdateRoleService::class)->execute($role, $request->validated());
+        } catch (RuntimeException $exception) {
+            return response()->json(['message' => $exception->getMessage()], 422);
+        }
 
         return new RoleDetailResource($role);
     }

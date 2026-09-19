@@ -76,6 +76,7 @@ Route::prefix('v1')->group(function () {
         Route::post('/roles', [RoleController::class, 'store']);
         Route::get('/roles/permissions', [RoleController::class, 'permissions']);
         Route::get('/roles/{role}', [RoleController::class, 'show']);
+        Route::put('/roles/{role}', [RoleController::class, 'update']);
         Route::delete('/roles/{role}', [RoleController::class, 'destroy']);
         Route::get('/fournisseurs', [FournisseurController::class, 'index']);
         Route::post('/fournisseurs', [FournisseurController::class, 'store']);
