@@ -143,7 +143,9 @@ class OrderController extends Controller
 
         abort_unless(in_array($status, $allowedStatuses, true), 409, "Cette transition de statut n'est pas autorisée.");
 
-        $order = $this->orderStatusService->change($order, $status);
+        $order = $this->orderStatusService->change($order, $status, [
+            'date_report' => $request->validated('date_report'),
+        ]);
 
         return new OrderResource($order->fresh(self::WITH));
     }

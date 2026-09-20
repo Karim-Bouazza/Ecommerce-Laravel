@@ -5,6 +5,7 @@ namespace App\Enums;
 enum OrderStatus: string
 {
     case New = 'pending';
+    case Reported = 'reported';
     case Call1 = 'call_1';
     case Call2 = 'call_2';
     case Call3 = 'call_3';
@@ -27,6 +28,7 @@ enum OrderStatus: string
     {
         return match ($this) {
             self::New => 'Nouvelle',
+            self::Reported => 'Reportée',
             self::Call1 => 'Appel 1',
             self::Call2 => 'Appel 2',
             self::Call3 => 'Appel 3',
@@ -51,6 +53,7 @@ enum OrderStatus: string
     {
         return match ($this) {
             self::New => 'warning',
+            self::Reported => 'orange',
             self::Call1, self::Call2, self::Call3 => 'warning',
             self::Unreachable, self::Duplicated => 'gray',
             self::ToCheck => 'indigo',
@@ -84,6 +87,13 @@ enum OrderStatus: string
 
         return match ($this) {
             self::New => [
+                self::Reported,
+                self::Call1, self::Call2, self::Call3,
+                self::Unreachable, self::ToCheck, self::Duplicated, self::FakeOrder,
+                self::Confirmed, self::ConfirmedBot, self::ConfirmedNoStock,
+                self::Cancelled,
+            ],
+            self::Reported => [
                 self::Call1, self::Call2, self::Call3,
                 self::Unreachable, self::ToCheck, self::Duplicated, self::FakeOrder,
                 self::Confirmed, self::ConfirmedBot, self::ConfirmedNoStock,
@@ -115,7 +125,7 @@ enum OrderStatus: string
     public function isEditable(): bool
     {
         return match ($this) {
-            self::New, self::Call1, self::Call2, self::Call3,
+            self::New, self::Reported, self::Call1, self::Call2, self::Call3,
             self::Unreachable, self::ConfirmedBot, self::ConfirmedNoStock, self::Confirmed => true,
             default => false,
         };
@@ -141,6 +151,7 @@ enum OrderStatus: string
         return match ($group) {
             'nouvelles' => [self::New],
             'en_cours' => [
+                self::Reported,
                 self::Call1, self::Call2, self::Call3,
                 self::Unreachable, self::ToCheck, self::Duplicated, self::FakeOrder, self::Scheduled,
                 self::ConfirmedBot, self::ConfirmedNoStock,

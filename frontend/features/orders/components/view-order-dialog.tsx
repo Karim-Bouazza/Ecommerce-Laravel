@@ -73,6 +73,12 @@ export function ViewOrderDialog({ order }: ViewOrderDialogProps) {
             />
             <DetailField label="Adresse" value={order.address || "—"} />
             <DetailField label="Statut" value={order.status_label} />
+            {order.date_report && (
+              <DetailField
+                label="Date de report"
+                value={new Date(order.date_report).toLocaleDateString("fr-FR")}
+              />
+            )}
             <DetailField label="Paiement" value={order.payment_status_label} />
             <DetailField
               label="Livraison"

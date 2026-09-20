@@ -20,6 +20,7 @@ class UpdateOrderStatusRequest extends FormRequest
     {
         return [
             'status' => ['required', 'string', Rule::in(array_column(OrderStatus::cases(), 'value'))],
+            'date_report' => ['required_if:status,'.OrderStatus::Reported->value, 'nullable', 'date'],
         ];
     }
 }

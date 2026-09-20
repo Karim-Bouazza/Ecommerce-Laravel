@@ -7,6 +7,7 @@ export type BadgeColor =
   | "indigo"
   | "purple"
   | "primary"
+  | "orange"
 
 export type OrderItem = {
   id: number
@@ -75,6 +76,7 @@ export type Order = {
   delivery_price: number
   total_price: number
   scheduled_at: string | null
+  date_report: string | null
   created_at: string
   status_changed_at: string
   items: OrderItem[]

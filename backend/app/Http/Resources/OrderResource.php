@@ -61,6 +61,7 @@ class OrderResource extends JsonResource
             'total_price' => (int) $this->total_price,
 
             'scheduled_at' => $this->scheduled_at?->toIso8601String(),
+            'date_report' => $this->date_report?->toIso8601String(),
             'created_at' => $this->created_at?->toIso8601String(),
             'status_changed_at' => ($this->latestStatusHistory?->created_at ?? $this->created_at)?->toIso8601String(),
 

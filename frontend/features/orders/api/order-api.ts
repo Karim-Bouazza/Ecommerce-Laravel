@@ -84,9 +84,16 @@ export async function deleteOrder(id: number): Promise<void> {
   }
 }
 
-export async function updateOrderStatus(id: number, status: string): Promise<Order> {
+export async function updateOrderStatus(
+  id: number,
+  status: string,
+  dateReport?: string
+): Promise<Order> {
   try {
-    const { data } = await api.patch<Order>(`/api/v1/orders/${id}/status`, { status })
+    const { data } = await api.patch<Order>(`/api/v1/orders/${id}/status`, {
+      status,
+      date_report: dateReport,
+    })
     return data
   } catch (error) {
     throw toApiError(error)

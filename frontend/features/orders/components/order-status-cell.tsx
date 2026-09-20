@@ -1,5 +1,6 @@
 "use client"
 
+import * as React from "react"
 import { cn } from "cn"
 
 import {
@@ -9,8 +10,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { ReportOrderDialog } from "@/features/orders/components/report-order-dialog"
 import { useUpdateOrderStatus } from "@/features/orders/hooks/use-update-order-status"
 import type { BadgeColor, Order } from "@/features/orders/types"
+
+const REPORTED_STATUS = "reported"
 
 export const statusBadgeClasses: Record<BadgeColor, string> = {
   success: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
@@ -21,6 +25,7 @@ export const statusBadgeClasses: Record<BadgeColor, string> = {
   indigo: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400",
   purple: "bg-purple-500/10 text-purple-600 dark:text-purple-400",
   primary: "bg-primary/10 text-primary",
+  orange: "bg-orange-500/10 text-orange-600 dark:text-orange-400",
 }
 
 type OrderStatusCellProps = {
@@ -29,6 +34,7 @@ type OrderStatusCellProps = {
 
 export function OrderStatusCell({ order }: OrderStatusCellProps) {
   const mutation = useUpdateOrderStatus()
+  const [reportDialogOpen, setReportDialogOpen] = React.useState(false)
 
   if (order.status_transitions.length === 0) {
     return (
@@ -44,29 +50,37 @@ export function OrderStatusCell({ order }: OrderStatusCellProps) {
   }
 
   return (
-    <Select
-      value={order.status}
-      disabled={mutation.isPending}
-      onValueChange={(value) => {
-        if (value !== order.status) mutation.mutate({ id: order.id, status: value as string })
-      }}
-    >
-      <SelectTrigger
-        className={cn(
-          "h-auto w-fit rounded-full border-none px-2.5 py-0.5 text-xs font-medium",
-          statusBadgeClasses[order.status_color]
-        )}
+    <>
+      <Select
+        value={order.status}
+        disabled={mutation.isPending}
+        onValueChange={(value) => {
+          if (value === order.status) return
+          if (value === REPORTED_STATUS) {
+            setReportDialogOpen(true)
+            return
+          }
+          mutation.mutate({ id: order.id, status: value as string })
+        }}
       >
-        <SelectValue>{order.status_label}</SelectValue>
-      </SelectTrigger>
-      <SelectContent align="start">
-        <SelectItem value={order.status}>{order.status_label}</SelectItem>
-        {order.status_transitions.map((transition) => (
-          <SelectItem key={transition.value} value={transition.value}>
-            {transition.label}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+        <SelectTrigger
+          className={cn(
+            "h-auto w-fit rounded-full border-none px-2.5 py-0.5 text-xs font-medium",
+            statusBadgeClasses[order.status_color]
+          )}
+        >
+          <SelectValue>{order.status_label}</SelectValue>
+        </SelectTrigger>
+        <SelectContent align="start">
+          <SelectItem value={order.status}>{order.status_label}</SelectItem>
+          {order.status_transitions.map((transition) => (
+            <SelectItem key={transition.value} value={transition.value}>
+              {transition.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <ReportOrderDialog order={order} open={reportDialogOpen} onOpenChange={setReportDialogOpen} />
+    </>
   )
 }

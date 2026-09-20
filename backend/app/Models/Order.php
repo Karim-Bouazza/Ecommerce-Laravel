@@ -19,6 +19,7 @@ class Order extends Model
         'reference',
         'status',
         'scheduled_at',
+        'date_report',
         'payment_status',
         'type',
         'subtotal',
@@ -41,6 +42,7 @@ class Order extends Model
     protected $casts = [
         'status' => OrderStatus::class,
         'scheduled_at' => 'datetime',
+        'date_report' => 'datetime',
         'payment_status' => PaymentStatus::class,
         'type' => OrderType::class,
         'free_delivery' => 'boolean',

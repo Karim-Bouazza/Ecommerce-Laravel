@@ -6,6 +6,7 @@ use App\Enums\OrderStatus;
 use App\Exceptions\InvalidOrderTransitionException;
 use App\Services\Orders\StatusTransitions\Handlers\AssignedOrderTransitionHandler;
 use App\Services\Orders\StatusTransitions\Handlers\DefaultOrderTransitionHandler;
+use App\Services\Orders\StatusTransitions\Handlers\ReportedOrderTransitionHandler;
 
 final class OrderStatusTransition
 {
@@ -17,6 +18,7 @@ final class OrderStatusTransition
 
         return match ($to) {
             OrderStatus::Assigned => app(AssignedOrderTransitionHandler::class),
+            OrderStatus::Reported => app(ReportedOrderTransitionHandler::class),
             default => app(DefaultOrderTransitionHandler::class),
         };
     }

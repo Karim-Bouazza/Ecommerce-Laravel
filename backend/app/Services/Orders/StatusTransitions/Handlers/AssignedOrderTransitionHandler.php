@@ -13,7 +13,7 @@ class AssignedOrderTransitionHandler implements OrderStatusTransitionHandler
     {
     }
 
-    public function execute(Order $order, OrderStatus $to): void
+    public function execute(Order $order, OrderStatus $to, array $data = []): void
     {
         $this->zimouPackageService->createPackage($order);
 
