@@ -10,7 +10,7 @@ class StockResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
-        $stockInterne = (int) $this->stock_in - (int) $this->stock_out;
+        $stockInterne = (int) $this->stock_in - (int) $this->stock_out - (int) $this->reserved_quantity - (int) $this->in_delivery_quantity;
 
         return [
             'id' => $this->id,
