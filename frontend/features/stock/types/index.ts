@@ -13,6 +13,12 @@ export type StockItem = {
   valeur_en_livraison: number
 }
 
+export type StockStats = {
+  confirme_sans_stock: number
+  valeur_du_stock: number
+  valeur_en_livraison: number
+}
+
 export type PaginatedResponse<T> = {
   data: T[]
   meta: {

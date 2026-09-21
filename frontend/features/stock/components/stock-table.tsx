@@ -7,6 +7,7 @@ import { Tabs, TabsList, TabsTab } from "@/components/ui/tabs"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { getStockColumns } from "@/features/stock/components/stock-columns"
 import type { StockFiltersValue } from "@/features/stock/components/stock-filters-sheet"
+import { StockStatsCards } from "@/features/stock/components/stock-stats-cards"
 import { StockToolbarActions } from "@/features/stock/components/stock-toolbar-actions"
 import { useStock } from "@/features/stock/hooks/use-stock"
 import { useWarehouseOptions } from "@/features/stock/hooks/use-warehouse-options"
@@ -31,18 +32,24 @@ export function StockTable() {
     setPage(1)
   }, [warehouseId, debouncedSearch, filters, perPage])
 
-  const { data, isPending, isFetching, refetch } = useStock({
-    page,
-    per_page: perPage,
+  const statsParams = {
     search: debouncedSearch || undefined,
     warehouse_id: warehouseId ?? undefined,
     ...filters,
+  }
+
+  const { data, isPending, isFetching, refetch } = useStock({
+    page,
+    per_page: perPage,
+    ...statsParams,
   })
 
   const columns = React.useMemo(() => getStockColumns(warehouseId ?? 0), [warehouseId])
 
   return (
     <div className="flex flex-col gap-4">
+      <StockStatsCards params={statsParams} />
+
       <Tabs
         value={warehouseId !== null ? String(warehouseId) : undefined}
         onValueChange={(value) => setWarehouseId(Number(value))}

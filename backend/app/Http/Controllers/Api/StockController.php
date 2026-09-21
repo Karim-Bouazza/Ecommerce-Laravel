@@ -11,6 +11,7 @@ use App\Models\Stock;
 use App\Models\Warehouse;
 use App\Services\Warehouses\UpdateWarehouseStockService;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
@@ -21,6 +22,42 @@ class StockController extends Controller
         abort_unless(auth()->user()->hasPermission('stock.view'), 403);
 
         $perPage = (int) $request->input('per_page', 15);
+
+        $products = $this->filteredQuery($request)
+            ->orderBy('name')
+            ->paginate($perPage)
+            ->withQueryString();
+
+        return StockResource::collection($products);
+    }
+
+    public function stats(Request $request): JsonResponse
+    {
+        abort_unless(auth()->user()->hasPermission('stock.view'), 403);
+
+        $confirmeSansStock = 0;
+        $valeurDuStock = 0;
+        $valeurEnLivraison = 0;
+
+        $this->filteredQuery($request)
+            ->get()
+            ->each(function (Product $product) use (&$confirmeSansStock, &$valeurDuStock, &$valeurEnLivraison) {
+                $stockInterne = (int) $product->stock_in - (int) $product->stock_out;
+
+                $confirmeSansStock += (int) $product->confirmed_no_stock_quantity;
+                $valeurDuStock += $product->purchase_price !== null ? $stockInterne * $product->purchase_price : 0;
+                $valeurEnLivraison += (float) $product->in_delivery_value;
+            });
+
+        return response()->json([
+            'confirme_sans_stock' => $confirmeSansStock,
+            'valeur_du_stock' => $valeurDuStock,
+            'valeur_en_livraison' => $valeurEnLivraison,
+        ]);
+    }
+
+    private function filteredQuery(Request $request): Builder
+    {
         $search = trim((string) $request->input('search', ''));
         $warehouseId = $request->input('warehouse_id');
         $purchasePriceMin = $request->input('purchase_price_min');
@@ -28,7 +65,7 @@ class StockController extends Controller
         $stockInterneMin = $request->input('stock_interne_min');
         $stockInterneMax = $request->input('stock_interne_max');
 
-        $products = $this->withStockSums(Product::query(), $warehouseId)
+        return $this->withStockSums(Product::query(), $warehouseId)
             ->when($search !== '', fn (Builder $query) => $query->where('name', 'like', "%{$search}%"))
             ->when(
                 $purchasePriceMin !== null,
@@ -51,12 +88,7 @@ class StockController extends Controller
                     'COALESCE(stock_in, 0) - COALESCE(stock_out, 0) <= ?',
                     [$stockInterneMax]
                 )
-            )
-            ->orderBy('name')
-            ->paginate($perPage)
-            ->withQueryString();
-
-        return StockResource::collection($products);
+            );
     }
 
     public function adjust(AdjustStockRequest $request, Product $product): StockResource

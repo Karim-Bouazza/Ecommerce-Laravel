@@ -1,5 +1,5 @@
 import { api, toApiError } from "@/lib/api"
-import type { PaginatedResponse, StockItem } from "@/features/stock/types"
+import type { PaginatedResponse, StockItem, StockStats } from "@/features/stock/types"
 
 export type GetStockParams = {
   page?: number
@@ -15,6 +15,17 @@ export type GetStockParams = {
 export async function getStock(params: GetStockParams): Promise<PaginatedResponse<StockItem>> {
   try {
     const { data } = await api.get<PaginatedResponse<StockItem>>("/api/v1/stock", { params })
+    return data
+  } catch (error) {
+    throw toApiError(error)
+  }
+}
+
+export type GetStockStatsParams = Omit<GetStockParams, "page" | "per_page">
+
+export async function getStockStats(params: GetStockStatsParams): Promise<StockStats> {
+  try {
+    const { data } = await api.get<StockStats>("/api/v1/stock/stats", { params })
     return data
   } catch (error) {
     throw toApiError(error)

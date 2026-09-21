@@ -99,6 +99,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/return-entries/purchase-entry-options', [ReturnEntryController::class, 'purchaseEntryOptions']);
         Route::get('/return-entries/purchase-entries/{purchaseEntry}/items', [ReturnEntryController::class, 'purchaseEntryItems']);
         Route::get('/stock', [StockController::class, 'index']);
+        Route::get('/stock/stats', [StockController::class, 'stats']);
         Route::post('/stock/{product}/adjust', [StockController::class, 'adjust']);
         Route::get('/stock-movements', [StockMovementController::class, 'index']);
         Route::get('/stock-alerts', [StockAlertController::class, 'index']);
