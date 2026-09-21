@@ -2,12 +2,10 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Enums\StockMovementType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AdjustStockRequest;
 use App\Http\Resources\StockResource;
 use App\Models\Product;
-use App\Models\Stock;
 use App\Models\Warehouse;
 use App\Services\Warehouses\UpdateWarehouseStockService;
 use Illuminate\Database\Eloquent\Builder;
@@ -35,25 +33,16 @@ class StockController extends Controller
     {
         abort_unless(auth()->user()->hasPermission('stock.view'), 403);
 
-        $confirmeSansStock = 0;
-        $valeurDuStock = 0;
-        $valeurEnLivraison = 0;
+        $totals = $this->filteredQuery($request)->get()->reduce(
+            fn (array $totals, Product $product) => [
+                'confirme_sans_stock' => $totals['confirme_sans_stock'] + $product->confirme_sans_stock,
+                'valeur_du_stock' => $totals['valeur_du_stock'] + ($product->valeur_du_stock ?? 0),
+                'valeur_en_livraison' => $totals['valeur_en_livraison'] + $product->valeur_en_livraison,
+            ],
+            ['confirme_sans_stock' => 0, 'valeur_du_stock' => 0, 'valeur_en_livraison' => 0],
+        );
 
-        $this->filteredQuery($request)
-            ->get()
-            ->each(function (Product $product) use (&$confirmeSansStock, &$valeurDuStock, &$valeurEnLivraison) {
-                $stockInterne = (int) $product->stock_in - (int) $product->stock_out;
-
-                $confirmeSansStock += (int) $product->confirmed_no_stock_quantity;
-                $valeurDuStock += $product->purchase_price !== null ? $stockInterne * $product->purchase_price : 0;
-                $valeurEnLivraison += (float) $product->in_delivery_value;
-            });
-
-        return response()->json([
-            'confirme_sans_stock' => $confirmeSansStock,
-            'valeur_du_stock' => $valeurDuStock,
-            'valeur_en_livraison' => $valeurEnLivraison,
-        ]);
+        return response()->json($totals);
     }
 
     private function filteredQuery(Request $request): Builder
@@ -65,7 +54,8 @@ class StockController extends Controller
         $stockInterneMin = $request->input('stock_interne_min');
         $stockInterneMax = $request->input('stock_interne_max');
 
-        return $this->withStockSums(Product::query(), $warehouseId)
+        return Product::query()
+            ->withStockSums($warehouseId)
             ->when($search !== '', fn (Builder $query) => $query->where('name', 'like', "%{$search}%"))
             ->when(
                 $purchasePriceMin !== null,
@@ -77,17 +67,11 @@ class StockController extends Controller
             )
             ->when(
                 $stockInterneMin !== null,
-                fn (Builder $query) => $query->havingRaw(
-                    'COALESCE(stock_in, 0) - COALESCE(stock_out, 0) >= ?',
-                    [$stockInterneMin]
-                )
+                fn (Builder $query) => $query->havingRaw(Product::stockInterneSql() . ' >= ?', [$stockInterneMin])
             )
             ->when(
                 $stockInterneMax !== null,
-                fn (Builder $query) => $query->havingRaw(
-                    'COALESCE(stock_in, 0) - COALESCE(stock_out, 0) <= ?',
-                    [$stockInterneMax]
-                )
+                fn (Builder $query) => $query->havingRaw(Product::stockInterneSql() . ' <= ?', [$stockInterneMax])
             );
     }
 
@@ -102,28 +86,8 @@ class StockController extends Controller
             (float) $request->validated('purchase_price'),
         );
 
-        $updated = $this->withStockSums(Product::query()->whereKey($product->id), $warehouse->id)->firstOrFail();
+        $updated = Product::query()->whereKey($product->id)->withStockSums($warehouse->id)->firstOrFail();
 
         return new StockResource($updated);
-    }
-
-    private function withStockSums(Builder $query, mixed $warehouseId): Builder
-    {
-        return $query
-            ->select(['id', 'name', 'image_1', 'purchase_price'])
-            ->withSum(['stockMovements as stock_in' => function ($query) use ($warehouseId) {
-                $query->where('type', StockMovementType::In)
-                    ->when($warehouseId, fn ($query) => $query->where('warehouse_id', $warehouseId));
-            }], 'quantity')
-            ->withSum(['stockMovements as stock_out' => function ($query) use ($warehouseId) {
-                $query->where('type', StockMovementType::Out)
-                    ->when($warehouseId, fn ($query) => $query->where('warehouse_id', $warehouseId));
-            }], 'quantity')
-            ->withSum(['orderItems as reserved_quantity' => Stock::reservedItemsQuery($warehouseId)], 'quantity')
-            ->withSum(['orderItems as in_delivery_quantity' => Stock::inDeliveryItemsQuery($warehouseId)], 'quantity')
-            ->withSum(['orderItems as in_delivery_value' => Stock::inDeliveryItemsQuery($warehouseId)], 'total_price')
-            ->withSum(['orderItems as in_return_quantity' => Stock::inReturnItemsQuery($warehouseId)], 'quantity')
-            ->withSum(['orderItems as confirmed_no_stock_quantity' => Stock::confirmedNoStockItemsQuery($warehouseId)], 'quantity')
-            ->withSum(['orderItems as sold_quantity' => Stock::soldItemsQuery($warehouseId)], 'quantity');
     }
 }
