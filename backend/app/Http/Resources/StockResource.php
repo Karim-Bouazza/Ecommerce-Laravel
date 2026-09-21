@@ -11,6 +11,7 @@ class StockResource extends JsonResource
     public function toArray(Request $request): array
     {
         $stockInterne = (int) $this->stock_in - (int) $this->stock_out - (int) $this->reserved_quantity - (int) $this->in_delivery_quantity;
+        $stockTotal = $stockInterne + (int) $this->reserved_quantity + (int) $this->in_delivery_quantity + (int) $this->in_return_quantity;
 
         return [
             'id' => $this->id,
@@ -23,7 +24,7 @@ class StockResource extends JsonResource
             'confirme_sans_stock' => (int) $this->confirmed_no_stock_quantity,
             'vendu' => (int) $this->sold_quantity,
             'purchase_price' => $this->purchase_price,
-            'valeur_du_stock' => $this->purchase_price !== null ? $stockInterne * $this->purchase_price : null,
+            'valeur_du_stock' => $this->purchase_price !== null ? $stockTotal * $this->purchase_price : null,
             'valeur_en_livraison' => (int) $this->in_delivery_value,
         ];
     }

@@ -5,6 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property int|float|null $stock_in
+ * @property int|float|null $stock_out
+ * @property int|float|null $reserved_quantity
+ * @property int|float|null $in_delivery_quantity
+ * @property int|float|null $in_delivery_value
+ * @property int|float|null $in_return_quantity
+ * @property int|float|null $confirmed_no_stock_quantity
+ * @property int|float|null $sold_quantity
+ */
 class Product extends Model
 {
     protected $fillable = [
