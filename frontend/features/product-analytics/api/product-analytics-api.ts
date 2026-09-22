@@ -51,11 +51,11 @@ export async function getProductAnalyticsChart(
   params: GetProductAnalyticsChartParams
 ): Promise<ProductAnalyticsChartItem[]> {
   try {
-    const { data } = await api.get<{ data: ProductAnalyticsChartItem[] }>(
+    const { data } = await api.get<ProductAnalyticsChartItem[]>(
       "/api/v1/products/analytics/chart",
       { params }
     )
-    return data.data
+    return data
   } catch (error) {
     throw toApiError(error)
   }
