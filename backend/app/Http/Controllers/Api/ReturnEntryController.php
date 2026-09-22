@@ -35,6 +35,7 @@ class ReturnEntryController extends Controller
 
         $entries = ReturnEntry::query()
             ->with(self::WITH)
+            ->withSum('versements as paid_amount_sum', 'amount')
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($query) use ($search) {
                     $query->where('reference', 'like', "%{$search}%")
@@ -151,12 +152,18 @@ class ReturnEntryController extends Controller
 
         $items = $purchaseEntry->items()
             ->with('product')
-            ->get()
-            ->map(function ($item) use ($excludeReturnEntryId) {
-                $returned = ReturnEntryItem::query()
-                    ->where('purchase_entry_item_id', $item->id)
-                    ->when($excludeReturnEntryId, fn ($query) => $query->where('return_entry_id', '!=', $excludeReturnEntryId))
-                    ->sum('quantity');
+            ->get();
+
+        $returnedByItemId = ReturnEntryItem::query()
+            ->selectRaw('purchase_entry_item_id, sum(quantity) as total')
+            ->whereIn('purchase_entry_item_id', $items->pluck('id'))
+            ->when($excludeReturnEntryId, fn ($query) => $query->where('return_entry_id', '!=', $excludeReturnEntryId))
+            ->groupBy('purchase_entry_item_id')
+            ->pluck('total', 'purchase_entry_item_id');
+
+        $items = $items
+            ->map(function ($item) use ($returnedByItemId) {
+                $returned = (int) ($returnedByItemId[$item->id] ?? 0);
 
                 return [
                     'id' => $item->id,
@@ -164,8 +171,8 @@ class ReturnEntryController extends Controller
                     'product_name' => $item->product?->name,
                     'purchase_price' => $item->purchase_price,
                     'purchased_quantity' => $item->quantity,
-                    'returned_quantity' => (int) $returned,
-                    'remaining_quantity' => max(0, $item->quantity - (int) $returned),
+                    'returned_quantity' => $returned,
+                    'remaining_quantity' => max(0, $item->quantity - $returned),
                 ];
             })
             ->values();

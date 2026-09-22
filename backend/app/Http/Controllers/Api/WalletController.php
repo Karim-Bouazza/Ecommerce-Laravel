@@ -99,6 +99,7 @@ class WalletController extends Controller
         $search = trim((string) $request->input('search', ''));
 
         $transactions = $wallet->transactions()
+            ->with('creator')
             ->when(
                 $category && $category !== 'all',
                 fn ($query) => $query->where('category', WalletTransactionCategory::from($category))

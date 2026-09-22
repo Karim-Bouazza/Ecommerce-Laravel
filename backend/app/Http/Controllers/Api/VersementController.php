@@ -49,10 +49,14 @@ class VersementController extends Controller
     {
         abort_unless(auth()->user()->hasPermission('versements.view'), 403);
 
-        $fournisseurs = Fournisseur::all();
+        $sums = Fournisseur::query()
+            ->withSum('completedPurchaseEntries as total_dues_sum', 'total')
+            ->withSum('completedPurchaseEntryVersements as entries_paid_amount', 'amount')
+            ->withSum('versements as direct_paid_amount', 'amount')
+            ->get();
 
-        $totalDues = (int) $fournisseurs->sum(fn (Fournisseur $fournisseur) => $fournisseur->totalDues());
-        $totalPaid = (int) $fournisseurs->sum(fn (Fournisseur $fournisseur) => $fournisseur->totalPaid());
+        $totalDues = (int) $sums->sum(fn (Fournisseur $fournisseur) => $fournisseur->totalDues());
+        $totalPaid = (int) $sums->sum(fn (Fournisseur $fournisseur) => $fournisseur->totalPaid());
 
         return response()->json([
             'total_dues' => $totalDues,

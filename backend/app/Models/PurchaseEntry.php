@@ -11,6 +11,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class PurchaseEntry extends Model
 {
+    protected ?int $paidAmountCache = null;
+
     protected $fillable = [
         'reference',
         'warehouse_id',
@@ -72,7 +74,11 @@ class PurchaseEntry extends Model
 
     public function paidAmount(): int
     {
-        return (int) $this->versements()->sum('amount');
+        if (array_key_exists('paid_amount_sum', $this->attributes)) {
+            return (int) $this->attributes['paid_amount_sum'];
+        }
+
+        return $this->paidAmountCache ??= (int) $this->versements()->sum('amount');
     }
 
     public function remainingAmount(): int

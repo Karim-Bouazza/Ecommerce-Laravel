@@ -24,6 +24,9 @@ class FournisseurController extends Controller
         $search = trim((string) $request->input('search', ''));
 
         $fournisseurs = Fournisseur::query()
+            ->withSum('completedPurchaseEntries as total_dues_sum', 'total')
+            ->withSum('completedPurchaseEntryVersements as entries_paid_amount', 'amount')
+            ->withSum('versements as direct_paid_amount', 'amount')
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($query) use ($search) {
                     $query->where('name', 'like', "%{$search}%")

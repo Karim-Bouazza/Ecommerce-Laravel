@@ -32,6 +32,7 @@ class PurchaseEntryController extends Controller
 
         $entries = PurchaseEntry::query()
             ->with(self::WITH)
+            ->withSum('versements as paid_amount_sum', 'amount')
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($query) use ($search) {
                     $query->where('reference', 'like', "%{$search}%")
