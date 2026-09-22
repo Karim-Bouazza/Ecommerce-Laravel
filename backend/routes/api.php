@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\DeliveryCompanyOptionController;
 use App\Http\Controllers\Api\FournisseurController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\PaiementController;
+use App\Http\Controllers\Api\ProductAnalyticsController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ProviderCommuneController;
 use App\Http\Controllers\Api\ProviderStopDeskController;
@@ -28,6 +29,11 @@ use App\Http\Controllers\Api\WilayaController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
+
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::get('/products/analytics', [ProductAnalyticsController::class, 'index']);
+        Route::get('/products/analytics/stats', [ProductAnalyticsController::class, 'stats']);
+    });
 
     Route::get('/products/{product}', [ProductController::class, 'show']);
     Route::get('/wilayas', [WilayaController::class, 'index']);
