@@ -33,6 +33,7 @@ Route::prefix('v1')->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/products/analytics', [ProductAnalyticsController::class, 'index']);
         Route::get('/products/analytics/stats', [ProductAnalyticsController::class, 'stats']);
+        Route::get('/products/analytics/chart', [ProductAnalyticsController::class, 'chart']);
     });
 
     Route::get('/products/{product}', [ProductController::class, 'show']);

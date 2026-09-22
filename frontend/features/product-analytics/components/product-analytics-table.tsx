@@ -9,6 +9,7 @@ import {
   ProductAnalyticsFiltersSheet,
   type ProductAnalyticsFiltersValue,
 } from "@/features/product-analytics/components/product-analytics-filters-sheet"
+import { ProductAnalyticsDeliveredChart } from "@/features/product-analytics/components/product-analytics-delivered-chart"
 import { ProductAnalyticsStatsCards } from "@/features/product-analytics/components/product-analytics-stats-cards"
 import { useProductAnalytics } from "@/features/product-analytics/hooks/use-product-analytics"
 
@@ -38,6 +39,8 @@ export function ProductAnalyticsTable() {
   return (
     <div className="flex flex-col gap-4">
       <ProductAnalyticsStatsCards params={queryParams} />
+
+      <ProductAnalyticsDeliveredChart params={queryParams} />
 
       <DataTable
         columns={productAnalyticsColumns}

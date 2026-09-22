@@ -25,6 +25,12 @@ export type ProductAnalyticsItem = {
 
 export type ProductAnalyticsStats = Omit<ProductAnalyticsItem, "id" | "name" | "image">
 
+export type ProductAnalyticsChartItem = {
+  id: number
+  name: string
+  commandes_livrees: number
+}
+
 export type PaginatedResponse<T> = {
   data: T[]
   meta: {

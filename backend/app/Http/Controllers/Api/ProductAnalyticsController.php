@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\ProductAnalyticsChartResource;
 use App\Http\Resources\ProductAnalyticsResource;
 use App\Models\Product;
 use App\Queries\Products\ProductAnalyticsQuery;
@@ -87,6 +88,20 @@ class ProductAnalyticsController extends Controller
             'marge_brute' => $margin,
             'profit_pourcentage' => ProductAnalyticsCalculator::profitPercentage($margin, $sales),
         ]);
+    }
+
+    public function chart(Request $request): AnonymousResourceCollection
+    {
+        abort_unless(auth()->user()->hasPermission('products.view'), 403);
+
+        $limit = min((int) $request->input('limit', 10), 20);
+
+        $products = $this->filteredQuery($request)
+            ->orderByDesc('delivered_count')
+            ->limit($limit)
+            ->get();
+
+        return ProductAnalyticsChartResource::collection($products);
     }
 
     private function filteredQuery(Request $request): Builder

@@ -1,6 +1,7 @@
 import { api, toApiError } from "@/lib/api"
 import type {
   PaginatedResponse,
+  ProductAnalyticsChartItem,
   ProductAnalyticsItem,
   ProductAnalyticsStats,
 } from "@/features/product-analytics/types"
@@ -37,6 +38,24 @@ export async function getProductAnalyticsStats(
       params,
     })
     return data
+  } catch (error) {
+    throw toApiError(error)
+  }
+}
+
+export type GetProductAnalyticsChartParams = GetProductAnalyticsStatsParams & {
+  limit?: number
+}
+
+export async function getProductAnalyticsChart(
+  params: GetProductAnalyticsChartParams
+): Promise<ProductAnalyticsChartItem[]> {
+  try {
+    const { data } = await api.get<{ data: ProductAnalyticsChartItem[] }>(
+      "/api/v1/products/analytics/chart",
+      { params }
+    )
+    return data.data
   } catch (error) {
     throw toApiError(error)
   }
