@@ -15,7 +15,7 @@ export function useLogin() {
 
   const form = useForm<LoginSchema>({
     resolver: zodResolver(loginSchema),
-    defaultValues: { email: "", password: "" },
+    defaultValues: { email: "", password: "", remember: false },
   })
 
   const mutation = useMutation({

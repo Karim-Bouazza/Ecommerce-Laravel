@@ -6,6 +6,7 @@ export const loginSchema = z.object({
     .min(1, "L'adresse e-mail est requise.")
     .email("Adresse e-mail invalide."),
   password: z.string().min(1, "Le mot de passe est requis."),
+  remember: z.boolean().optional(),
 })
 
 export type LoginSchema = z.infer<typeof loginSchema>

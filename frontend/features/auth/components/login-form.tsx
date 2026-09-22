@@ -2,12 +2,14 @@
 
 import { useState } from "react"
 import Image from "next/image"
+import { Controller } from "react-hook-form"
 import { Eye, EyeOff } from "lucide-react"
 import { cn } from "cn"
 
 import { useLogin } from "@/features/auth/hooks/use-login"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 
@@ -19,6 +21,7 @@ export function LoginForm({
   const { form, onSubmit, isSubmitting } = useLogin()
   const {
     register,
+    control,
     formState: { errors },
   } = form
 
@@ -93,6 +96,22 @@ export function LoginForm({
                   </button>
                 </div>
                 <FieldError errors={errors.password ? [errors.password] : undefined} />
+              </Field>
+              <Field orientation="horizontal">
+                <Controller
+                  name="remember"
+                  control={control}
+                  render={({ field }) => (
+                    <Checkbox
+                      id="remember"
+                      checked={field.value ?? false}
+                      onCheckedChange={(checked) => field.onChange(checked === true)}
+                    />
+                  )}
+                />
+                <FieldLabel htmlFor="remember" className="text-sm font-normal">
+                  Se souvenir de moi
+                </FieldLabel>
               </Field>
               <Field className="mt-5">
                 <Button
