@@ -12,6 +12,9 @@ export type GetProductAnalyticsParams = {
   search?: string
   date_from?: string
   date_to?: string
+  wilaya_id?: number
+  price_min?: number
+  price_max?: number
 }
 
 export async function getProductAnalytics(

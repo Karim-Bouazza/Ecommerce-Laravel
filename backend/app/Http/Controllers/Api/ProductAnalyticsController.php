@@ -109,7 +109,17 @@ class ProductAnalyticsController extends Controller
         $search = trim((string) $request->input('search', ''));
         $dateFrom = $request->input('date_from');
         $dateTo = $request->input('date_to');
+        $wilayaId = $request->input('wilaya_id');
+        $priceMin = $request->input('price_min');
+        $priceMax = $request->input('price_max');
 
-        return $this->query->build($search !== '' ? $search : null, $dateFrom, $dateTo);
+        return $this->query->build(
+            $search !== '' ? $search : null,
+            $dateFrom,
+            $dateTo,
+            $wilayaId !== null ? (int) $wilayaId : null,
+            $priceMin !== null ? (float) $priceMin : null,
+            $priceMax !== null ? (float) $priceMax : null,
+        );
     }
 }
