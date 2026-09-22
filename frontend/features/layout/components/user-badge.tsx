@@ -1,18 +1,18 @@
 "use client"
 
+import Link from "next/link"
+import { User } from "lucide-react"
 import { cn } from "cn"
 
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { useMe } from "@/features/auth/hooks/use-me"
-
-function getInitials(name: string): string {
-  return name
-    .trim()
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase() ?? "")
-    .join("")
-}
+import { getInitials } from "@/features/auth/lib/get-initials"
 
 export function UserBadge({ className }: { className?: string }) {
   const { data: me } = useMe()
@@ -20,20 +20,34 @@ export function UserBadge({ className }: { className?: string }) {
   if (!me) return null
 
   return (
-    <div className={cn("flex items-center gap-3", className)}>
-      <Avatar>
-        <AvatarFallback className="bg-primary font-semibold text-primary-foreground">
-          {getInitials(me.name)}
-        </AvatarFallback>
-      </Avatar>
-      <div className="flex flex-col leading-tight">
-        <span className="text-sm font-semibold">{me.name}</span>
-        {me.role && (
-          <span className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
-            {me.role.name}
-          </span>
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        className={cn(
+          "flex cursor-pointer items-center gap-3 rounded-md outline-hidden",
+          className
         )}
-      </div>
-    </div>
+      >
+        <Avatar>
+          {me.avatar && <AvatarImage src={me.avatar} alt={me.name} />}
+          <AvatarFallback className="bg-primary font-semibold text-primary-foreground">
+            {getInitials(me.name)}
+          </AvatarFallback>
+        </Avatar>
+        <div className="flex flex-col leading-tight text-left">
+          <span className="text-sm font-semibold">{me.name}</span>
+          {me.role && (
+            <span className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+              {me.role.name}
+            </span>
+          )}
+        </div>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem render={<Link href="/admin/profile" />}>
+          <User />
+          Profil
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }

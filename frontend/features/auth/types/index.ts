@@ -3,6 +3,7 @@ export type User = {
   name: string
   email: string
   phone: string | null
+  avatar: string | null
   role: {
     id: number
     name: string

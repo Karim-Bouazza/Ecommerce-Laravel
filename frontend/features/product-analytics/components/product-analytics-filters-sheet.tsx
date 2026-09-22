@@ -66,7 +66,7 @@ export function ProductAnalyticsFiltersSheet({ value, onApply }: ProductAnalytic
           <SheetTitle>Filtres</SheetTitle>
         </SheetHeader>
 
-        <FieldGroup className="px-4">
+        <FieldGroup className="min-h-0 flex-1 overflow-y-auto px-4">
           <Field>
             <FieldLabel className="flex items-center gap-2">
               Par date de changement de statut
