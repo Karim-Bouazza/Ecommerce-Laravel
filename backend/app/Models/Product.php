@@ -97,13 +97,13 @@ class Product extends Model
 
     public static function stockInterneSql(): string
     {
-        return 'COALESCE(stock_in,0) - COALESCE(stock_out,0) - COALESCE(reserved_quantity,0) - COALESCE(in_delivery_quantity,0) - COALESCE(in_return_quantity,0)';
+        return 'COALESCE(stock_in,0) - COALESCE(stock_out,0) - COALESCE(reserved_quantity,0) - COALESCE(in_delivery_quantity,0) - COALESCE(in_return_quantity,0) - COALESCE(sold_quantity,0)';
     }
 
     protected function stockInterne(): Attribute
     {
         return Attribute::make(
-            get: fn() => (int) $this->stock_in - (int) $this->stock_out - (int) $this->reserved_quantity - (int) $this->in_delivery_quantity - (int) $this->in_return_quantity,
+            get: fn() => (int) $this->stock_in - (int) $this->stock_out - (int) $this->reserved_quantity - (int) $this->in_delivery_quantity - (int) $this->in_return_quantity - (int) $this->sold_quantity,
         );
     }
 
@@ -135,7 +135,7 @@ class Product extends Model
     protected function stockTotal(): Attribute
     {
         return Attribute::make(
-            get: fn() => $this->stock_interne + $this->stock_reserve + $this->stock_en_livraison + $this->stock_en_retour,
+            get: fn() => $this->stock_interne + $this->stock_reserve + $this->stock_en_livraison + $this->stock_en_retour + $this->vendu,
         );
     }
 
