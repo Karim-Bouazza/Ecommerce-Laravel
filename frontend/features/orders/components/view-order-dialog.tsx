@@ -65,6 +65,11 @@ export function ViewOrderDialog({ order }: ViewOrderDialogProps) {
 
         <div className="flex max-h-[70vh] flex-col gap-4 overflow-y-auto py-2 pr-1">
           <div className="grid gap-4 sm:grid-cols-2">
+            <DetailField label="Nom de la commande" value={order.name || "—"} />
+            <DetailField
+              label="N° de commande prestataire"
+              value={order.provider_order_id || "—"}
+            />
             <DetailField label="Client" value={order.client_name || "—"} />
             <DetailField label="Téléphone" value={order.phone_number || "—"} />
             <DetailField
