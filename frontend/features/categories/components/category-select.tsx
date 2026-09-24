@@ -15,6 +15,7 @@ type CategorySelectProps = {
   placeholder?: string
   disabled?: boolean
   invalid?: boolean
+  excludeIds?: number[]
 }
 
 export function CategorySelect({
@@ -23,8 +24,12 @@ export function CategorySelect({
   placeholder = "Sélectionner une catégorie",
   disabled,
   invalid,
+  excludeIds,
 }: CategorySelectProps) {
-  const { data: categories = [] } = useCategories()
+  const { data: allCategories = [] } = useCategories()
+  const categories = excludeIds
+    ? allCategories.filter((category) => !excludeIds.includes(category.id))
+    : allCategories
 
   return (
     <Select

@@ -92,6 +92,10 @@ class PermissionRegistry
                 'versements.create' => 'Créer des versements',
                 'versements.edit' => 'Modifier des versements',
                 'versements.delete' => 'Supprimer des versements',
+                'charges.view' => 'Voir les charges',
+                'charges.create' => 'Créer des charges',
+                'charges.edit' => 'Modifier des charges',
+                'charges.delete' => 'Supprimer des charges',
             ],
             'Utilisateurs' => [
                 'administrateurs.view' => 'Voir les administrateurs',

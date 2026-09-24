@@ -1,6 +1,6 @@
 "use client"
 
-import { Percent, ShoppingCart, TrendingUp, Wallet } from "lucide-react"
+import { Percent, Receipt, ShoppingCart, TrendingUp, Wallet } from "lucide-react"
 import { cn } from "cn"
 
 import { Card, CardContent } from "@/components/ui/card"
@@ -43,6 +43,27 @@ const stats = [
     icon: Percent,
     iconClassName: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
     format: (data: ProductAnalyticsStats) => `${percentFormatter.format(data.profit_pourcentage)} %`,
+  },
+  {
+    key: "charge_totale" as const,
+    label: "CHARGES TOTALES",
+    icon: Receipt,
+    iconClassName: "bg-orange-500/10 text-orange-600 dark:text-orange-400",
+    format: (data: ProductAnalyticsStats) => formatPrice(data.charge_totale) ?? "—",
+  },
+  {
+    key: "benefice_net" as const,
+    label: "BÉNÉFICE NET",
+    icon: TrendingUp,
+    iconClassName: "bg-purple-500/10 text-purple-600 dark:text-purple-400",
+    format: (data: ProductAnalyticsStats) => formatPrice(data.benefice_net) ?? "—",
+  },
+  {
+    key: "profit_net_pourcentage" as const,
+    label: "PROFIT NET",
+    icon: Percent,
+    iconClassName: "bg-rose-500/10 text-rose-600 dark:text-rose-400",
+    format: (data: ProductAnalyticsStats) => `${percentFormatter.format(data.profit_net_pourcentage)} %`,
   },
 ]
 

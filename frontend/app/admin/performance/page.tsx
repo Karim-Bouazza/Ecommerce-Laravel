@@ -1,5 +1,5 @@
-import { ComingSoon } from "@/components/shared/coming-soon"
+import { PerformancePage } from "@/features/performance/pages/performance-page"
 
-export default function PerformancePage() {
-  return <ComingSoon />
+export default function Page() {
+  return <PerformancePage />
 }

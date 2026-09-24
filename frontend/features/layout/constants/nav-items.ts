@@ -10,12 +10,14 @@ import {
   MessageCircle,
   Network,
   Package,
+  Palette,
   Radio,
   ScanBarcode,
   Settings,
   Share2,
   Smartphone,
   Store,
+  Tag,
   Truck,
   User,
   Users,
@@ -63,7 +65,10 @@ export const NAV_SECTIONS: NavSection[] = [
   },
   {
     label: "Catalogue",
-    items: [{ label: "Produits", href: "/admin/products", icon: Package, permission: "products.view" }],
+    items: [
+      { label: "Produits", href: "/admin/products", icon: Package, permission: "products.view" },
+      { label: "Catégories", href: "/admin/categories", icon: Tag, permission: "categories.view" },
+    ],
   },
   {
     label: "Stock",
@@ -194,6 +199,16 @@ export const NAV_SECTIONS: NavSection[] = [
           { label: "Frais de livraison des produits", href: "/admin/management/shipping-fees" },
           { label: "Préférences", href: "/admin/management/preferences" },
           { label: "Notifications", href: "/admin/management/notifications" },
+        ],
+      },
+      {
+        label: "Site Web",
+        href: "/admin/website",
+        icon: Palette,
+        items: [
+          { label: "Couleurs", href: "/admin/website/colors" },
+          { label: "Logo", href: "/admin/website/logo" },
+          { label: "Catégories (Accueil)", href: "/admin/website/hero-categories" },
         ],
       },
     ],

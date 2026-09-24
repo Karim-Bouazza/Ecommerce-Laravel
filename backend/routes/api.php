@@ -2,12 +2,14 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\ChargeController;
 use App\Http\Controllers\Api\ClientController;
 use App\Http\Controllers\Api\DeliveryCompanyIntegrationController;
 use App\Http\Controllers\Api\DeliveryCompanyOptionController;
 use App\Http\Controllers\Api\FournisseurController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\PaiementController;
+use App\Http\Controllers\Api\PerformanceController;
 use App\Http\Controllers\Api\ProductAnalyticsController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ProviderCommuneController;
@@ -16,9 +18,12 @@ use App\Http\Controllers\Api\ProviderWilayaController;
 use App\Http\Controllers\Api\PurchaseEntryController;
 use App\Http\Controllers\Api\ReturnEntryController;
 use App\Http\Controllers\Api\RoleController;
+use App\Http\Controllers\Api\SiteSettingColorsThemeController;
+use App\Http\Controllers\Api\SiteSettingLogoController;
 use App\Http\Controllers\Api\StockAlertController;
 use App\Http\Controllers\Api\StockController;
 use App\Http\Controllers\Api\StockMovementController;
+use App\Http\Controllers\Api\StorefrontHeroCategoryController;
 use App\Http\Controllers\Api\TransferController;
 use App\Http\Controllers\Api\VersementController;
 use App\Http\Controllers\Api\WalletController;
@@ -34,12 +39,16 @@ Route::prefix('v1')->group(function () {
         Route::get('/products/analytics', [ProductAnalyticsController::class, 'index']);
         Route::get('/products/analytics/stats', [ProductAnalyticsController::class, 'stats']);
         Route::get('/products/analytics/chart', [ProductAnalyticsController::class, 'chart']);
+        Route::get('/performance/revenue', [PerformanceController::class, 'revenue']);
     });
 
     Route::get('/products/{product}', [ProductController::class, 'show']);
     Route::get('/wilayas', [WilayaController::class, 'index']);
     Route::get('/wilayas/{wilaya}', [WilayaController::class, 'show']);
     Route::post('/orders', [OrderController::class, 'store']);
+    Route::get('/site-settings/colors-theme', [SiteSettingColorsThemeController::class, 'show']);
+    Route::get('/site-settings/logo', [SiteSettingLogoController::class, 'show']);
+    Route::get('/site-settings/hero-categories', [StorefrontHeroCategoryController::class, 'index']);
 
     Route::post('/login', [AuthController::class, 'login']);
 
@@ -52,6 +61,16 @@ Route::prefix('v1')->group(function () {
         Route::put('/products/{product}', [ProductController::class, 'update']);
         Route::delete('/products/{product}', [ProductController::class, 'destroy']);
         Route::get('/categories', [CategoryController::class, 'index']);
+        Route::post('/categories', [CategoryController::class, 'store']);
+        Route::put('/categories/{category}', [CategoryController::class, 'update']);
+        Route::delete('/categories/{category}', [CategoryController::class, 'destroy']);
+        Route::post('/categories/{category}/toggle-active', [CategoryController::class, 'toggleActive']);
+        Route::get('/category-options', [CategoryController::class, 'options']);
+        Route::put('/site-settings/colors-theme', [SiteSettingColorsThemeController::class, 'update']);
+        Route::put('/site-settings/logo', [SiteSettingLogoController::class, 'update']);
+        Route::post('/site-settings/hero-categories', [StorefrontHeroCategoryController::class, 'store']);
+        Route::put('/site-settings/hero-categories/{heroCategory}', [StorefrontHeroCategoryController::class, 'update']);
+        Route::delete('/site-settings/hero-categories/{heroCategory}', [StorefrontHeroCategoryController::class, 'destroy']);
         Route::get('/clients', [ClientController::class, 'index']);
         Route::get('/clients/blacklist', [ClientController::class, 'blacklisted']);
         Route::put('/clients/{client}', [ClientController::class, 'update']);
@@ -71,6 +90,13 @@ Route::prefix('v1')->group(function () {
         Route::post('/versements', [VersementController::class, 'store']);
         Route::put('/versements/{versement}', [VersementController::class, 'update']);
         Route::delete('/versements/{versement}', [VersementController::class, 'destroy']);
+        Route::get('/charges', [ChargeController::class, 'index']);
+        Route::get('/charges/stats', [ChargeController::class, 'stats']);
+        Route::post('/charges', [ChargeController::class, 'store']);
+        Route::put('/charges/{charge}', [ChargeController::class, 'update']);
+        Route::delete('/charges/{charge}', [ChargeController::class, 'destroy']);
+        Route::get('/charges/{charge}/versements', [ChargeController::class, 'versements']);
+        Route::post('/charges/{charge}/versements', [ChargeController::class, 'createVersement']);
         Route::get('/paiements', [PaiementController::class, 'index']);
         Route::post('/paiements', [PaiementController::class, 'store']);
         Route::put('/paiements/{paiement}', [PaiementController::class, 'update']);

@@ -110,4 +110,36 @@ export const productAnalyticsColumns: ColumnDef<ProductAnalyticsItem>[] = [
     header: "Profit %",
     cell: ({ row }) => <RateBadge value={row.original.profit_pourcentage} />,
   },
+  {
+    accessorKey: "charge_totale",
+    header: "Charge Totale (DZD)",
+    cell: ({ row }) => formatPrice(row.original.charge_totale),
+  },
+  {
+    id: "charge_par_piece",
+    header: "Charge / Pièce (DZD)",
+    cell: ({ row }) =>
+      row.original.moyenne_par_piece
+        ? formatPrice(row.original.moyenne_par_piece.charge)
+        : <span className="text-muted-foreground">—</span>,
+  },
+  {
+    accessorKey: "benefice_net",
+    header: "Bénéfice Net (DZD)",
+    cell: ({ row }) =>
+      formatPrice(row.original.benefice_net) ?? <span className="text-muted-foreground">—</span>,
+  },
+  {
+    id: "benefice_net_par_piece",
+    header: "Bénéfice Net / Pièce (DZD)",
+    cell: ({ row }) =>
+      row.original.moyenne_par_piece?.benefice_net != null
+        ? formatPrice(row.original.moyenne_par_piece.benefice_net)
+        : <span className="text-muted-foreground">—</span>,
+  },
+  {
+    accessorKey: "profit_net_pourcentage",
+    header: "Profit Net %",
+    cell: ({ row }) => <RateBadge value={row.original.profit_net_pourcentage} />,
+  },
 ]
