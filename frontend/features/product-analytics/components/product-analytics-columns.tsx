@@ -3,7 +3,7 @@
 import type { ColumnDef } from "@tanstack/react-table"
 
 import { formatPrice } from "@/shared/lib/format-price"
-import { RateBadge } from "@/features/product-analytics/components/rate-badge"
+import { RateBadge } from "@/components/data-table/rate-badge"
 import type { ProductAnalyticsItem, ProductAnalyticsMetric } from "@/features/product-analytics/types"
 
 const quantityFormatter = new Intl.NumberFormat("fr-FR")

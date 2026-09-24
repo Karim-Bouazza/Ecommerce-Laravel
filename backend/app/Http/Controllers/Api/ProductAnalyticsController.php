@@ -8,6 +8,7 @@ use App\Http\Resources\ProductAnalyticsResource;
 use App\Models\Product;
 use App\Queries\Products\ProductAnalyticsQuery;
 use App\Services\Charges\AllocateChargesToProductsService;
+use App\Support\Analytics\OrderRateCalculator;
 use App\Support\Analytics\ProductAnalyticsCalculator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -91,10 +92,10 @@ class ProductAnalyticsController extends Controller
             'commandes_confirmees' => ['count' => $totals['confirmed_count'], 'quantity' => $totals['confirmed_quantity']],
             'commandes_livrees' => ['count' => $totals['delivered_count'], 'quantity' => $totals['delivered_quantity']],
             'commandes_retournees' => ['count' => $totals['returned_count'], 'quantity' => $totals['returned_quantity']],
-            'taux_confirmation' => ProductAnalyticsCalculator::confirmationRate($totals['confirmed_or_later_count'], $totals['total_orders_count']),
-            'performance_confirmation' => ProductAnalyticsCalculator::confirmationPerformance($totals['confirmed_or_later_count'], $totals['total_orders_count'], $totals['pending_count']),
-            'taux_livraison' => ProductAnalyticsCalculator::deliveryRate($totals['delivered_count'], $totals['total_orders_count']),
-            'performance_livraison' => ProductAnalyticsCalculator::deliveryPerformance($totals['delivered_count'], $totals['delivery_resolved_count']),
+            'taux_confirmation' => OrderRateCalculator::confirmationRate($totals['confirmed_or_later_count'], $totals['total_orders_count']),
+            'performance_confirmation' => OrderRateCalculator::confirmationPerformance($totals['confirmed_or_later_count'], $totals['total_orders_count'], $totals['pending_count']),
+            'taux_livraison' => OrderRateCalculator::deliveryRate($totals['delivered_count'], $totals['total_orders_count']),
+            'performance_livraison' => OrderRateCalculator::deliveryPerformance($totals['delivered_count'], $totals['delivery_resolved_count']),
             'quantite_vendue' => $totals['delivered_quantity'],
             'ventes' => $sales,
             'cout_total_produit' => $cost,

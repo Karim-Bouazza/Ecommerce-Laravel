@@ -30,6 +30,7 @@ use App\Http\Controllers\Api\WalletController;
 use App\Http\Controllers\Api\WarehouseController;
 use App\Http\Controllers\Api\WarehouseOptionController;
 use App\Http\Controllers\Api\WarehouseProductOptionController;
+use App\Http\Controllers\Api\WilayaAnalyticsController;
 use App\Http\Controllers\Api\WilayaController;
 use Illuminate\Support\Facades\Route;
 
@@ -39,6 +40,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/products/analytics', [ProductAnalyticsController::class, 'index']);
         Route::get('/products/analytics/stats', [ProductAnalyticsController::class, 'stats']);
         Route::get('/products/analytics/chart', [ProductAnalyticsController::class, 'chart']);
+        Route::get('/wilayas/analytics', [WilayaAnalyticsController::class, 'index']);
         Route::get('/performance/revenue', [PerformanceController::class, 'revenue']);
     });
 

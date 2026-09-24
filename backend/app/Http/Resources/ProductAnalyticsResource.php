@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Support\Analytics\OrderRateCalculator;
 use App\Support\Analytics\ProductAnalyticsCalculator;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -42,20 +43,20 @@ class ProductAnalyticsResource extends JsonResource
                 'count' => (int) $this->returned_count,
                 'quantity' => (int) $this->returned_quantity,
             ],
-            'taux_confirmation' => ProductAnalyticsCalculator::confirmationRate(
+            'taux_confirmation' => OrderRateCalculator::confirmationRate(
                 (int) $this->confirmed_or_later_count,
                 (int) $this->total_orders_count,
             ),
-            'performance_confirmation' => ProductAnalyticsCalculator::confirmationPerformance(
+            'performance_confirmation' => OrderRateCalculator::confirmationPerformance(
                 (int) $this->confirmed_or_later_count,
                 (int) $this->total_orders_count,
                 (int) $this->pending_count,
             ),
-            'taux_livraison' => ProductAnalyticsCalculator::deliveryRate(
+            'taux_livraison' => OrderRateCalculator::deliveryRate(
                 (int) $this->delivered_count,
                 (int) $this->total_orders_count,
             ),
-            'performance_livraison' => ProductAnalyticsCalculator::deliveryPerformance(
+            'performance_livraison' => OrderRateCalculator::deliveryPerformance(
                 (int) $this->delivered_count,
                 (int) $this->delivery_resolved_count,
             ),

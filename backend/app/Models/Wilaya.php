@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class Wilaya extends Model
 {
@@ -17,5 +18,10 @@ class Wilaya extends Model
     public function communes(): HasMany
     {
         return $this->hasMany(Communes::class);
+    }
+
+    public function orders(): HasManyThrough
+    {
+        return $this->hasManyThrough(Order::class, Client::class);
     }
 }

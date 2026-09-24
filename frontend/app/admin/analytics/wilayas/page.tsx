@@ -1,5 +1,5 @@
-import { ComingSoon } from "@/components/shared/coming-soon"
+import { WilayaAnalyticsPage } from "@/features/wilaya-analytics/pages/wilaya-analytics-page"
 
 export default function AnalyticsWilayasPage() {
-  return <ComingSoon />
+  return <WilayaAnalyticsPage />
 }
