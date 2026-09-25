@@ -77,6 +77,11 @@ export function ViewProductDialog({ product }: ViewProductDialogProps) {
               >
                 {product.is_active ? "Actif" : "Inactif"}
               </span>
+              {product.is_new && (
+                <span className="inline-flex w-fit items-center rounded-full bg-amber-500/10 px-2.5 py-0.5 text-xs font-medium text-amber-600 dark:text-amber-400">
+                  Nouveau
+                </span>
+              )}
             </div>
           </div>
 
@@ -84,6 +89,14 @@ export function ViewProductDialog({ product }: ViewProductDialogProps) {
             <DetailField
               label="Catégorie"
               value={product.category ?? <span className="text-muted-foreground">—</span>}
+            />
+            <DetailField
+              label="Marque"
+              value={product.brand ?? <span className="text-muted-foreground">—</span>}
+            />
+            <DetailField
+              label="SKU"
+              value={product.sku ?? <span className="text-muted-foreground">—</span>}
             />
             <DetailField label="Stock total" value={product.total_stock} />
             <DetailField
@@ -95,6 +108,62 @@ export function ViewProductDialog({ product }: ViewProductDialogProps) {
               value={formatPrice(product.price) ?? <span className="text-muted-foreground">—</span>}
             />
           </div>
+
+          {product.tags.length > 0 && (
+            <DetailField
+              label="Étiquettes"
+              value={
+                <div className="flex flex-wrap gap-1.5">
+                  {product.tags.map((tag) => (
+                    <span
+                      key={tag.id}
+                      className="inline-flex items-center rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium"
+                    >
+                      {tag.name}
+                    </span>
+                  ))}
+                </div>
+              }
+            />
+          )}
+
+          {product.specs.length > 0 && (
+            <DetailField
+              label="Caractéristiques"
+              value={
+                <div className="grid gap-1 sm:grid-cols-2">
+                  {product.specs.map((spec) => (
+                    <div key={spec.id} className="flex justify-between gap-2 text-sm">
+                      <span className="text-muted-foreground">{spec.label}</span>
+                      <span className="font-medium">{spec.value}</span>
+                    </div>
+                  ))}
+                </div>
+              }
+            />
+          )}
+
+          {product.variants.length > 0 && (
+            <DetailField
+              label="Variantes"
+              value={
+                <div className="flex flex-wrap gap-1.5">
+                  {product.variants.map((variant) => (
+                    <span
+                      key={variant.id}
+                      className="inline-flex items-center rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium"
+                    >
+                      {variant.label}
+                    </span>
+                  ))}
+                </div>
+              }
+            />
+          )}
+
+          {product.short_description && (
+            <DetailField label="Description courte" value={product.short_description} />
+          )}
 
           <DetailField label="Description" value={product.description} />
         </div>

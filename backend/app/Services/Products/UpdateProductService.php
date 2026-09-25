@@ -13,11 +13,15 @@ class UpdateProductService
     {
         $product->update(Arr::only($data, [
             'category_id',
+            'brand_id',
+            'sku',
             'name',
             'description',
+            'short_description',
             'purchase_price',
             'price',
             'is_active',
+            'is_new',
         ]));
 
         if ($image) {
@@ -26,6 +30,33 @@ class UpdateProductService
 
             if ($previousImage) {
                 Storage::disk('public')->delete($previousImage);
+            }
+        }
+
+        if (array_key_exists('tags', $data)) {
+            $product->tags()->sync($data['tags'] ?? []);
+        }
+
+        if (array_key_exists('specs', $data)) {
+            $product->specs()->delete();
+
+            foreach ($data['specs'] ?? [] as $index => $spec) {
+                $product->specs()->create([
+                    'label' => $spec['label'],
+                    'value' => $spec['value'],
+                    'sort_order' => $index,
+                ]);
+            }
+        }
+
+        if (array_key_exists('variants', $data)) {
+            $product->variants()->delete();
+
+            foreach ($data['variants'] ?? [] as $index => $label) {
+                $product->variants()->create([
+                    'label' => $label,
+                    'sort_order' => $index,
+                ]);
             }
         }
 

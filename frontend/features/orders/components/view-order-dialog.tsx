@@ -63,7 +63,7 @@ export function ViewOrderDialog({ order }: ViewOrderDialogProps) {
           <DialogTitle>Détails de la commande — {order.reference}</DialogTitle>
         </DialogHeader>
 
-        <div className="flex max-h-[70vh] flex-col gap-4 overflow-y-auto py-2 pr-1">
+        <div className="flex flex-col gap-4 py-2">
           <div className="grid gap-4 sm:grid-cols-2">
             <DetailField label="Nom de la commande" value={order.name || "—"} />
             <DetailField

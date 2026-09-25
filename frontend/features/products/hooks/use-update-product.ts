@@ -21,11 +21,18 @@ export function useUpdateProduct(product: Product, onSuccess?: () => void) {
     resolver: zodResolver(productUpdateSchema),
     defaultValues: {
       name: product.name,
+      sku: product.sku,
       description: product.description,
+      short_description: product.short_description,
       category_id: product.category_id,
+      brand_id: product.brand_id,
       purchase_price: product.purchase_price,
       price: product.price,
       is_active: product.is_active,
+      is_new: product.is_new,
+      tags: product.tags.map((tag) => tag.id),
+      specs: product.specs.map((spec) => ({ label: spec.label, value: spec.value })),
+      variants: (product.variants ?? []).map((variant) => variant.label),
       image: null,
     },
   })

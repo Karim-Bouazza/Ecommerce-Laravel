@@ -1,30 +1,10 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import type { HeroCategory } from "@/features/site-settings/types";
 
-const CATEGORIES = [
-  {
-    name: "CCTV Cameras",
-    image: "https://picsum.photos/seed/cctv-cameras-security/240/240",
-  },
-  {
-    name: "Alarm Systems",
-    image: "https://picsum.photos/seed/alarm-systems-security/240/240",
-  },
-  {
-    name: "Access Control",
-    image: "https://picsum.photos/seed/access-control-security/240/240",
-  },
-  {
-    name: "Video Intercoms",
-    image: "https://picsum.photos/seed/video-intercoms-security/240/240",
-  },
-  {
-    name: "Sensors & Detectors",
-    image: "https://picsum.photos/seed/sensors-detectors-security/240/240",
-  },
-];
+export function Categories({ items = [] }: { items?: HeroCategory[] }) {
+  if (items.length === 0) return null;
 
-export function Categories() {
   return (
     <section className="mx-auto max-w-7xl px-4 py-12 sm:px-4 lg:px-6">
       <div className="flex items-center justify-between gap-4">
@@ -32,7 +12,7 @@ export function Categories() {
           Shop by Category
         </h2>
         <Link
-          href="/categories"
+          href="/products"
           className="flex shrink-0 items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
         >
           View All Categories
@@ -41,9 +21,9 @@ export function Categories() {
       </div>
 
       <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-        {CATEGORIES.map((category, index) => (
+        {items.map((category, index) => (
           <div
-            key={category.name}
+            key={category.id}
             className={`flex items-center gap-3 rounded-xl border p-4 ${
               index === 0
                 ? "border-primary/30 bg-primary/5"
@@ -52,13 +32,13 @@ export function Categories() {
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={category.image}
-              alt={category.name}
+              src={category.image_url ?? undefined}
+              alt={category.category_name}
               className="size-18 shrink-0 rounded-lg object-cover"
             />
             <div className="min-w-0">
               <p className="truncate text-sm font-semibold text-foreground">
-                {category.name}
+                {category.category_name}
               </p>
               <div className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
                 View Products

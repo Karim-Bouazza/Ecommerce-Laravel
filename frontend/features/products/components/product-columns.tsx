@@ -31,8 +31,18 @@ export const productColumns: ColumnDef<Product>[] = [
     cell: ({ row }) => row.original.category ?? <span className="text-muted-foreground">—</span>,
   },
   {
+    accessorKey: "brand",
+    header: "Marque",
+    cell: ({ row }) => row.original.brand ?? <span className="text-muted-foreground">—</span>,
+  },
+  {
     accessorKey: "name",
     header: "Nom",
+  },
+  {
+    accessorKey: "sku",
+    header: "SKU",
+    cell: ({ row }) => row.original.sku ?? <span className="text-muted-foreground">—</span>,
   },
   {
     accessorKey: "purchase_price",
@@ -59,6 +69,18 @@ export const productColumns: ColumnDef<Product>[] = [
         {row.original.is_active ? "Actif" : "Inactif"}
       </span>
     ),
+  },
+  {
+    accessorKey: "is_new",
+    header: "Nouveau",
+    cell: ({ row }) =>
+      row.original.is_new ? (
+        <span className="inline-flex items-center rounded-full bg-amber-500/10 px-2.5 py-0.5 text-xs font-medium text-amber-600 dark:text-amber-400">
+          Nouveau
+        </span>
+      ) : (
+        <span className="text-muted-foreground">—</span>
+      ),
   },
   {
     id: "actions",

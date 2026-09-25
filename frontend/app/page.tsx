@@ -22,7 +22,7 @@ export default async function Home() {
     <StorefrontTheme>
       <Navbar />
       <Hero categories={heroCategories} />
-      <Categories />
+      <Categories items={heroCategories} />
       <Products />
       <FeaturedCarousel />
       <DealsOfTheDay />

@@ -19,6 +19,8 @@ class WilayaResource extends JsonResource
             "id" => $this->id,
             'code' => $this->code,
             'name' => $this->name,
+            'price_domicile' => $this->price_domicile,
+            'price_stop_desk' => $this->price_stop_desk,
         ];
     }
 }

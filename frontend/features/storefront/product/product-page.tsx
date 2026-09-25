@@ -1,14 +1,17 @@
 "use client"
 
+import { useEffect } from "react"
 import Link from "next/link"
 import { toast } from "sonner"
 import { ChevronRight, Link2, RotateCcw, ShieldCheck, Star, Truck } from "lucide-react"
 import { cn } from "cn"
 
 import { formatPrice } from "@/shared/lib/format-price"
+import { trackViewContent } from "@/features/pixels/lib/track-events"
+import type { StorefrontProductDetail } from "@/features/storefront/catalog/api/products-api"
 import { CodOrderForm } from "./cod-order-form"
 import { ProductGallery } from "./product-gallery"
-import type { ProductDetail } from "./product-data"
+import { MOCK_RATING } from "./product-data"
 
 const GUARANTEES = [
   { icon: Truck, label: "Livraison 58 wilayas" },
@@ -43,11 +46,18 @@ function copyLink() {
     .catch(() => toast.error("Impossible de copier le lien"))
 }
 
-export function ProductPage({ product }: { product: ProductDetail }) {
-  const inStock = product.stock > 0
-  const discount = product.originalPrice
-    ? Math.round((1 - product.price / product.originalPrice) * 100)
-    : 0
+export function ProductPage({ product }: { product: StorefrontProductDetail }) {
+  const inStock = product.in_stock
+  const subtitle = [product.category, product.brand].filter(Boolean).join(" · ")
+
+  useEffect(() => {
+    trackViewContent({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      category: product.category,
+    })
+  }, [product.id, product.name, product.price, product.category])
 
   return (
     <main className="mx-auto max-w-7xl px-4 pt-8 pb-16 sm:px-6 lg:px-8">
@@ -70,9 +80,7 @@ export function ProductPage({ product }: { product: ProductDetail }) {
 
         <div className="flex flex-col gap-5">
           <div>
-            <p className="text-sm text-muted-foreground">
-              {product.category} · {product.brand}
-            </p>
+            {subtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
             <div className="mt-1 flex flex-wrap items-center gap-3">
               <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">{product.name}</h1>
               <span
@@ -87,25 +95,29 @@ export function ProductPage({ product }: { product: ProductDetail }) {
               </span>
             </div>
             <div className="mt-2">
-              <Rating value={product.rating} reviews={product.reviews} />
+              <Rating value={MOCK_RATING.value} reviews={MOCK_RATING.reviews} />
             </div>
           </div>
 
           <div className="flex flex-wrap items-baseline gap-3">
             <span className="text-3xl font-bold">{formatPrice(product.price)}</span>
-            {product.originalPrice && (
+            {product.compare_price !== null && product.compare_price > product.price && (
               <span className="text-lg text-muted-foreground line-through">
-                {formatPrice(product.originalPrice)}
+                {formatPrice(product.compare_price)}
               </span>
             )}
-            {discount > 0 && (
+            {product.discount_percentage !== null && (
               <span className="rounded-md bg-red-100 px-2 py-0.5 text-xs font-bold text-red-600">
-                -{discount}%
+                -{product.discount_percentage}%
               </span>
             )}
           </div>
 
-          <p className="text-sm leading-relaxed text-muted-foreground">{product.shortDescription}</p>
+          {product.short_description && (
+            <p className="text-sm leading-relaxed text-muted-foreground">
+              {product.short_description}
+            </p>
+          )}
 
           {inStock ? (
             <CodOrderForm product={product} />
@@ -128,14 +140,18 @@ export function ProductPage({ product }: { product: ProductDetail }) {
           </ul>
 
           <dl className="space-y-2 border-t border-border pt-5 text-sm">
-            <div className="flex gap-2">
-              <dt className="font-medium">Référence :</dt>
-              <dd className="text-muted-foreground">{product.sku}</dd>
-            </div>
-            <div className="flex gap-2">
-              <dt className="font-medium">Tags :</dt>
-              <dd className="text-muted-foreground">{product.tags.join(", ")}</dd>
-            </div>
+            {product.sku && (
+              <div className="flex gap-2">
+                <dt className="font-medium">Référence :</dt>
+                <dd className="text-muted-foreground">{product.sku}</dd>
+              </div>
+            )}
+            {product.tags.length > 0 && (
+              <div className="flex gap-2">
+                <dt className="font-medium">Tags :</dt>
+                <dd className="text-muted-foreground">{product.tags.join(", ")}</dd>
+              </div>
+            )}
             <div className="flex items-center gap-2">
               <dt className="font-medium">Partager :</dt>
               <dd>
@@ -159,22 +175,22 @@ export function ProductPage({ product }: { product: ProductDetail }) {
             Description
           </h2>
           <div className="mt-3 space-y-3 text-sm leading-relaxed text-muted-foreground">
-            {product.description.map((paragraph) => (
-              <p key={paragraph}>{paragraph}</p>
-            ))}
+            <p>{product.description}</p>
           </div>
         </div>
-        <div>
-          <h2 className="text-lg font-semibold">Caractéristiques</h2>
-          <dl className="mt-3 divide-y divide-border overflow-hidden rounded-2xl border border-border text-sm">
-            {product.specs.map((spec) => (
-              <div key={spec.label} className="grid grid-cols-[40%_1fr] gap-3 px-4 py-3">
-                <dt className="text-muted-foreground">{spec.label}</dt>
-                <dd className="font-medium">{spec.value}</dd>
-              </div>
-            ))}
-          </dl>
-        </div>
+        {product.specs.length > 0 && (
+          <div>
+            <h2 className="text-lg font-semibold">Caractéristiques</h2>
+            <dl className="mt-3 divide-y divide-border overflow-hidden rounded-2xl border border-border text-sm">
+              {product.specs.map((spec) => (
+                <div key={spec.label} className="grid grid-cols-[40%_1fr] gap-3 px-4 py-3">
+                  <dt className="text-muted-foreground">{spec.label}</dt>
+                  <dd className="font-medium">{spec.value}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        )}
       </section>
     </main>
   )

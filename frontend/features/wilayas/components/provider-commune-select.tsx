@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { cn } from "cn"
 
 import {
   Select,
@@ -17,6 +18,7 @@ type ProviderCommuneSelectProps = {
   onChange: (providerCommuneId: number) => void
   placeholder?: string
   invalid?: boolean
+  className?: string
 }
 
 export function ProviderCommuneSelect({
@@ -25,6 +27,7 @@ export function ProviderCommuneSelect({
   onChange,
   placeholder = "Commune",
   invalid,
+  className,
 }: ProviderCommuneSelectProps) {
   const { data: providerCommunes = [] } = useProviderCommunes(providerWilayaId)
   const nameById = React.useMemo(
@@ -41,7 +44,7 @@ export function ProviderCommuneSelect({
       }}
       disabled={providerWilayaId === null}
     >
-      <SelectTrigger className="w-full" aria-invalid={invalid}>
+      <SelectTrigger className={cn("w-full", className)} aria-invalid={invalid}>
         <SelectValue placeholder={placeholder}>
           {(selected: string | null) => (selected ? (nameById.get(selected) ?? selected) : placeholder)}
         </SelectValue>

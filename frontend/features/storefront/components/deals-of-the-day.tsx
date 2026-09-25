@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Heart } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { cn } from "cn";
 
 type Deal = {
@@ -56,7 +56,7 @@ function DealCard({ deal, featured = false }: { deal: Deal; featured?: boolean }
     <div className="relative flex h-full flex-col overflow-hidden rounded-3xl bg-muted/60">
       <div
         className={cn(
-          "flex items-start justify-between gap-3",
+          "flex items-start",
           featured ? "p-6 pb-3 sm:p-8 sm:pb-4" : "p-3 pb-2 sm:p-4 sm:pb-2"
         )}
       >
@@ -78,16 +78,6 @@ function DealCard({ deal, featured = false }: { deal: Deal; featured?: boolean }
             ${deal.price.toFixed(2)}
           </p>
         </div>
-        <button
-          type="button"
-          aria-label="Ajouter aux favoris"
-          className={cn(
-            "flex shrink-0 items-center justify-center rounded-full bg-white text-primary shadow-sm transition-colors hover:bg-primary hover:text-primary-foreground",
-            featured ? "size-11" : "size-7"
-          )}
-        >
-          <Heart className={featured ? "size-5" : "size-3.5"} />
-        </button>
       </div>
 
       <div

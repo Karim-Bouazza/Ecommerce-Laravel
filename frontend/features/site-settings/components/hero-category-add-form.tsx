@@ -6,20 +6,21 @@ import { Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { CategorySelect } from "@/features/categories/components/category-select"
 import { useCreateHeroCategory } from "@/features/site-settings/hooks/use-hero-categories-mutations"
-import type { HeroCategory } from "@/features/site-settings/types"
+import { HERO_CATEGORIES_MAX, type HeroCategory } from "@/features/site-settings/types"
 
 export function HeroCategoryAddForm({ existing }: { existing: HeroCategory[] }) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [categoryId, setCategoryId] = useState<number | null>(null)
   const [file, setFile] = useState<File | null>(null)
   const mutation = useCreateHeroCategory()
+  const limitReached = existing.length >= HERO_CATEGORIES_MAX
 
   function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
     setFile(event.target.files?.[0] ?? null)
   }
 
   function handleSubmit() {
-    if (!categoryId || !file) return
+    if (!categoryId || !file || limitReached) return
 
     mutation.mutate(
       { category_id: categoryId, image: file },
@@ -30,6 +31,15 @@ export function HeroCategoryAddForm({ existing }: { existing: HeroCategory[] }) 
           if (fileInputRef.current) fileInputRef.current.value = ""
         },
       }
+    )
+  }
+
+  if (limitReached) {
+    return (
+      <p className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
+        Limite de {HERO_CATEGORIES_MAX} catégories mises en avant atteinte. Retirez-en une pour
+        en ajouter une autre.
+      </p>
     )
   }
 

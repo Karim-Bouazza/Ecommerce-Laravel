@@ -20,11 +20,18 @@ export function useCreateProduct(onSuccess?: () => void) {
     resolver: zodResolver(productSchema),
     defaultValues: {
       name: "",
+      sku: null,
       description: "",
+      short_description: null,
       category_id: null,
+      brand_id: null,
       purchase_price: null,
       price: 0,
       is_active: true,
+      is_new: false,
+      tags: [],
+      specs: [],
+      variants: [],
       image: null,
     },
   })

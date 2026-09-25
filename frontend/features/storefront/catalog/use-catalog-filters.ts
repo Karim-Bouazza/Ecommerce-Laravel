@@ -2,33 +2,25 @@
 
 import { useCallback, useMemo } from "react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { useQuery } from "@tanstack/react-query"
 import {
-  CATALOG_PRODUCTS,
-  PRICE_BOUNDS,
-  RATING_OPTIONS,
-  SORT_OPTIONS,
-  type CatalogProduct,
-  type SortValue,
-} from "./catalog-data"
+  getStorefrontCategories,
+  getStorefrontProducts,
+} from "./api/products-api"
+import { SORT_OPTIONS, type SortValue } from "./catalog-data"
 
-export type FacetKey = "category" | "brand" | "color" | "connectivity" | "availability"
+export type FacetKey = "category" | "availability"
 
-export const FACET_KEYS: FacetKey[] = ["category", "brand", "color", "connectivity", "availability"]
+export const FACET_KEYS: FacetKey[] = ["category", "availability"]
 
 export type CatalogFilters = Record<FacetKey, string[]> & {
   price: [number, number] | null
-  rating: number | null
   search: string
   sort: SortValue
+  page: number
 }
 
-const FACET_VALUE: Record<FacetKey, (product: CatalogProduct) => string> = {
-  category: (p) => p.category,
-  brand: (p) => p.brand,
-  color: (p) => p.color,
-  connectivity: (p) => p.connectivity,
-  availability: (p) => (p.inStock ? "in-stock" : "out-of-stock"),
-}
+const DEFAULT_PRICE_BOUNDS: [number, number] = [0, 100000]
 
 function parseList(value: string | null) {
   return value ? value.split(",").filter(Boolean) : []
@@ -39,58 +31,33 @@ function parseFilters(params: URLSearchParams): CatalogFilters {
   const max = Number(params.get("max"))
   const hasPrice = params.has("min") || params.has("max")
   const sort = params.get("sort")
-  const rating = Number(params.get("rating"))
+  const page = Number(params.get("page"))
 
   return {
     category: parseList(params.get("category")),
-    brand: parseList(params.get("brand")),
-    color: parseList(params.get("color")),
-    connectivity: parseList(params.get("connectivity")),
     availability: parseList(params.get("availability")),
     price: hasPrice
-      ? [
-          Number.isFinite(min) && params.has("min") ? min : PRICE_BOUNDS[0],
-          Number.isFinite(max) && params.has("max") ? max : PRICE_BOUNDS[1],
-        ]
+      ? [Number.isFinite(min) ? min : 0, Number.isFinite(max) ? max : DEFAULT_PRICE_BOUNDS[1]]
       : null,
-    rating: RATING_OPTIONS.some((r) => r === rating) ? rating : null,
     search: params.get("search")?.trim() ?? "",
     sort: SORT_OPTIONS.some((o) => o.value === sort) ? (sort as SortValue) : "featured",
+    page: Number.isFinite(page) && page > 0 ? page : 1,
   }
 }
 
-// `skip` lets facet counts ignore their own facet, so each option shows how
-// many results it would yield if selected.
-function matches(product: CatalogProduct, filters: CatalogFilters, skip?: FacetKey | "rating") {
-  for (const key of FACET_KEYS) {
-    if (key === skip || filters[key].length === 0) continue
-    if (!filters[key].includes(FACET_VALUE[key](product))) return false
-  }
-  if (filters.price) {
-    const [min, max] = filters.price
-    if (product.price < min || product.price > max) return false
-  }
-  if (skip !== "rating" && filters.rating && product.rating < filters.rating) return false
-  if (filters.search && !product.name.toLowerCase().includes(filters.search.toLowerCase())) {
-    return false
-  }
-  return true
+const SORT_MAP: Record<SortValue, "price_asc" | "price_desc" | "newest" | undefined> = {
+  featured: undefined,
+  new: "newest",
+  "price-asc": "price_asc",
+  "price-desc": "price_desc",
 }
 
-function sortProducts(products: CatalogProduct[], sort: SortValue) {
-  const sorted = [...products]
-  switch (sort) {
-    case "new":
-      return sorted.sort((a, b) => Number(!!b.isNew) - Number(!!a.isNew))
-    case "popular":
-      return sorted.sort((a, b) => b.reviews - a.reviews)
-    case "price-asc":
-      return sorted.sort((a, b) => a.price - b.price)
-    case "price-desc":
-      return sorted.sort((a, b) => b.price - a.price)
-    default:
-      return sorted
-  }
+function availabilityToInStock(availability: string[]): 0 | 1 | undefined {
+  const hasIn = availability.includes("in-stock")
+  const hasOut = availability.includes("out-of-stock")
+  if (hasIn && !hasOut) return 1
+  if (hasOut && !hasIn) return 0
+  return undefined
 }
 
 export function useCatalogFilters() {
@@ -104,9 +71,10 @@ export function useCatalogFilters() {
   )
 
   const updateParams = useCallback(
-    (mutate: (params: URLSearchParams) => void) => {
+    (mutate: (params: URLSearchParams) => void, resetPage = true) => {
       const params = new URLSearchParams(searchParams.toString())
       mutate(params)
+      if (resetPage) params.delete("page")
       const query = params.toString()
       router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false })
     },
@@ -127,21 +95,12 @@ export function useCatalogFilters() {
   )
 
   const setPrice = useCallback(
-    ([min, max]: [number, number]) =>
+    ([min, max]: [number, number], bounds: [number, number]) =>
       updateParams((params) => {
-        if (min > PRICE_BOUNDS[0]) params.set("min", String(min))
+        if (min > bounds[0]) params.set("min", String(min))
         else params.delete("min")
-        if (max < PRICE_BOUNDS[1]) params.set("max", String(max))
+        if (max < bounds[1]) params.set("max", String(max))
         else params.delete("max")
-      }),
-    [updateParams]
-  )
-
-  const setRating = useCallback(
-    (rating: number | null) =>
-      updateParams((params) => {
-        if (rating) params.set("rating", String(rating))
-        else params.delete("rating")
       }),
     [updateParams]
   )
@@ -155,6 +114,15 @@ export function useCatalogFilters() {
     [updateParams]
   )
 
+  const setPage = useCallback(
+    (page: number) =>
+      updateParams((params) => {
+        if (page > 1) params.set("page", String(page))
+        else params.delete("page")
+      }, false),
+    [updateParams]
+  )
+
   const clearSearch = useCallback(
     () => updateParams((params) => params.delete("search")),
     [updateParams]
@@ -163,52 +131,77 @@ export function useCatalogFilters() {
   const clearAll = useCallback(
     () =>
       updateParams((params) => {
-        for (const key of [...FACET_KEYS, "min", "max", "rating", "search"]) params.delete(key)
+        for (const key of [...FACET_KEYS, "min", "max", "search", "sort", "page"]) params.delete(key)
       }),
     [updateParams]
   )
 
-  const products = useMemo(
-    () => sortProducts(CATALOG_PRODUCTS.filter((p) => matches(p, filters)), filters.sort),
-    [filters]
-  )
+  const categoriesQuery = useQuery({
+    queryKey: ["storefront-categories"],
+    queryFn: getStorefrontCategories,
+    staleTime: 5 * 60 * 1000,
+  })
+
+  const productsQuery = useQuery({
+    queryKey: [
+      "storefront-products",
+      filters.category,
+      filters.availability,
+      filters.price,
+      filters.search,
+      filters.sort,
+      filters.page,
+    ],
+    queryFn: () =>
+      getStorefrontProducts({
+        category_id: filters.category.length ? filters.category.join(",") : undefined,
+        search: filters.search || undefined,
+        price_min: filters.price?.[0],
+        price_max: filters.price?.[1],
+        in_stock: availabilityToInStock(filters.availability),
+        sort: SORT_MAP[filters.sort],
+        page: filters.page,
+        per_page: 24,
+      }),
+    placeholderData: (previous) => previous,
+  })
+
+  const categories = categoriesQuery.data ?? []
+  const priceBounds: [number, number] = productsQuery.data
+    ? [productsQuery.data.price_bounds.min, productsQuery.data.price_bounds.max]
+    : DEFAULT_PRICE_BOUNDS
 
   const counts = useMemo(() => {
-    const result = {} as Record<FacetKey, Record<string, number>>
-    for (const key of FACET_KEYS) {
-      result[key] = {}
-      for (const product of CATALOG_PRODUCTS) {
-        if (!matches(product, filters, key)) continue
-        const value = FACET_VALUE[key](product)
-        result[key][value] = (result[key][value] ?? 0) + 1
-      }
+    const categoryCounts: Record<string, number> = {}
+    for (const category of categories) {
+      categoryCounts[String(category.id)] = category.products_count
     }
-    return result
-  }, [filters])
-
-  const ratingCounts = useMemo(() => {
-    const pool = CATALOG_PRODUCTS.filter((p) => matches(p, filters, "rating"))
-    return Object.fromEntries(
-      RATING_OPTIONS.map((r) => [r, pool.filter((p) => p.rating >= r).length])
-    ) as Record<number, number>
-  }, [filters])
+    return {
+      category: categoryCounts,
+      availability: {},
+    } as Record<FacetKey, Record<string, number>>
+  }, [categories])
 
   const activeCount =
     FACET_KEYS.reduce((total, key) => total + filters[key].length, 0) +
     (filters.price ? 1 : 0) +
-    (filters.rating ? 1 : 0) +
     (filters.search ? 1 : 0)
 
   return {
     filters,
-    products,
+    products: productsQuery.data?.data ?? [],
+    total: productsQuery.data?.meta.total ?? 0,
+    lastPage: productsQuery.data?.meta.last_page ?? 1,
+    isLoading: productsQuery.isLoading,
+    isFetching: productsQuery.isFetching,
+    categories,
+    priceBounds,
     counts,
-    ratingCounts,
     activeCount,
     toggleValue,
     setPrice,
-    setRating,
     setSort,
+    setPage,
     clearSearch,
     clearAll,
   }

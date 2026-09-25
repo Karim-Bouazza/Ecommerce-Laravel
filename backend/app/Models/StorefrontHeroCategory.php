@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Storage;
 
 class StorefrontHeroCategory extends Model
 {
+    public const MAX_ITEMS = 5;
+
     protected $table = 'storefront_hero_categories';
 
     protected $fillable = [

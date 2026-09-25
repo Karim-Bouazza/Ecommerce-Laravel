@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { QueryProvider } from "@/components/query-provider";
 import { Toaster } from "@/components/ui/sonner";
+import { TrackingPixels } from "@/features/pixels/components/tracking-pixels";
 import "./globals.css";
 
 const inter = Inter({
@@ -31,6 +32,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <QueryProvider>
+            <TrackingPixels />
             {children}
             <Toaster />
           </QueryProvider>

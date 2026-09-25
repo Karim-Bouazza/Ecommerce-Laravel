@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\UpdateWilayaRequest;
 use App\Http\Resources\WilayaDetailResource;
 use App\Http\Resources\WilayaResource;
 use App\Models\Wilaya;
-use Illuminate\Http\Request;
 
 class WilayaController extends Controller
 {
@@ -24,5 +24,12 @@ class WilayaController extends Controller
         $wilaya->load('communes');
 
         return new WilayaDetailResource($wilaya);
+    }
+
+    public function update(UpdateWilayaRequest $request, Wilaya $wilaya): WilayaResource
+    {
+        $wilaya->update($request->validated());
+
+        return new WilayaResource($wilaya->fresh());
     }
 }

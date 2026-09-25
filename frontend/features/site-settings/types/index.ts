@@ -19,3 +19,5 @@ export type HeroCategory = {
   category_name: string
   item_count: number
 }
+
+export const HERO_CATEGORIES_MAX = 5

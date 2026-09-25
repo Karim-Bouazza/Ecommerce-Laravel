@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { cn } from "cn"
 
 import {
   Select,
@@ -17,6 +18,7 @@ type ProviderWilayaSelectProps = {
   placeholder?: string
   disabled?: boolean
   invalid?: boolean
+  className?: string
 }
 
 export function ProviderWilayaSelect({
@@ -25,6 +27,7 @@ export function ProviderWilayaSelect({
   placeholder = "Wilaya",
   disabled,
   invalid,
+  className,
 }: ProviderWilayaSelectProps) {
   const { data: providerWilayas = [] } = useProviderWilayas()
   const byId = React.useMemo(
@@ -42,7 +45,7 @@ export function ProviderWilayaSelect({
       }}
       disabled={disabled}
     >
-      <SelectTrigger className="w-full" aria-invalid={invalid}>
+      <SelectTrigger className={cn("w-full", className)} aria-invalid={invalid}>
         <SelectValue placeholder={placeholder}>
           {(selected: string | null) => (selected ? (byId.get(selected)?.name ?? selected) : placeholder)}
         </SelectValue>

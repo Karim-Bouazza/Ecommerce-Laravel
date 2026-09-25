@@ -6,6 +6,8 @@ use App\Enums\StockMovementType;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
@@ -32,8 +34,11 @@ class Product extends Model
 {
     protected $fillable = [
         'category_id',
+        'brand_id',
+        'sku',
         'name',
         'description',
+        'short_description',
         'price',
         'purchase_price',
         'compare_price',
@@ -43,16 +48,48 @@ class Product extends Model
         'image_3',
         'image_4',
         'is_active',
+        'is_new',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
+        'is_new' => 'boolean',
         'stock_minimum' => 'integer',
     ];
 
     public function category()
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function brand(): BelongsTo
+    {
+        return $this->belongsTo(Brand::class);
+    }
+
+    public function tags(): BelongsToMany
+    {
+        return $this->belongsToMany(Tag::class);
+    }
+
+    public function specs(): HasMany
+    {
+        return $this->hasMany(ProductSpec::class)->orderBy('sort_order');
+    }
+
+    public function variants(): HasMany
+    {
+        return $this->hasMany(ProductVariant::class)->orderBy('sort_order');
+    }
+
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(ProductReview::class);
+    }
+
+    public function approvedReviews(): HasMany
+    {
+        return $this->reviews()->where('is_approved', true);
     }
 
     public function orderItems(): HasMany

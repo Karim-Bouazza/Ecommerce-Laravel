@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronRight, Heart, Star } from "lucide-react";
+import { ChevronRight, Star } from "lucide-react";
 import {
   Carousel,
   CarouselContent,
@@ -106,14 +106,6 @@ export function FeaturedCarousel() {
               >
                 <div className="overflow-hidden rounded-2xl border border-border bg-white p-1 shadow-sm">
                   <div className="relative">
-                    <button
-                      type="button"
-                      aria-label="Ajouter aux favoris"
-                      className="absolute top-2 right-2 z-10 flex size-8 items-center justify-center rounded-full bg-white/90 text-foreground shadow-sm hover:text-primary"
-                    >
-                      <Heart className="size-4" />
-                    </button>
-
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={deal.image}

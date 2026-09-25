@@ -16,8 +16,10 @@ import {
   Settings,
   Share2,
   Smartphone,
+  Star,
   Store,
   Tag,
+  Tags,
   Truck,
   User,
   Users,
@@ -68,6 +70,8 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [
       { label: "Produits", href: "/admin/products", icon: Package, permission: "products.view" },
       { label: "Catégories", href: "/admin/categories", icon: Tag, permission: "categories.view" },
+      { label: "Étiquettes", href: "/admin/tags", icon: Tags, permission: "tags.view" },
+      { label: "Avis produits", href: "/admin/reviews", icon: Star, permission: "product_reviews.view" },
     ],
   },
   {
@@ -149,6 +153,7 @@ export const NAV_SECTIONS: NavSection[] = [
         items: [
           { label: "New", href: "/admin/adpilot/new" },
           { label: "Comptes", href: "/admin/adpilot/accounts" },
+          { label: "Pixels", href: "/admin/adpilot/pixels", permission: "pixels.view" },
           { label: "Analyses intelligentes", href: "/admin/adpilot/smart-analytics" },
           { label: "Rentabilité", href: "/admin/adpilot/profitability" },
           { label: "Lab de performance", href: "/admin/adpilot/performance-lab" },
@@ -187,6 +192,7 @@ export const NAV_SECTIONS: NavSection[] = [
           { label: "Intégration API", href: "/admin/partners/api-integration" },
           { label: "Société", href: "/admin/partners/company" },
           { label: "Livreur", href: "/admin/partners/delivery-person" },
+          { label: "Stop Desk", href: "/admin/partners/stop-desk" },
         ],
       },
       {
@@ -194,7 +200,7 @@ export const NAV_SECTIONS: NavSection[] = [
         href: "/admin/management",
         icon: Settings,
         items: [
-          { label: "Marques", href: "/admin/management/brands" },
+          { label: "Marques", href: "/admin/management/brands", permission: "brands.view" },
           { label: "Statuts", href: "/admin/management/statuses" },
           { label: "Frais de livraison des produits", href: "/admin/management/shipping-fees" },
           { label: "Préférences", href: "/admin/management/preferences" },

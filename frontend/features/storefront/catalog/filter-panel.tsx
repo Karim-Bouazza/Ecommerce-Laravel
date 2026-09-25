@@ -1,54 +1,22 @@
 "use client"
 
-import { useState, type ComponentType, type KeyboardEvent, type ReactNode } from "react"
+import { useState, type KeyboardEvent, type ReactNode } from "react"
 import { Collapsible } from "@base-ui/react/collapsible"
 import {
   ArrowRight,
   Banknote,
-  Cctv,
-  Check,
   ChevronDown,
-  Fingerprint,
   Funnel,
   LayoutGrid,
   PackageCheck,
-  Palette,
-  Radar,
   RotateCcw,
-  Search,
-  Siren,
   SlidersHorizontal,
-  Star,
-  TabletSmartphone,
-  Tag,
-  Wifi,
-  type LucideProps,
 } from "lucide-react"
 import { cn } from "cn"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Slider } from "@/components/ui/slider"
-import {
-  AVAILABILITY_OPTIONS,
-  BRAND_OPTIONS,
-  CATEGORY_OPTIONS,
-  COLOR_OPTIONS,
-  CONNECTIVITY_OPTIONS,
-  PRICE_BOUNDS,
-  PRICE_STEP,
-  RATING_OPTIONS,
-  type FilterOption,
-} from "./catalog-data"
+import { AVAILABILITY_OPTIONS, PRICE_STEP, type FilterOption } from "./catalog-data"
 import type { CatalogFiltersApi, FacetKey } from "./use-catalog-filters"
-
-type Icon = ComponentType<LucideProps>
-
-const CATEGORY_ICONS: Record<string, Icon> = {
-  "cctv-cameras": Cctv,
-  "alarm-systems": Siren,
-  "access-control": Fingerprint,
-  "video-intercoms": TabletSmartphone,
-  "sensors-detectors": Radar,
-}
 
 const numberFormat = new Intl.NumberFormat("fr-FR")
 
@@ -112,7 +80,7 @@ function FilterSection({
   children,
 }: {
   title: string
-  icon: Icon
+  icon: typeof LayoutGrid
   selectedCount?: number
   defaultOpen?: boolean
   children: ReactNode
@@ -152,12 +120,12 @@ function CheckboxList({
   facet,
   options,
   api,
-  icons,
+  hideCount = false,
 }: {
   facet: FacetKey
   options: FilterOption[]
   api: CatalogFiltersApi
-  icons?: Record<string, Icon>
+  hideCount?: boolean
 }) {
   const selected = api.filters[facet]
 
@@ -166,8 +134,7 @@ function CheckboxList({
       {options.map((option) => {
         const checked = selected.includes(option.value)
         const count = api.counts[facet][option.value] ?? 0
-        const disabled = !checked && count === 0
-        const OptionIcon = icons?.[option.value]
+        const disabled = !hideCount && !checked && count === 0
 
         return (
           <li key={option.value}>
@@ -184,165 +151,15 @@ function CheckboxList({
                 onCheckedChange={() => api.toggleValue(facet, option.value)}
                 className="size-4 rounded-[4px]"
               />
-              {OptionIcon && (
-                <OptionIcon
-                  className={cn("size-4 shrink-0", checked ? "text-primary" : "text-muted-foreground")}
-                />
-              )}
               <span className={cn("flex-1 truncate", checked ? "font-medium text-foreground" : "text-foreground/80")}>
                 {option.label}
               </span>
-              <Count value={count} />
+              {!hideCount && <Count value={count} />}
             </label>
           </li>
         )
       })}
     </ul>
-  )
-}
-
-function BrandList({ api }: { api: CatalogFiltersApi }) {
-  const [query, setQuery] = useState("")
-  const normalized = query.trim().toLowerCase()
-  const options = normalized
-    ? BRAND_OPTIONS.filter((o) => o.label.toLowerCase().includes(normalized))
-    : BRAND_OPTIONS
-
-  return (
-    <div className="space-y-2.5">
-      <div className="relative">
-        <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-        <input
-          type="search"
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-          placeholder="Rechercher une marque…"
-          aria-label="Rechercher une marque"
-          className="h-9 w-full rounded-lg border border-border bg-muted/40 pr-3 pl-9 text-[13px] transition-colors outline-none placeholder:text-muted-foreground focus:border-primary focus:bg-background focus:ring-3 focus:ring-primary/15"
-        />
-      </div>
-      {options.length > 0 ? (
-        <CheckboxList facet="brand" options={options} api={api} />
-      ) : (
-        <p className="py-2 text-center text-xs text-muted-foreground">Aucune marque trouvée</p>
-      )}
-    </div>
-  )
-}
-
-// Compact toggle pills — better than long lists for short, visual options.
-function ChipList({
-  facet,
-  options,
-  api,
-  swatches,
-}: {
-  facet: FacetKey
-  options: FilterOption[]
-  api: CatalogFiltersApi
-  swatches?: Record<string, string>
-}) {
-  const selected = api.filters[facet]
-
-  return (
-    <div className="flex flex-wrap gap-2">
-      {options.map((option) => {
-        const checked = selected.includes(option.value)
-        const count = api.counts[facet][option.value] ?? 0
-        const swatch = swatches?.[option.value]
-
-        return (
-          <button
-            key={option.value}
-            type="button"
-            role="checkbox"
-            aria-checked={checked}
-            disabled={!checked && count === 0}
-            onClick={() => api.toggleValue(facet, option.value)}
-            className={cn(
-              "inline-flex h-8 items-center gap-1.5 rounded-full border px-2.5 text-xs transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-40",
-              checked
-                ? "border-primary bg-primary/8 font-medium text-foreground"
-                : "border-border text-foreground/80 hover:border-foreground/25 hover:bg-muted/60"
-            )}
-          >
-            {swatch && (
-              <span
-                className="flex size-4 items-center justify-center rounded-full ring-1 ring-black/10 ring-inset"
-                style={{ background: swatch }}
-              >
-                {checked && (
-                  <Check
-                    strokeWidth={3.5}
-                    className={cn(
-                      "size-2.5",
-                      option.value === "white" || option.value === "silver" ? "text-foreground" : "text-white"
-                    )}
-                  />
-                )}
-              </span>
-            )}
-            {!swatch && checked && <Check strokeWidth={3} className="size-3.5 text-primary" />}
-            {option.label}
-            <span className="text-xs tabular-nums text-muted-foreground">{count}</span>
-          </button>
-        )
-      })}
-    </div>
-  )
-}
-
-function RatingList({ api }: { api: CatalogFiltersApi }) {
-  return (
-    <div role="radiogroup" aria-label="Note minimale" className="-mx-2 space-y-0.5">
-      {RATING_OPTIONS.map((threshold) => {
-        const checked = api.filters.rating === threshold
-        const count = api.ratingCounts[threshold] ?? 0
-
-        return (
-          <button
-            key={threshold}
-            type="button"
-            role="radio"
-            aria-checked={checked}
-            aria-label={`${numberFormat.format(threshold)} étoiles et plus`}
-            disabled={!checked && count === 0}
-            // Clicking the active option clears it — radios alone can't be unselected.
-            onClick={() => api.setRating(checked ? null : threshold)}
-            className={cn(
-              "flex w-full items-center gap-2.5 rounded-md px-2 py-1.5 text-[13px] transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-40",
-              checked ? "bg-primary/8" : "hover:bg-muted/70"
-            )}
-          >
-            <span
-              className={cn(
-                "flex size-4 shrink-0 items-center justify-center rounded-full border transition-colors",
-                checked ? "border-primary" : "border-muted-foreground/30"
-              )}
-            >
-              {checked && <span className="size-2 rounded-full bg-primary" />}
-            </span>
-            <span className="flex items-center gap-0.5" aria-hidden>
-              {Array.from({ length: 5 }, (_, index) => (
-                <Star
-                  key={index}
-                  className={cn(
-                    "size-3.5",
-                    index < Math.floor(threshold)
-                      ? "fill-amber-400 text-amber-400"
-                      : "fill-muted text-muted-foreground/30"
-                  )}
-                />
-              ))}
-            </span>
-            <span className={cn("flex-1 text-left", checked ? "font-medium" : "text-foreground/80")}>
-              {numberFormat.format(threshold)} et plus
-            </span>
-            <Count value={count} />
-          </button>
-        )
-      })}
-    </div>
   )
 }
 
@@ -398,9 +215,11 @@ function PriceInput({
 }
 
 function PriceRange({
+  bounds,
   value,
   onCommit,
 }: {
+  bounds: [number, number]
   value: [number, number]
   onCommit: (value: [number, number]) => void
 }) {
@@ -408,7 +227,7 @@ function PriceRange({
   const [draft, setDraft] = useState(value)
 
   function commitBound(index: 0 | 1, amount: number) {
-    const [lo, hi] = PRICE_BOUNDS
+    const [lo, hi] = bounds
     const clamped = Math.min(Math.max(amount, lo), hi)
     const next: [number, number] =
       index === 0
@@ -423,8 +242,8 @@ function PriceRange({
       <div className="px-1 pt-1">
         <Slider
           value={draft}
-          min={PRICE_BOUNDS[0]}
-          max={PRICE_BOUNDS[1]}
+          min={bounds[0]}
+          max={bounds[1]}
           step={PRICE_STEP}
           minStepsBetweenValues={1}
           onValueChange={(next) => setDraft(next as [number, number])}
@@ -445,37 +264,31 @@ function PriceRange({
 /* Panel                                                               */
 /* ------------------------------------------------------------------ */
 
-const COLOR_SWATCHES = Object.fromEntries(COLOR_OPTIONS.map((o) => [o.value, o.swatch]))
-
 export function FilterPanel({ api }: { api: CatalogFiltersApi }) {
-  const price = api.filters.price ?? PRICE_BOUNDS
+  const price = api.filters.price ?? api.priceBounds
+  const categoryOptions: FilterOption[] = api.categories.map((category) => ({
+    value: String(category.id),
+    label: category.name,
+  }))
 
   return (
     <div>
       <FilterSection title="Catégorie" icon={LayoutGrid} selectedCount={api.filters.category.length}>
-        <CheckboxList facet="category" options={CATEGORY_OPTIONS} api={api} icons={CATEGORY_ICONS} />
+        {categoryOptions.length > 0 ? (
+          <CheckboxList facet="category" options={categoryOptions} api={api} />
+        ) : (
+          <p className="py-2 text-center text-xs text-muted-foreground">Aucune catégorie</p>
+        )}
       </FilterSection>
 
       <FilterSection title="Prix" icon={Banknote} selectedCount={api.filters.price ? 1 : 0}>
-        {/* Remount when the committed range changes externally (chip removed, reset). */}
-        <PriceRange key={price.join("-")} value={price} onCommit={api.setPrice} />
-      </FilterSection>
-
-      <FilterSection title="Marque" icon={Tag} selectedCount={api.filters.brand.length}>
-        <BrandList api={api} />
-      </FilterSection>
-
-      <FilterSection title="Couleur" icon={Palette} selectedCount={api.filters.color.length} defaultOpen={false}>
-        <ChipList facet="color" options={COLOR_OPTIONS} api={api} swatches={COLOR_SWATCHES} />
-      </FilterSection>
-
-      <FilterSection
-        title="Connectivité"
-        icon={Wifi}
-        selectedCount={api.filters.connectivity.length}
-        defaultOpen={false}
-      >
-        <ChipList facet="connectivity" options={CONNECTIVITY_OPTIONS} api={api} />
+        {/* Remount when the committed range or bounds change externally (chip removed, reset). */}
+        <PriceRange
+          key={`${price.join("-")}-${api.priceBounds.join("-")}`}
+          bounds={api.priceBounds}
+          value={price}
+          onCommit={(next) => api.setPrice(next, api.priceBounds)}
+        />
       </FilterSection>
 
       <FilterSection
@@ -484,11 +297,7 @@ export function FilterPanel({ api }: { api: CatalogFiltersApi }) {
         selectedCount={api.filters.availability.length}
         defaultOpen={false}
       >
-        <CheckboxList facet="availability" options={AVAILABILITY_OPTIONS} api={api} />
-      </FilterSection>
-
-      <FilterSection title="Note des clients" icon={Star} selectedCount={api.filters.rating ? 1 : 0} defaultOpen={false}>
-        <RatingList api={api} />
+        <CheckboxList facet="availability" options={AVAILABILITY_OPTIONS} api={api} hideCount />
       </FilterSection>
     </div>
   )

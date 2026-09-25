@@ -30,6 +30,7 @@ export function CategorySelect({
   const categories = excludeIds
     ? allCategories.filter((category) => !excludeIds.includes(category.id))
     : allCategories
+  const labelById = new Map(categories.map((category) => [String(category.id), category.name]))
 
   return (
     <Select
@@ -38,7 +39,9 @@ export function CategorySelect({
       disabled={disabled}
     >
       <SelectTrigger className="w-full" aria-invalid={invalid}>
-        <SelectValue placeholder={placeholder} />
+        <SelectValue placeholder={placeholder}>
+          {(val: string | null) => (val ? (labelById.get(val) ?? val) : placeholder)}
+        </SelectValue>
       </SelectTrigger>
       <SelectContent>
         {categories.map((category) => (

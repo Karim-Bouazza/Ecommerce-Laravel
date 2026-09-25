@@ -8,6 +8,5 @@ export function useWilayas() {
   return useQuery({
     queryKey: ["wilayas"],
     queryFn: getWilayas,
-    staleTime: Infinity,
   })
 }

@@ -10,6 +10,15 @@ export async function getWilayas(): Promise<Wilaya[]> {
   }
 }
 
+export async function updateWilayaStopDeskPrice(id: number, price_stop_desk: number): Promise<Wilaya> {
+  try {
+    const { data } = await api.put<Wilaya>(`/api/v1/wilayas/${id}`, { price_stop_desk })
+    return data
+  } catch (error) {
+    throw toApiError(error)
+  }
+}
+
 export async function getWilayaCommunes(wilayaId: number): Promise<Commune[]> {
   try {
     const { data } = await api.get<Wilaya & { communes: Commune[] }>(`/api/v1/wilayas/${wilayaId}`)
@@ -66,6 +75,17 @@ export async function getProviderStopDesks(
       params: { provider_wilaya_id: providerWilayaId, provider_commune_id: providerCommuneId },
     })
     return data.data
+  } catch (error) {
+    throw toApiError(error)
+  }
+}
+
+export async function getProviderHomeDeliveryPrice(providerWilayaId: number): Promise<number | null> {
+  try {
+    const { data } = await api.get<{ price: number | null }>("/api/v1/provider-delivery-price/home", {
+      params: { provider_wilaya_id: providerWilayaId },
+    })
+    return data.price
   } catch (error) {
     throw toApiError(error)
   }

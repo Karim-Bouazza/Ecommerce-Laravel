@@ -9,6 +9,14 @@ export function ProductGallery({ images, name }: { images: string[]; name: strin
   const count = images.length
   const go = (step: number) => setActive((i) => (i + step + count) % count)
 
+  if (count === 0) {
+    return (
+      <div className="flex aspect-square w-full items-center justify-center rounded-3xl bg-muted/60 text-sm text-muted-foreground">
+        Aucune image
+      </div>
+    )
+  }
+
   return (
     <div className="flex flex-col gap-3">
       <div className="relative overflow-hidden rounded-3xl bg-muted/60">

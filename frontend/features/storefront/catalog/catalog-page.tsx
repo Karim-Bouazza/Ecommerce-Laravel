@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronRight, SearchX, SlidersHorizontal, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, SearchX, SlidersHorizontal, X } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -18,17 +18,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { formatPrice } from "@/shared/lib/format-price";
-import {
-  AVAILABILITY_OPTIONS,
-  BRAND_OPTIONS,
-  CATEGORY_OPTIONS,
-  COLOR_OPTIONS,
-  CONNECTIVITY_OPTIONS,
-  PRICE_BOUNDS,
-  SORT_OPTIONS,
-  type FilterOption,
-  type SortValue,
-} from "./catalog-data";
+import { AVAILABILITY_OPTIONS, SORT_OPTIONS, type SortValue } from "./catalog-data";
 import {
   FilterHeader,
   FilterPanel,
@@ -36,19 +26,7 @@ import {
   showResultsButtonClass,
 } from "./filter-panel";
 import { ProductCard } from "./product-card";
-import {
-  useCatalogFilters,
-  type CatalogFiltersApi,
-  type FacetKey,
-} from "./use-catalog-filters";
-
-const FACET_OPTIONS: Record<FacetKey, FilterOption[]> = {
-  category: CATEGORY_OPTIONS,
-  brand: BRAND_OPTIONS,
-  color: COLOR_OPTIONS,
-  connectivity: CONNECTIVITY_OPTIONS,
-  availability: AVAILABILITY_OPTIONS,
-};
+import { useCatalogFilters, type CatalogFiltersApi } from "./use-catalog-filters";
 
 function ActiveFilters({ api }: { api: CatalogFiltersApi }) {
   const { filters } = api;
@@ -61,29 +39,28 @@ function ActiveFilters({ api }: { api: CatalogFiltersApi }) {
       onRemove: api.clearSearch,
     });
   }
-  for (const facet of Object.keys(FACET_OPTIONS) as FacetKey[]) {
-    for (const value of filters[facet]) {
-      const label =
-        FACET_OPTIONS[facet].find((o) => o.value === value)?.label ?? value;
-      chips.push({
-        key: `${facet}-${value}`,
-        label,
-        onRemove: () => api.toggleValue(facet, value),
-      });
-    }
+  for (const categoryId of filters.category) {
+    const label =
+      api.categories.find((c) => String(c.id) === categoryId)?.name ?? categoryId;
+    chips.push({
+      key: `category-${categoryId}`,
+      label,
+      onRemove: () => api.toggleValue("category", categoryId),
+    });
+  }
+  for (const value of filters.availability) {
+    const label = AVAILABILITY_OPTIONS.find((o) => o.value === value)?.label ?? value;
+    chips.push({
+      key: `availability-${value}`,
+      label,
+      onRemove: () => api.toggleValue("availability", value),
+    });
   }
   if (filters.price) {
     chips.push({
       key: "price",
       label: `${formatPrice(filters.price[0])} – ${formatPrice(filters.price[1])}`,
-      onRemove: () => api.setPrice(PRICE_BOUNDS),
-    });
-  }
-  if (filters.rating) {
-    chips.push({
-      key: "rating",
-      label: `${filters.rating.toLocaleString("fr-FR")}★ et plus`,
-      onRemove: () => api.setRating(null),
+      onRemove: () => api.setPrice(api.priceBounds, api.priceBounds),
     });
   }
 
@@ -150,7 +127,7 @@ function MobileFilters({ api }: { api: CatalogFiltersApi }) {
         </div>
         <SheetFooter className="border-t border-border p-3">
           <SheetClose className={showResultsButtonClass}>
-            <ShowResultsLabel count={api.products.length} />
+            <ShowResultsLabel count={api.total} />
           </SheetClose>
         </SheetFooter>
       </SheetContent>
@@ -207,6 +184,37 @@ function EmptyState({ onReset }: { onReset: () => void }) {
   );
 }
 
+function Pagination({ api }: { api: CatalogFiltersApi }) {
+  if (api.lastPage <= 1) return null;
+  const page = api.filters.page;
+
+  return (
+    <div className="mt-8 flex items-center justify-center gap-3">
+      <button
+        type="button"
+        disabled={page <= 1}
+        onClick={() => api.setPage(page - 1)}
+        aria-label="Page précédente"
+        className="flex size-9 items-center justify-center rounded-full border border-border transition-colors hover:bg-muted disabled:pointer-events-none disabled:opacity-40"
+      >
+        <ChevronLeft className="size-4" />
+      </button>
+      <span className="text-sm text-muted-foreground">
+        Page <span className="font-medium text-foreground">{page}</span> / {api.lastPage}
+      </span>
+      <button
+        type="button"
+        disabled={page >= api.lastPage}
+        onClick={() => api.setPage(page + 1)}
+        aria-label="Page suivante"
+        className="flex size-9 items-center justify-center rounded-full border border-border transition-colors hover:bg-muted disabled:pointer-events-none disabled:opacity-40"
+      >
+        <ChevronRight className="size-4" />
+      </button>
+    </div>
+  );
+}
+
 export function CatalogPage() {
   const api = useCatalogFilters();
 
@@ -241,10 +249,8 @@ export function CatalogPage() {
             <div className="flex items-center gap-3">
               <MobileFilters api={api} />
               <p className="text-sm text-muted-foreground" aria-live="polite">
-                <span className="font-semibold text-foreground">
-                  {api.products.length}
-                </span>{" "}
-                {api.products.length > 1 ? "produits" : "produit"}
+                <span className="font-semibold text-foreground">{api.total}</span>{" "}
+                {api.total > 1 ? "produits" : "produit"}
               </p>
             </div>
             <SortSelect api={api} />
@@ -253,14 +259,19 @@ export function CatalogPage() {
           <ActiveFilters api={api} />
 
           {api.products.length > 0 ? (
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:gap-5">
+            <div
+              className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:gap-5 data-fetching:opacity-60"
+              data-fetching={api.isFetching || undefined}
+            >
               {api.products.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>
-          ) : (
+          ) : !api.isLoading ? (
             <EmptyState onReset={api.clearAll} />
-          )}
+          ) : null}
+
+          <Pagination api={api} />
         </section>
       </div>
     </main>

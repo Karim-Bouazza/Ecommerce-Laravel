@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\BrandController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\ChargeController;
 use App\Http\Controllers\Api\ClientController;
@@ -10,9 +11,12 @@ use App\Http\Controllers\Api\FournisseurController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\PaiementController;
 use App\Http\Controllers\Api\PerformanceController;
+use App\Http\Controllers\Api\PixelController;
 use App\Http\Controllers\Api\ProductAnalyticsController;
 use App\Http\Controllers\Api\ProductController;
+use App\Http\Controllers\Api\ProductReviewController;
 use App\Http\Controllers\Api\ProviderCommuneController;
+use App\Http\Controllers\Api\ProviderDeliveryPriceController;
 use App\Http\Controllers\Api\ProviderStopDeskController;
 use App\Http\Controllers\Api\ProviderWilayaController;
 use App\Http\Controllers\Api\PurchaseEntryController;
@@ -23,7 +27,11 @@ use App\Http\Controllers\Api\SiteSettingLogoController;
 use App\Http\Controllers\Api\StockAlertController;
 use App\Http\Controllers\Api\StockController;
 use App\Http\Controllers\Api\StockMovementController;
+use App\Http\Controllers\Api\StorefrontCategoryController;
 use App\Http\Controllers\Api\StorefrontHeroCategoryController;
+use App\Http\Controllers\Api\StorefrontProductController;
+use App\Http\Controllers\Api\StorefrontProductReviewController;
+use App\Http\Controllers\Api\TagController;
 use App\Http\Controllers\Api\TransferController;
 use App\Http\Controllers\Api\VersementController;
 use App\Http\Controllers\Api\WalletController;
@@ -41,16 +49,25 @@ Route::prefix('v1')->group(function () {
         Route::get('/products/analytics/stats', [ProductAnalyticsController::class, 'stats']);
         Route::get('/products/analytics/chart', [ProductAnalyticsController::class, 'chart']);
         Route::get('/wilayas/analytics', [WilayaAnalyticsController::class, 'index']);
+        Route::put('/wilayas/{wilaya}', [WilayaController::class, 'update']);
         Route::get('/performance/revenue', [PerformanceController::class, 'revenue']);
     });
 
     Route::get('/products/{product}', [ProductController::class, 'show']);
     Route::get('/wilayas', [WilayaController::class, 'index']);
     Route::get('/wilayas/{wilaya}', [WilayaController::class, 'show']);
+    Route::get('/provider-wilayas', [ProviderWilayaController::class, 'index']);
+    Route::get('/provider-communes', [ProviderCommuneController::class, 'index']);
+    Route::get('/provider-delivery-price/home', [ProviderDeliveryPriceController::class, 'home']);
     Route::post('/orders', [OrderController::class, 'store']);
     Route::get('/site-settings/colors-theme', [SiteSettingColorsThemeController::class, 'show']);
     Route::get('/site-settings/logo', [SiteSettingLogoController::class, 'show']);
     Route::get('/site-settings/hero-categories', [StorefrontHeroCategoryController::class, 'index']);
+    Route::get('/storefront/products', [StorefrontProductController::class, 'index']);
+    Route::get('/storefront/products/{product}', [StorefrontProductController::class, 'show']);
+    Route::post('/storefront/products/{product}/reviews', [StorefrontProductReviewController::class, 'store']);
+    Route::get('/storefront/categories', [StorefrontCategoryController::class, 'index']);
+    Route::get('/pixels/active', [PixelController::class, 'active']);
 
     Route::post('/login', [AuthController::class, 'login']);
 
@@ -68,6 +85,25 @@ Route::prefix('v1')->group(function () {
         Route::delete('/categories/{category}', [CategoryController::class, 'destroy']);
         Route::post('/categories/{category}/toggle-active', [CategoryController::class, 'toggleActive']);
         Route::get('/category-options', [CategoryController::class, 'options']);
+        Route::get('/brands', [BrandController::class, 'index']);
+        Route::post('/brands', [BrandController::class, 'store']);
+        Route::put('/brands/{brand}', [BrandController::class, 'update']);
+        Route::delete('/brands/{brand}', [BrandController::class, 'destroy']);
+        Route::post('/brands/{brand}/toggle-active', [BrandController::class, 'toggleActive']);
+        Route::get('/brand-options', [BrandController::class, 'options']);
+        Route::get('/pixels', [PixelController::class, 'index']);
+        Route::post('/pixels', [PixelController::class, 'store']);
+        Route::put('/pixels/{pixel}', [PixelController::class, 'update']);
+        Route::delete('/pixels/{pixel}', [PixelController::class, 'destroy']);
+        Route::post('/pixels/{pixel}/toggle-active', [PixelController::class, 'toggleActive']);
+        Route::get('/tags', [TagController::class, 'index']);
+        Route::post('/tags', [TagController::class, 'store']);
+        Route::put('/tags/{tag}', [TagController::class, 'update']);
+        Route::delete('/tags/{tag}', [TagController::class, 'destroy']);
+        Route::get('/tag-options', [TagController::class, 'options']);
+        Route::get('/product-reviews', [ProductReviewController::class, 'index']);
+        Route::put('/product-reviews/{productReview}', [ProductReviewController::class, 'update']);
+        Route::delete('/product-reviews/{productReview}', [ProductReviewController::class, 'destroy']);
         Route::put('/site-settings/colors-theme', [SiteSettingColorsThemeController::class, 'update']);
         Route::put('/site-settings/logo', [SiteSettingLogoController::class, 'update']);
         Route::post('/site-settings/hero-categories', [StorefrontHeroCategoryController::class, 'store']);
@@ -145,8 +181,6 @@ Route::prefix('v1')->group(function () {
         Route::post('/transfers', [TransferController::class, 'store']);
         Route::post('/transfers/{transfer}/confirm', [TransferController::class, 'confirm']);
         Route::delete('/transfers/{transfer}', [TransferController::class, 'destroy']);
-        Route::get('/provider-wilayas', [ProviderWilayaController::class, 'index']);
-        Route::get('/provider-communes', [ProviderCommuneController::class, 'index']);
         Route::get('/provider-stopdesks', [ProviderStopDeskController::class, 'index']);
         Route::get('/orders', [OrderController::class, 'index']);
         Route::get('/orders/generate-name', [OrderController::class, 'generateName']);
