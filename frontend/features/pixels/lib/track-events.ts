@@ -1,3 +1,19 @@
+// Pixel base scripts load only after the active-pixels request resolves, so events fired earlier
+// (e.g. ViewContent on the landing page) would hit an undefined window.fbq and be lost.
+// They are buffered here until TrackingPixels has initialized the pixels and sent the first PageView.
+let pixelsReady = false
+const pendingEvents: Array<() => void> = []
+
+function dispatch(fire: () => void) {
+  if (pixelsReady) fire()
+  else pendingEvents.push(fire)
+}
+
+export function markPixelsReady() {
+  pixelsReady = true
+  pendingEvents.splice(0).forEach((fire) => fire())
+}
+
 export type TrackInitiateCheckoutParams = {
   id: number | string
   name: string
@@ -6,7 +22,7 @@ export type TrackInitiateCheckoutParams = {
   currency?: string
 }
 
-export function trackInitiateCheckout({
+function fireInitiateCheckout({
   id,
   name,
   value,
@@ -62,7 +78,7 @@ export type TrackPurchaseParams = {
   currency?: string
 }
 
-export function trackPurchase({
+function firePurchase({
   orderId,
   productId,
   productName,
@@ -121,7 +137,7 @@ export type TrackViewContentParams = {
   currency?: string
 }
 
-export function trackViewContent({ id, name, price, category, currency = "DZD" }: TrackViewContentParams) {
+function fireViewContent({ id, name, price, category, currency = "DZD" }: TrackViewContentParams) {
   const contentId = String(id)
 
   window.fbq?.("track", "ViewContent", {
@@ -160,4 +176,16 @@ export function trackViewContent({ id, name, price, category, currency = "DZD" }
       },
     ],
   })
+}
+
+export function trackInitiateCheckout(params: TrackInitiateCheckoutParams) {
+  dispatch(() => fireInitiateCheckout(params))
+}
+
+export function trackPurchase(params: TrackPurchaseParams) {
+  dispatch(() => firePurchase(params))
+}
+
+export function trackViewContent(params: TrackViewContentParams) {
+  dispatch(() => fireViewContent(params))
 }

@@ -5,6 +5,7 @@ import Script from "next/script"
 import { usePathname, useSearchParams } from "next/navigation"
 
 import { useActivePixels } from "@/features/pixels/hooks/use-active-pixels"
+import { markPixelsReady } from "@/features/pixels/lib/track-events"
 import type { ActivePixel, PixelProvider } from "@/features/pixels/types"
 
 const EXCLUDED_PREFIXES = ["/admin", "/login"]
@@ -37,7 +38,8 @@ function fireGooglePageView(googleIds: string[]) {
 function TrackingPixelsInner() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  const { data: pixels } = useActivePixels()
+  const { data: pixels, isSuccess, isError } = useActivePixels()
+  const pixelsResolved = isSuccess || isError
 
   const [readyProviders, setReadyProviders] = React.useState<Set<PixelProvider>>(new Set())
   const hasFiredInitialPageView = React.useRef(false)
@@ -63,13 +65,16 @@ function TrackingPixelsInner() {
 
   // Fire the initial PageView once every base script that has an active pixel has finished loading.
   // Google is excluded here: gtag('config', id) already sends its own page_view on init.
+  // Waits for the active-pixels query first, otherwise the empty initial state would count as "all ready".
+  // Events tracked before this point (e.g. ViewContent on a landing page) are queued and flushed after PageView.
   React.useEffect(() => {
-    if (hasFiredInitialPageView.current) return
-    if (expectedProviders.size > 0 && readyProviders.size < expectedProviders.size) return
+    if (hasFiredInitialPageView.current || !pixelsResolved || !isStorefront) return
+    if (readyProviders.size < expectedProviders.size) return
 
     fireBasePageView(readyProviders)
     hasFiredInitialPageView.current = true
-  }, [readyProviders, expectedProviders])
+    markPixelsReady()
+  }, [pixelsResolved, isStorefront, readyProviders, expectedProviders])
 
   // Fire PageView again on every client-side route change (SPA navigations don't reload the base scripts).
   React.useEffect(() => {
