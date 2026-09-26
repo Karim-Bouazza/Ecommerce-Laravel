@@ -182,6 +182,7 @@ Route::prefix('v1')->group(function () {
         Route::post('/transfers/{transfer}/confirm', [TransferController::class, 'confirm']);
         Route::delete('/transfers/{transfer}', [TransferController::class, 'destroy']);
         Route::get('/provider-stopdesks', [ProviderStopDeskController::class, 'index']);
+        Route::post('/provider-delivery-price/calculate-package', [ProviderDeliveryPriceController::class, 'calculatePackage']);
         Route::get('/orders', [OrderController::class, 'index']);
         Route::get('/orders/generate-name', [OrderController::class, 'generateName']);
         Route::post('/orders/manual', [OrderController::class, 'storeManual']);

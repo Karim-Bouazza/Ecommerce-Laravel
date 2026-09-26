@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Controller, useFieldArray, type UseFormReturn } from "react-hook-form"
+import { Controller, useFieldArray, useWatch, type UseFormReturn } from "react-hook-form"
 import { useMutation } from "@tanstack/react-query"
 import { Plus } from "lucide-react"
 
@@ -14,9 +14,11 @@ import { cn } from "cn"
 import { ProviderCommuneSelect } from "@/features/wilayas/components/provider-commune-select"
 import { ProviderStopDeskSelect } from "@/features/wilayas/components/provider-stopdesk-select"
 import { ProviderWilayaSelect } from "@/features/wilayas/components/provider-wilaya-select"
+import { useProviderPackagePrice } from "@/features/wilayas/hooks/use-provider-package-price"
 import { OrderItemRow } from "@/features/orders/components/order-item-row"
 import { generateOrderName } from "@/features/orders/api/order-api"
 import { useWarehouseOptions } from "@/features/orders/hooks/use-warehouse-options"
+import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import type { CreateOrderSchema } from "@/features/orders/schemas/order-schema"
 
 type OrderFormFieldsProps = {
@@ -39,7 +41,7 @@ export function OrderFormFields({ form, idPrefix }: OrderFormFieldsProps) {
   const { data: warehouses = [] } = useWarehouseOptions()
 
   const deliveryType = watch("delivery_type")
-  const items = watch("items")
+  const items = useWatch({ control, name: "items" })
   const deliveryPrice = watch("delivery_price") ?? 0
 
   const subtotal = React.useMemo(
@@ -50,6 +52,36 @@ export function OrderFormFields({ form, idPrefix }: OrderFormFieldsProps) {
 
   const providerWilayaId = watch("provider_wilaya_id")
   const providerCommuneId = watch("provider_commune_id")
+  const providerOfficeId = watch("provider_office_id")
+  const freeDelivery = watch("free_delivery")
+  const canBeOpened = watch("can_be_opened")
+
+  const debouncedSubtotal = useDebouncedValue(subtotal, 500)
+  const canCalculateDeliveryPrice =
+    providerWilayaId !== null && (deliveryType !== "point_relais" || providerOfficeId !== null)
+
+  const packagePriceQuery = useProviderPackagePrice({
+    enabled: canCalculateDeliveryPrice,
+    price: debouncedSubtotal,
+    provider_wilaya_id: providerWilayaId ?? 0,
+    provider_commune_id: providerCommuneId,
+    delivery_type: deliveryType,
+    provider_office_id: providerOfficeId,
+    free_delivery: freeDelivery,
+    can_be_opened: canBeOpened,
+  })
+
+  React.useEffect(() => {
+    if (!canCalculateDeliveryPrice) {
+      setValue("delivery_price", 0)
+      return
+    }
+
+    if (packagePriceQuery.data) {
+      setValue("delivery_price", packagePriceQuery.data.delivery_price, { shouldValidate: true })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canCalculateDeliveryPrice, packagePriceQuery.data, setValue])
 
   const nameManuallyEdited = React.useRef(false)
   const skipNextNameSync = React.useRef(true)
@@ -276,21 +308,24 @@ export function OrderFormFields({ form, idPrefix }: OrderFormFieldsProps) {
 
           <Field data-invalid={!!errors.delivery_price}>
             <FieldLabel htmlFor={`${idPrefix}-delivery-price`}>Frais de livraison</FieldLabel>
-            <Controller
-              control={control}
-              name="delivery_price"
-              render={({ field }) => (
-                <Input
-                  id={`${idPrefix}-delivery-price`}
-                  type="number"
-                  min={0}
-                  value={field.value ?? ""}
-                  onChange={(event) =>
-                    field.onChange(event.target.value === "" ? undefined : Number(event.target.value))
-                  }
-                />
-              )}
+            <Input
+              id={`${idPrefix}-delivery-price`}
+              readOnly
+              disabled
+              placeholder={
+                canCalculateDeliveryPrice ? "Calcul…" : "Sélectionnez la wilaya (et le stop desk)"
+              }
+              value={
+                canCalculateDeliveryPrice && packagePriceQuery.isSuccess
+                  ? `${amountFormatter.format(deliveryPrice)} DZD`
+                  : ""
+              }
             />
+            {packagePriceQuery.isError && (
+              <p className="text-sm text-destructive">
+                Impossible de calculer les frais de livraison.
+              </p>
+            )}
             <FieldError errors={errors.delivery_price ? [errors.delivery_price] : undefined} />
           </Field>
         </div>

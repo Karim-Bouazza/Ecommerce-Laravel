@@ -90,3 +90,35 @@ export async function getProviderHomeDeliveryPrice(providerWilayaId: number): Pr
     throw toApiError(error)
   }
 }
+
+export type ProviderPackagePrice = {
+  insurance_value: number
+  extra_weight_price: number
+  delivery_price: number
+  total_price: number
+  price_to_pay: number
+}
+
+export type CalculateProviderPackagePriceParams = {
+  price: number
+  provider_wilaya_id: number
+  provider_commune_id: number | null
+  delivery_type: "express" | "point_relais"
+  provider_office_id: string | null
+  free_delivery: boolean
+  can_be_opened: boolean
+}
+
+export async function calculateProviderPackagePrice(
+  params: CalculateProviderPackagePriceParams
+): Promise<ProviderPackagePrice> {
+  try {
+    const { data } = await api.post<ProviderPackagePrice>(
+      "/api/v1/provider-delivery-price/calculate-package",
+      params
+    )
+    return data
+  } catch (error) {
+    throw toApiError(error)
+  }
+}

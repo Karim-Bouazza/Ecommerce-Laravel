@@ -15,6 +15,14 @@ enum DeliveryType: string
         };
     }
 
+    public function zimouId(): int
+    {
+        return match ($this) {
+            self::Express => 2,
+            self::PointRelais => 3,
+        };
+    }
+
     /**
      * @return array<string, string>
      */
