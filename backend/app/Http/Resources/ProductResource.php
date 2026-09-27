@@ -30,6 +30,7 @@ class ProductResource extends JsonResource
             'variants' => ProductVariantResource::collection($this->whenLoaded('variants')),
             'purchase_price' => $this->purchase_price,
             'price' => $this->price,
+            'compare_price' => $this->compare_price,
             'total_stock' => $this->totalStock(),
             'is_active' => $this->is_active,
             'is_new' => $this->is_new,

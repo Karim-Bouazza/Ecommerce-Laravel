@@ -64,6 +64,7 @@ Route::prefix('v1')->group(function () {
     Route::get('/site-settings/logo', [SiteSettingLogoController::class, 'show']);
     Route::get('/site-settings/hero-categories', [StorefrontHeroCategoryController::class, 'index']);
     Route::get('/storefront/products', [StorefrontProductController::class, 'index']);
+    Route::get('/storefront/products/deals-of-the-day', [StorefrontProductController::class, 'deals']);
     Route::get('/storefront/products/{product}', [StorefrontProductController::class, 'show']);
     Route::post('/storefront/products/{product}/reviews', [StorefrontProductReviewController::class, 'store']);
     Route::get('/storefront/categories', [StorefrontCategoryController::class, 'index']);

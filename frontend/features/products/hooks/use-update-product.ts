@@ -28,6 +28,7 @@ export function useUpdateProduct(product: Product, onSuccess?: () => void) {
       brand_id: product.brand_id,
       purchase_price: product.purchase_price,
       price: product.price,
+      compare_price: product.compare_price,
       is_active: product.is_active,
       is_new: product.is_new,
       tags: product.tags.map((tag) => tag.id),

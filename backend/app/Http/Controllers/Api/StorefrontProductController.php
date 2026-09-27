@@ -44,6 +44,22 @@ class StorefrontProductController extends Controller
         ]);
     }
 
+    public function deals(Request $request)
+    {
+        $limit = (int) $request->input('limit', 10);
+        $limit = max(1, min($limit, 20));
+
+        $products = $this->baseQuery()
+            ->whereNotNull('products.compare_price')
+            ->whereColumn('products.compare_price', '>', 'products.price')
+            ->orderByRaw('(products.compare_price - products.price) / products.compare_price DESC')
+            ->orderByDesc('products.created_at')
+            ->limit($limit)
+            ->get();
+
+        return StorefrontProductResource::collection($products);
+    }
+
     public function show(Product $product)
     {
         if (!$product->is_active) {

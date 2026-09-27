@@ -32,6 +32,7 @@ type BaseProductPayload = {
   brand_id: number | null
   purchase_price: number | null
   price: number
+  compare_price: number | null
   is_active: boolean
   is_new: boolean
   tags: number[]
@@ -52,16 +53,19 @@ function toProductFormData(payload: BaseProductPayload & { image: File | null })
   if (payload.short_description) {
     formData.append("short_description", payload.short_description)
   }
-  if (payload.category_id !== null) {
+  if (payload.category_id != null) {
     formData.append("category_id", String(payload.category_id))
   }
-  if (payload.brand_id !== null) {
+  if (payload.brand_id != null) {
     formData.append("brand_id", String(payload.brand_id))
   }
-  if (payload.purchase_price !== null) {
+  if (payload.purchase_price != null) {
     formData.append("purchase_price", String(payload.purchase_price))
   }
   formData.append("price", String(payload.price))
+  if (payload.compare_price != null) {
+    formData.append("compare_price", String(payload.compare_price))
+  }
   formData.append("is_active", payload.is_active ? "1" : "0")
   formData.append("is_new", payload.is_new ? "1" : "0")
   if (payload.image) {

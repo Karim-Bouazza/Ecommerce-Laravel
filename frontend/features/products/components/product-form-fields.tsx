@@ -1,6 +1,6 @@
 "use client"
 
-import { Controller, useFieldArray, type UseFormReturn } from "react-hook-form"
+import { Controller, useFieldArray, useWatch, type UseFormReturn } from "react-hook-form"
 import { Plus, Trash2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -34,6 +34,20 @@ export function ProductFormFields<TOutput>({
 
   const { fields, append, remove } = useFieldArray({ control, name: "specs" })
   const { data: tagOptions = [] } = useTags()
+
+  const priceValue = useWatch({ control, name: "price" })
+  const comparePriceValue = useWatch({ control, name: "compare_price" })
+  const discountHint =
+    typeof priceValue === "number" &&
+    typeof comparePriceValue === "number" &&
+    comparePriceValue > priceValue
+      ? Math.round((1 - priceValue / comparePriceValue) * 100)
+      : null
+
+  const specsErrorMessage = !Array.isArray(errors.specs) ? errors.specs?.message : undefined
+  const variantsErrorMessage = !Array.isArray(errors.variants)
+    ? errors.variants?.message
+    : undefined
 
   return (
     <div className="grid items-start gap-4 py-4 sm:grid-cols-2 sm:gap-x-8">
@@ -169,6 +183,31 @@ export function ProductFormFields<TOutput>({
           <FieldError errors={errors.price ? [errors.price] : undefined} />
         </Field>
 
+        <Field data-invalid={!!errors.compare_price}>
+          <FieldLabel htmlFor={`${idPrefix}-compare-price`}>
+            Prix comparé / avant réduction (DZD)
+          </FieldLabel>
+          <Input
+            id={`${idPrefix}-compare-price`}
+            type="number"
+            min={0}
+            aria-invalid={!!errors.compare_price}
+            {...register("compare_price", {
+              setValueAs: (value) => (value === "" ? null : Number(value)),
+            })}
+          />
+          {discountHint !== null ? (
+            <p className="text-xs font-medium text-emerald-600">
+              -{discountHint}% par rapport au prix de vente
+            </p>
+          ) : (
+            <p className="text-xs text-muted-foreground">
+              Laisser vide pour vendre sans réduction.
+            </p>
+          )}
+          <FieldError errors={errors.compare_price ? [errors.compare_price] : undefined} />
+        </Field>
+
         <Field>
           <FieldLabel htmlFor={`${idPrefix}-is-active`}>Actif</FieldLabel>
           <Controller
@@ -219,7 +258,7 @@ export function ProductFormFields<TOutput>({
           />
         </Field>
 
-        <Field>
+        <Field data-invalid={!!errors.specs}>
           <div className="flex items-center justify-between">
             <FieldLabel>Caractéristiques</FieldLabel>
             <Button
@@ -258,9 +297,10 @@ export function ProductFormFields<TOutput>({
               </div>
             ))}
           </div>
+          {specsErrorMessage && <FieldError errors={[{ message: specsErrorMessage }]} />}
         </Field>
 
-        <Field>
+        <Field data-invalid={!!errors.variants}>
           <FieldLabel>Variantes</FieldLabel>
           <p className="text-xs text-muted-foreground">
             Le client pourra choisir une de ces options lors de la commande. Tapez un
@@ -277,6 +317,7 @@ export function ProductFormFields<TOutput>({
               />
             )}
           />
+          {variantsErrorMessage && <FieldError errors={[{ message: variantsErrorMessage }]} />}
         </Field>
       </FieldGroup>
     </div>

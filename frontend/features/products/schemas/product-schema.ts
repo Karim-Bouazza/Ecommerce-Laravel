@@ -14,6 +14,7 @@ const baseProductFields = {
   brand_id: z.number().nullable(),
   purchase_price: z.number().min(0).nullable(),
   price: z.number().min(0, "Le prix de vente est requis."),
+  compare_price: z.number().min(0).nullable(),
   is_active: z.boolean(),
   is_new: z.boolean(),
   tags: z.array(z.number()),
@@ -21,18 +22,35 @@ const baseProductFields = {
   variants: z.array(z.string()),
 }
 
-export const productSchema = z.object({
-  ...baseProductFields,
-  image: z
-    .instanceof(File)
-    .nullable()
-    .refine((file) => file !== null, { message: "L'image est requise." }),
-})
+function checkComparePrice(
+  values: { price: number; compare_price?: number | null },
+  ctx: z.RefinementCtx
+) {
+  if (values.compare_price != null && values.compare_price <= values.price) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["compare_price"],
+      message: "Le prix comparé doit être supérieur au prix de vente.",
+    })
+  }
+}
 
-export const productUpdateSchema = z.object({
-  ...baseProductFields,
-  image: z.instanceof(File).nullable(),
-})
+export const productSchema = z
+  .object({
+    ...baseProductFields,
+    image: z
+      .instanceof(File)
+      .nullable()
+      .refine((file) => file !== null, { message: "L'image est requise." }),
+  })
+  .superRefine(checkComparePrice)
+
+export const productUpdateSchema = z
+  .object({
+    ...baseProductFields,
+    image: z.instanceof(File).nullable(),
+  })
+  .superRefine(checkComparePrice)
 
 export type ProductFormInput = z.input<typeof productSchema>
 export type ProductFormOutput = z.output<typeof productSchema>

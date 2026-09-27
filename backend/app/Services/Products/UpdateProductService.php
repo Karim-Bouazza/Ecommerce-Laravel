@@ -20,6 +20,7 @@ class UpdateProductService
             'short_description',
             'purchase_price',
             'price',
+            'compare_price',
             'is_active',
             'is_new',
         ]));

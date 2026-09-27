@@ -25,6 +25,7 @@ class StoreProductRequest extends FormRequest
             'brand_id' => ['nullable', 'integer', 'exists:brands,id'],
             'purchase_price' => ['nullable', 'integer', 'min:0'],
             'price' => ['required', 'integer', 'min:0'],
+            'compare_price' => ['nullable', 'integer', 'min:0', 'gt:price'],
             'is_active' => ['boolean'],
             'is_new' => ['boolean'],
             'image' => ['required', 'image', 'max:4096'],

@@ -18,6 +18,7 @@ class CreateProductService
             'short_description' => $data['short_description'] ?? null,
             'purchase_price' => $data['purchase_price'] ?? null,
             'price' => $data['price'],
+            'compare_price' => $data['compare_price'] ?? null,
             'is_active' => $data['is_active'] ?? true,
             'is_new' => $data['is_new'] ?? false,
             'image_1' => $image->store('products', 'public'),

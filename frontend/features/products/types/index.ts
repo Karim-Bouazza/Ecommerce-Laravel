@@ -29,6 +29,7 @@ export type Product = {
   variants: ProductVariant[]
   purchase_price: number | null
   price: number
+  compare_price: number | null
   total_stock: number
   is_active: boolean
   is_new: boolean

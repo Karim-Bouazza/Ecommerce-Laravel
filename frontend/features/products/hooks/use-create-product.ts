@@ -27,6 +27,7 @@ export function useCreateProduct(onSuccess?: () => void) {
       brand_id: null,
       purchase_price: null,
       price: 0,
+      compare_price: null,
       is_active: true,
       is_new: false,
       tags: [],

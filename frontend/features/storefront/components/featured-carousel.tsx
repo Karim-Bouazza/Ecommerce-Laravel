@@ -1,72 +1,19 @@
 "use client";
 
-import { ChevronRight, Star } from "lucide-react";
+import Link from "next/link";
+import { ChevronRight } from "lucide-react";
+import { cn } from "cn";
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
   useCarousel,
 } from "@/components/ui/carousel";
+import { Skeleton } from "@/components/ui/skeleton";
+import { formatPrice } from "@/shared/lib/format-price";
+import { useDealsOfTheDay } from "@/features/storefront/catalog/use-deals-of-the-day";
 
-type Deal = {
-  name: string;
-  image: string;
-  price: number;
-  originalPrice: number;
-  rating: number;
-  sold: number;
-};
-
-const TODAY_DEALS: Deal[] = [
-  {
-    name: "HD Dome CCTV Camera",
-    image: "https://picsum.photos/seed/deal-dome-cctv-camera/400/400",
-    price: 89,
-    originalPrice: 178,
-    rating: 4.9,
-    sold: 652,
-  },
-  {
-    name: "Wireless Alarm Panel Kit",
-    image: "https://picsum.photos/seed/deal-alarm-panel-kit/400/400",
-    price: 150,
-    originalPrice: 210,
-    rating: 4.8,
-    sold: 412,
-  },
-  {
-    name: "Smart Access Control Reader",
-    image: "https://picsum.photos/seed/deal-access-control-reader/400/400",
-    price: 210,
-    originalPrice: 260,
-    rating: 4.9,
-    sold: 901,
-  },
-  {
-    name: "Video Door Intercom",
-    image: "https://picsum.photos/seed/deal-video-door-intercom/400/400",
-    price: 95,
-    originalPrice: 130,
-    rating: 4.9,
-    sold: 516,
-  },
-  {
-    name: "PIR Motion Sensor",
-    image: "https://picsum.photos/seed/deal-pir-motion-sensor/400/400",
-    price: 28,
-    originalPrice: 40,
-    rating: 4.9,
-    sold: 129,
-  },
-  {
-    name: "Smart Door Lock",
-    image: "https://picsum.photos/seed/deal-smart-door-lock/400/400",
-    price: 130,
-    originalPrice: 165,
-    rating: 4.8,
-    sold: 340,
-  },
-];
+const SKELETON_COUNT = 5;
 
 function CarouselNextFloating() {
   const { scrollNext, canScrollNext } = useCarousel();
@@ -85,6 +32,12 @@ function CarouselNextFloating() {
 }
 
 export function FeaturedCarousel() {
+  const { data: deals = [], isPending, isError } = useDealsOfTheDay();
+
+  if (isError || (!isPending && deals.length === 0)) {
+    return null;
+  }
+
   return (
     <section className="mx-auto max-w-7xl px-4 py-16 sm:px-4 lg:px-6">
       <div className="rounded-3xl bg-muted/40 p-5 sm:p-6">
@@ -99,42 +52,84 @@ export function FeaturedCarousel() {
 
         <Carousel opts={{ align: "start" }} className="mt-6">
           <CarouselContent>
-            {TODAY_DEALS.map((deal) => (
-              <CarouselItem
-                key={deal.name}
-                className="basis-[42%] sm:basis-[30%] lg:basis-[19%]"
-              >
-                <div className="overflow-hidden rounded-2xl border border-border bg-white p-1 shadow-sm">
-                  <div className="relative">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={deal.image}
-                      alt={deal.name}
-                      className="aspect-square w-full rounded-xl object-cover"
-                    />
-                  </div>
-
-                  <div className="mt-3 px-2 pb-3">
-                    <p className="truncate text-sm font-semibold text-foreground">
-                      {deal.name}
-                    </p>
-                    <div className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
-                      <Star className="size-3.5 fill-primary text-primary" />
-                      <span className="font-medium text-foreground">
-                        {deal.rating.toFixed(1)}
-                      </span>
-                      · {deal.sold} vendus
+            {isPending
+              ? Array.from({ length: SKELETON_COUNT }).map((_, index) => (
+                  <CarouselItem
+                    key={`deal-skeleton-${index}`}
+                    className="basis-[42%] sm:basis-[30%] lg:basis-[19%]"
+                  >
+                    <div className="overflow-hidden rounded-2xl border border-border bg-card p-1 shadow-sm">
+                      <Skeleton className="aspect-square w-full rounded-xl" />
+                      <div className="mt-3 space-y-2 px-2 pb-3">
+                        <Skeleton className="h-4 w-3/4" />
+                        <Skeleton className="h-3 w-1/2" />
+                        <Skeleton className="h-5 w-2/3" />
+                      </div>
                     </div>
-                    <p className="mt-1 text-xs text-muted-foreground line-through">
-                      ${deal.originalPrice.toFixed(2)}
-                    </p>
-                    <p className="text-base font-bold text-foreground">
-                      ${deal.price.toFixed(2)}
-                    </p>
-                  </div>
-                </div>
-              </CarouselItem>
-            ))}
+                  </CarouselItem>
+                ))
+              : deals.map((deal) => (
+                  <CarouselItem
+                    key={deal.id}
+                    className="basis-[42%] sm:basis-[30%] lg:basis-[19%]"
+                  >
+                    <div className="group overflow-hidden rounded-2xl border border-border bg-card p-1 shadow-sm">
+                      <div className="relative overflow-hidden rounded-xl bg-muted/50">
+                        <Link
+                          href={`/products/${deal.id}`}
+                          aria-label={deal.name}
+                        >
+                          {deal.image ? (
+                            /* eslint-disable-next-line @next/next/no-img-element */
+                            <img
+                              src={deal.image}
+                              alt={deal.name}
+                              loading="lazy"
+                              className={cn(
+                                "aspect-square w-full object-cover",
+                                !deal.in_stock && "opacity-50 grayscale",
+                              )}
+                            />
+                          ) : (
+                            <div
+                              aria-hidden
+                              className="flex aspect-square w-full items-center justify-center bg-muted text-2xl font-bold text-muted-foreground"
+                            >
+                              {deal.name.charAt(0).toUpperCase()}
+                            </div>
+                          )}
+                        </Link>
+
+                        {deal.discount_percentage !== null && (
+                          <span className="absolute top-2 left-2 rounded-md bg-red-100 px-2 py-0.5 text-xs font-bold text-red-600">
+                            -{deal.discount_percentage}%
+                          </span>
+                        )}
+
+                        {!deal.in_stock && (
+                          <span className="absolute inset-x-2 bottom-2 rounded-full bg-background/90 py-1.5 text-center text-xs font-medium text-muted-foreground backdrop-blur">
+                            Rupture de stock
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="mt-3 px-2 pb-3">
+                        <p className="truncate text-sm font-semibold text-foreground">
+                          <Link href={`/products/${deal.id}`}>{deal.name}</Link>
+                        </p>
+                        {deal.compare_price !== null &&
+                          deal.compare_price > deal.price && (
+                            <p className="mt-1 text-xs text-muted-foreground line-through">
+                              {formatPrice(deal.compare_price)}
+                            </p>
+                          )}
+                        <p className="text-base font-bold text-foreground">
+                          {formatPrice(deal.price)}
+                        </p>
+                      </div>
+                    </div>
+                  </CarouselItem>
+                ))}
           </CarouselContent>
 
           <CarouselNextFloating />

@@ -71,6 +71,13 @@ export function OrderFormFields({ form, idPrefix }: OrderFormFieldsProps) {
     can_be_opened: canBeOpened,
   })
 
+  const { refetch: refetchPackagePrice } = packagePriceQuery
+
+  React.useEffect(() => {
+    if (!canCalculateDeliveryPrice) return
+    refetchPackagePrice()
+  }, [canCalculateDeliveryPrice, freeDelivery, canBeOpened, refetchPackagePrice])
+
   React.useEffect(() => {
     if (!canCalculateDeliveryPrice) {
       setValue("delivery_price", 0)
@@ -316,7 +323,7 @@ export function OrderFormFields({ form, idPrefix }: OrderFormFieldsProps) {
                 canCalculateDeliveryPrice ? "Calcul…" : "Sélectionnez la wilaya (et le stop desk)"
               }
               value={
-                canCalculateDeliveryPrice && packagePriceQuery.isSuccess
+                canCalculateDeliveryPrice && packagePriceQuery.isSuccess && !packagePriceQuery.isFetching
                   ? `${amountFormatter.format(deliveryPrice)} DZD`
                   : ""
               }
