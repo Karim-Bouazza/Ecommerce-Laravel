@@ -5,6 +5,7 @@ import { Controller, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { NextIntlClientProvider, useLocale, useTranslations } from "next-intl";
 import {
   Building2,
   CheckCircle2,
@@ -40,6 +41,9 @@ import type { StorefrontProductDetail } from "@/features/storefront/catalog/api/
 import { createStorefrontOrder } from "./api/orders-api";
 import { createCodOrderSchema, type CodOrderSchema } from "./cod-order-schema";
 import { MAX_ORDER_QUANTITY, type DeliveryType } from "./product-data";
+import { useStorefrontLanguage } from "@/features/storefront/components/storefront-locale";
+import frenchMessages from "./messages/fr.json";
+import arabicMessages from "./messages/ar.json";
 
 function stopDeskPriceFor(wilaya: Wilaya | undefined): number | null {
   if (!wilaya) return null
@@ -48,20 +52,14 @@ function stopDeskPriceFor(wilaya: Wilaya | undefined): number | null {
 
 const DELIVERY_OPTIONS: {
   value: DeliveryType;
-  label: string;
-  hint: string;
   icon: typeof House;
 }[] = [
   {
     value: "home",
-    label: "À domicile",
-    hint: "Livré à votre adresse",
     icon: House,
   },
   {
     value: "stopdesk",
-    label: "Stop desk",
-    hint: "Retrait au bureau",
     icon: Building2,
   },
 ];
@@ -75,13 +73,15 @@ function QuantityStepper({
   onChange: (value: number) => void;
   max: number;
 }) {
+  const t = useTranslations("OrderForm");
+
   return (
     <div className="inline-flex h-11 items-center rounded-full border border-border">
       <button
         type="button"
         onClick={() => onChange(Math.max(1, value - 1))}
         disabled={value <= 1}
-        aria-label="Diminuer la quantité"
+        aria-label={t("decreaseQuantity")}
         className="flex size-11 items-center justify-center rounded-full transition-colors hover:bg-muted disabled:opacity-40"
       >
         <Minus className="size-4" />
@@ -96,7 +96,7 @@ function QuantityStepper({
         type="button"
         onClick={() => onChange(Math.min(max, value + 1))}
         disabled={value >= max}
-        aria-label="Augmenter la quantité"
+        aria-label={t("increaseQuantity")}
         className="flex size-11 items-center justify-center rounded-full transition-colors hover:bg-muted disabled:opacity-40"
       >
         <Plus className="size-4" />
@@ -110,13 +110,35 @@ export function CodOrderForm({
 }: {
   product: StorefrontProductDetail;
 }) {
+  const locale = useStorefrontLanguage();
+  const messages = locale === "ar" ? arabicMessages : frenchMessages;
+
+  return (
+    <NextIntlClientProvider locale={locale} messages={{ OrderForm: messages }}>
+      <CodOrderFormContent product={product} />
+    </NextIntlClientProvider>
+  );
+}
+
+function CodOrderFormContent({ product }: { product: StorefrontProductDetail }) {
+  const locale = useLocale();
+  const t = useTranslations("OrderForm");
+  const isArabic = locale === "ar";
   const [confirmed, setConfirmed] = useState<{
     values: CodOrderSchema;
     reference: string;
   } | null>(null);
 
   const hasVariants = product.variants.length > 0;
-  const schema = useMemo(() => createCodOrderSchema(hasVariants), [hasVariants]);
+  const schema = useMemo(() => createCodOrderSchema(hasVariants, {
+    firstName: t("validation.firstName"),
+    lastName: t("validation.lastName"),
+    phone: t("validation.phone"),
+    wilaya: t("validation.wilaya"),
+    wilayaNotFound: t("validation.wilayaNotFound"),
+    commune: t("validation.commune"),
+    option: t("validation.option"),
+  }), [hasVariants, t]);
 
   const form = useForm<CodOrderSchema>({
     resolver: zodResolver(schema),
@@ -208,34 +230,34 @@ export function CodOrderForm({
       });
 
       setConfirmed({ values, reference: order.reference });
-      toast.success(
-        "Commande envoyée ! Nous vous appellerons pour la confirmer.",
-      );
+      toast.success(t("orderSent"));
     } catch (error) {
-      toast.error(getErrorMessage(error));
+      toast.error(isArabic ? t("orderFailed") : getErrorMessage(error));
     }
   });
 
   if (confirmed) {
     return (
-      <div className="flex flex-col items-center rounded-3xl border border-border bg-card p-6 text-center shadow-xs sm:p-8">
+      <div lang={locale} dir={isArabic ? "rtl" : "ltr"} className="flex flex-col items-center rounded-3xl border border-border bg-card p-6 text-center shadow-xs sm:p-8">
         <div className="flex size-14 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-500/15">
           <CheckCircle2 className="size-7" />
         </div>
         <h2 className="mt-4 text-lg font-semibold">
-          Merci {confirmed.values.first_name} !
+          {t("thankYou", { name: confirmed.values.first_name })}
         </h2>
         <p className="mt-2 max-w-sm text-sm text-muted-foreground">
-          Votre commande{" "}
+          {t("confirmationStart")}{" "}
           <span className="font-medium text-foreground">
             #{confirmed.reference}
           </span>{" "}
-          de {confirmed.values.quantity} × {product.name} a bien été
-          enregistrée. Un conseiller vous appellera au{" "}
+          {t("confirmationDetails", {
+            quantity: confirmed.values.quantity,
+            product: product.name,
+          })}{" "}
           <span className="font-medium text-foreground">
             {confirmed.values.phone_number}
           </span>{" "}
-          pour la confirmer. Vous paierez à la livraison.
+          {t("confirmationEnd")}
         </p>
         <button
           type="button"
@@ -245,7 +267,7 @@ export function CodOrderForm({
           }}
           className="mt-6 rounded-full border border-border px-6 py-2.5 text-sm font-semibold transition-colors hover:bg-muted"
         >
-          Passer une autre commande
+          {t("anotherOrder")}
         </button>
       </div>
     );
@@ -255,27 +277,32 @@ export function CodOrderForm({
     <form
       onSubmit={onSubmit}
       noValidate
+      lang={locale}
+      dir={isArabic ? "rtl" : "ltr"}
       aria-labelledby="cod-form-title"
       className="rounded-3xl border border-border bg-card p-4 shadow-xs sm:p-6"
     >
       <div className="mb-5">
         <h2 id="cod-form-title" className="text-base font-semibold text-center">
-          Commander maintenant
+          {t("title")}
         </h2>
       </div>
 
       <FieldGroup className="gap-4">
         <div className="grid gap-4 sm:grid-cols-2">
           <Field data-invalid={!!errors.last_name}>
-            <FieldLabel htmlFor="last_name">Nom</FieldLabel>
-            <InputGroup className="h-11">
-              <InputGroupAddon>
+            <FieldLabel htmlFor="last_name">{t("lastName")}</FieldLabel>
+            <InputGroup dir={isArabic ? "rtl" : "ltr"} className="h-11">
+              <InputGroupAddon
+                align="inline-start"
+                className={isArabic ? "pr-3" : undefined}
+              >
                 <User />
               </InputGroupAddon>
               <InputGroupInput
                 id="last_name"
                 autoComplete="family-name"
-                placeholder="Entrer Nom"
+                placeholder={t("lastNamePlaceholder")}
                 aria-invalid={!!errors.last_name}
                 {...register("last_name")}
               />
@@ -286,15 +313,18 @@ export function CodOrderForm({
           </Field>
 
           <Field data-invalid={!!errors.first_name}>
-            <FieldLabel htmlFor="first_name">Prénom</FieldLabel>
-            <InputGroup className="h-11">
-              <InputGroupAddon>
+            <FieldLabel htmlFor="first_name">{t("firstName")}</FieldLabel>
+            <InputGroup dir={isArabic ? "rtl" : "ltr"} className="h-11">
+              <InputGroupAddon
+                align="inline-start"
+                className={isArabic ? "pr-3" : undefined}
+              >
                 <User />
               </InputGroupAddon>
               <InputGroupInput
                 id="first_name"
                 autoComplete="given-name"
-                placeholder="Entrer Prénom"
+                placeholder={t("firstNamePlaceholder")}
                 aria-invalid={!!errors.first_name}
                 {...register("first_name")}
               />
@@ -307,9 +337,12 @@ export function CodOrderForm({
         </div>
 
         <Field data-invalid={!!errors.phone_number}>
-          <FieldLabel htmlFor="phone_number">Téléphone</FieldLabel>
-          <InputGroup className="h-11">
-            <InputGroupAddon>
+          <FieldLabel htmlFor="phone_number">{t("phone")}</FieldLabel>
+          <InputGroup dir={isArabic ? "rtl" : "ltr"} className="h-11">
+            <InputGroupAddon
+              align="inline-start"
+              className={isArabic ? "pr-3" : undefined}
+            >
               <Phone />
             </InputGroupAddon>
             <InputGroupInput
@@ -317,7 +350,9 @@ export function CodOrderForm({
               type="tel"
               inputMode="numeric"
               autoComplete="tel"
-              placeholder="Entrer téléphone"
+              placeholder={t("phonePlaceholder")}
+              dir="ltr"
+              className={isArabic ? "text-right" : undefined}
               aria-invalid={!!errors.phone_number}
               {...register("phone_number")}
             />
@@ -328,7 +363,7 @@ export function CodOrderForm({
         </Field>
 
         <Field data-invalid={!!errors.provider_wilaya_id}>
-          <FieldLabel htmlFor="provider_wilaya_id">Wilaya</FieldLabel>
+          <FieldLabel htmlFor="provider_wilaya_id">{t("wilaya")}</FieldLabel>
           <Controller
             control={control}
             name="provider_wilaya_id"
@@ -340,7 +375,8 @@ export function CodOrderForm({
                   setValue("wilaya_id", matchedWilayaId);
                   setValue("provider_commune_id", null);
                 }}
-                placeholder="Choisir la wilaya"
+                placeholder={t("wilayaPlaceholder")}
+                arabic={isArabic}
                 invalid={!!errors.provider_wilaya_id}
                 className="data-[size=default]:h-11"
               />
@@ -352,7 +388,7 @@ export function CodOrderForm({
         </Field>
 
         <Field data-invalid={!!errors.provider_commune_id}>
-          <FieldLabel htmlFor="provider_commune_id">Commune</FieldLabel>
+          <FieldLabel htmlFor="provider_commune_id">{t("commune")}</FieldLabel>
           <Controller
             control={control}
             name="provider_commune_id"
@@ -361,7 +397,8 @@ export function CodOrderForm({
                 providerWilayaId={providerWilayaId}
                 value={field.value}
                 onChange={field.onChange}
-                placeholder="Choisir la commune"
+                placeholder={t("communePlaceholder")}
+                arabic={isArabic}
                 invalid={!!errors.provider_commune_id}
                 className="data-[size=default]:h-11"
               />
@@ -373,14 +410,14 @@ export function CodOrderForm({
         </Field>
 
         <Field>
-          <FieldLabel>Mode de livraison</FieldLabel>
+          <FieldLabel>{t("deliveryMode")}</FieldLabel>
           <Controller
             control={control}
             name="delivery_type"
             render={({ field }) => (
               <div
                 role="radiogroup"
-                aria-label="Mode de livraison"
+                aria-label={t("deliveryMode")}
                 className="grid grid-cols-2 gap-3"
               >
                 {DELIVERY_OPTIONS.map((option) => {
@@ -394,7 +431,8 @@ export function CodOrderForm({
                       aria-checked={selected}
                       onClick={() => field.onChange(option.value)}
                       className={cn(
-                        "flex items-start gap-3 rounded-2xl border p-3 text-left transition-colors",
+                        "flex items-start gap-3 rounded-2xl border p-3 transition-colors",
+                        isArabic ? "text-right" : "text-left",
                         selected
                           ? "border-primary bg-primary/5 ring-1 ring-primary"
                           : "border-border hover:bg-muted",
@@ -408,10 +446,14 @@ export function CodOrderForm({
                       />
                       <span className="min-w-0">
                         <span className="block text-sm font-semibold">
-                          {option.label}
+                          {isArabic
+                            ? t("homeDelivery")
+                            : t("stopDesk")}
                         </span>
                         <span className="block text-xs text-muted-foreground">
-                          {price !== null ? formatPrice(price) : option.hint}
+                          {price !== null ? formatPrice(price) : option.value === "home"
+                            ? t("homeDeliveryHint")
+                            : t("stopDeskHint")}
                         </span>
                       </span>
                     </button>
@@ -424,14 +466,14 @@ export function CodOrderForm({
 
         {hasVariants && (
           <Field data-invalid={!!errors.variant_id}>
-            <FieldLabel>Choisissez une option</FieldLabel>
+            <FieldLabel>{t("chooseOption")}</FieldLabel>
             <Controller
               control={control}
               name="variant_id"
               render={({ field }) => (
                 <div
                   role="radiogroup"
-                  aria-label="Variante"
+                  aria-label={t("variant")}
                   className="flex flex-wrap gap-2"
                 >
                   {product.variants.map((variant) => {
@@ -466,7 +508,7 @@ export function CodOrderForm({
       </FieldGroup>
 
       <div className="mt-5 flex items-center justify-between gap-3">
-        <span className="text-sm font-medium">Quantité</span>
+        <span className="text-sm font-medium">{t("quantity")}</span>
         <Controller
           control={control}
           name="quantity"
@@ -483,20 +525,20 @@ export function CodOrderForm({
       <dl className="mt-5 space-y-2 rounded-2xl bg-muted/60 p-4 text-sm">
         <div className="flex justify-between">
           <dt className="text-muted-foreground">
-            Sous-total ({quantity} article{quantity > 1 ? "s" : ""})
+            {t("subtotal", { quantity })}
           </dt>
           <dd className="font-medium tabular-nums">{formatPrice(subtotal)}</dd>
         </div>
         <div className="flex justify-between">
-          <dt className="text-muted-foreground">Livraison</dt>
+          <dt className="text-muted-foreground">{t("shipping")}</dt>
           <dd className="font-medium tabular-nums">
             {deliveryPrice !== null
               ? formatPrice(deliveryPrice)
-              : "Choisissez une wilaya"}
+              : t("chooseWilaya")}
           </dd>
         </div>
         <div className="flex justify-between border-t border-border pt-2 text-base">
-          <dt className="font-semibold">Total</dt>
+          <dt className="font-semibold">{t("total")}</dt>
           <dd className="font-bold tabular-nums">{formatPrice(total)}</dd>
         </div>
       </dl>
@@ -507,10 +549,10 @@ export function CodOrderForm({
         className="mt-5 flex h-12 w-full items-center justify-center gap-2 rounded-full bg-primary text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
       >
         {isSubmitting && <Loader2 className="size-4 animate-spin" />}
-        Confirmer la commande
+        {t("confirmOrder")}
       </button>
       <p className="mt-3 text-center text-xs text-muted-foreground">
-        Paiement à la livraison · Aucun prépaiement requis
+        {t("paymentNotice")}
       </p>
     </form>
   );

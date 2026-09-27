@@ -31,6 +31,7 @@ export async function getWilayaCommunes(wilayaId: number): Promise<Commune[]> {
 export type ProviderWilaya = {
   id: number
   name: string
+  name_ar: string | null
   wilaya_id: number | null
 }
 
@@ -46,6 +47,7 @@ export async function getProviderWilayas(): Promise<ProviderWilaya[]> {
 export type ProviderCommune = {
   id: number
   name: string
+  name_ar: string | null
 }
 
 export async function getProviderCommunes(providerWilayaId: number): Promise<ProviderCommune[]> {

@@ -19,6 +19,7 @@ type ProviderCommuneSelectProps = {
   placeholder?: string;
   invalid?: boolean;
   className?: string;
+  arabic?: boolean;
 };
 
 export function ProviderCommuneSelect({
@@ -28,14 +29,17 @@ export function ProviderCommuneSelect({
   placeholder = "Commune",
   invalid,
   className,
+  arabic = false,
 }: ProviderCommuneSelectProps) {
   const { data: providerCommunes = [] } = useProviderCommunes(providerWilayaId);
   const nameById = React.useMemo(
-    () =>
-      new Map(
-        providerCommunes.map((commune) => [String(commune.id), commune.name]),
-      ),
-    [providerCommunes],
+    () => new Map(
+      providerCommunes.map((commune) => [
+        String(commune.id),
+        arabic ? commune.name_ar ?? commune.name : commune.name,
+      ]),
+    ),
+    [providerCommunes, arabic],
   );
 
   return (
@@ -47,21 +51,21 @@ export function ProviderCommuneSelect({
       }}
       disabled={providerWilayaId === null}
     >
-      <SelectTrigger className={cn("w-full", className)} aria-invalid={invalid}>
+      <SelectTrigger dir={arabic ? "rtl" : "ltr"} className={cn("w-full", className)} aria-invalid={invalid}>
         <SelectValue placeholder={placeholder}>
           {(selected: string | null) =>
             selected ? (nameById.get(selected) ?? selected) : placeholder
           }
         </SelectValue>
       </SelectTrigger>
-      <SelectContent>
+      <SelectContent dir={arabic ? "rtl" : "ltr"}>
         {providerCommunes.map((commune) => (
           <SelectItem
             key={commune.id}
             value={String(commune.id)}
-            className="py-1.5 text-sm"
+            className="py-2.5 text-base"
           >
-            {commune.name}
+            {arabic ? commune.name_ar ?? commune.name : commune.name}
           </SelectItem>
         ))}
       </SelectContent>

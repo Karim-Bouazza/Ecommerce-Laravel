@@ -214,6 +214,7 @@ export const NAV_SECTIONS: NavSection[] = [
         items: [
           { label: "Couleurs", href: "/admin/website/colors" },
           { label: "Logo", href: "/admin/website/logo" },
+          { label: "Langue", href: "/admin/website/language" },
           { label: "Catégories (Accueil)", href: "/admin/website/hero-categories" },
         ],
       },

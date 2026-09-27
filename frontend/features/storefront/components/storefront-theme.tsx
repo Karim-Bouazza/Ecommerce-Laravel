@@ -2,8 +2,10 @@ import type { ReactNode } from "react"
 
 import { getColorsTheme } from "@/features/site-settings/api/colors-theme-api"
 import { getLogo } from "@/features/site-settings/api/logo-api"
-import type { SiteColorsTheme } from "@/features/site-settings/types"
+import { getSiteLanguage } from "@/features/site-settings/api/language-api"
+import type { SiteColorsTheme, SiteLanguage } from "@/features/site-settings/types"
 import { StorefrontLogoProvider } from "@/features/storefront/lib/logo-context"
+import { StorefrontLanguageProvider } from "@/features/storefront/components/storefront-locale"
 
 const DEFAULT_COLORS_THEME: SiteColorsTheme = {
   primary_color: "#007fff",
@@ -22,9 +24,10 @@ function safeColor(theme: SiteColorsTheme, key: keyof SiteColorsTheme): string {
 }
 
 export async function StorefrontTheme({ children }: { children: ReactNode }) {
-  const [theme, logo] = await Promise.all([
+  const [theme, logo, languageSetting] = await Promise.all([
     getColorsTheme().catch(() => DEFAULT_COLORS_THEME),
     getLogo().catch(() => null),
+    getSiteLanguage().catch(() => ({ language: "fr" as SiteLanguage })),
   ])
 
   const css = `:root {
@@ -49,7 +52,9 @@ export async function StorefrontTheme({ children }: { children: ReactNode }) {
   return (
     <>
       <style>{css}</style>
-      <StorefrontLogoProvider logoUrl={logo?.logo_url ?? null}>{children}</StorefrontLogoProvider>
+      <StorefrontLanguageProvider language={languageSetting.language}>
+        <StorefrontLogoProvider logoUrl={logo?.logo_url ?? null}>{children}</StorefrontLogoProvider>
+      </StorefrontLanguageProvider>
     </>
   )
 }

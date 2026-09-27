@@ -11,6 +11,12 @@ export type SiteLogo = {
   logo_url: string | null
 }
 
+export type SiteLanguage = "fr" | "ar"
+
+export type SiteLanguageSetting = {
+  language: SiteLanguage
+}
+
 export type HeroCategory = {
   id: number
   position: number

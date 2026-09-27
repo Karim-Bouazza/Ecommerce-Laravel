@@ -19,6 +19,7 @@ type ProviderWilayaSelectProps = {
   disabled?: boolean
   invalid?: boolean
   className?: string
+  arabic?: boolean
 }
 
 export function ProviderWilayaSelect({
@@ -28,6 +29,7 @@ export function ProviderWilayaSelect({
   disabled,
   invalid,
   className,
+  arabic = false,
 }: ProviderWilayaSelectProps) {
   const { data: providerWilayas = [] } = useProviderWilayas()
   const byId = React.useMemo(
@@ -45,15 +47,18 @@ export function ProviderWilayaSelect({
       }}
       disabled={disabled}
     >
-      <SelectTrigger className={cn("w-full", className)} aria-invalid={invalid}>
+      <SelectTrigger dir={arabic ? "rtl" : "ltr"} className={cn("w-full", className)} aria-invalid={invalid}>
         <SelectValue placeholder={placeholder}>
-          {(selected: string | null) => (selected ? (byId.get(selected)?.name ?? selected) : placeholder)}
+          {(selected: string | null) => {
+            const item = selected ? byId.get(selected) : undefined
+            return item ? (arabic ? item.name_ar ?? item.name : item.name) : placeholder
+          }}
         </SelectValue>
       </SelectTrigger>
-      <SelectContent>
+      <SelectContent dir={arabic ? "rtl" : "ltr"}>
         {providerWilayas.map((wilaya) => (
-          <SelectItem key={wilaya.id} value={String(wilaya.id)} className="py-1.5 text-sm">
-            {wilaya.name}
+          <SelectItem key={wilaya.id} value={String(wilaya.id)} className="py-2.5 text-base">
+            {arabic ? wilaya.name_ar ?? wilaya.name : wilaya.name}
           </SelectItem>
         ))}
       </SelectContent>

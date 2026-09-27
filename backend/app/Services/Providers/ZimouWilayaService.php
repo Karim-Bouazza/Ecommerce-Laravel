@@ -31,7 +31,7 @@ class ZimouWilayaService
     }
 
     /**
-     * @return array<int, array{id: int, name: string, wilaya_id: int|null}>
+     * @return array<int, array{id: int, name: string, name_ar: string|null, wilaya_id: int|null}>
      */
     public function listWithLocalMatch(): array
     {
@@ -39,6 +39,7 @@ class ZimouWilayaService
             ->map(fn (array $wilaya) => [
                 ...$wilaya,
                 'wilaya_id' => $this->matchLocalWilayaId($wilaya['name']),
+                'name_ar' => Wilaya::where('provider_id', $wilaya['id'])->value('ar_name'),
             ])
             ->all();
     }

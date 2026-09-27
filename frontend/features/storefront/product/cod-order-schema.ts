@@ -1,15 +1,28 @@
 import { z } from "zod"
 import { MAX_ORDER_QUANTITY } from "./product-data"
 
-export function createCodOrderSchema(requireVariant: boolean) {
+export type CodOrderValidationMessages = {
+  firstName: string
+  lastName: string
+  phone: string
+  wilaya: string
+  wilayaNotFound: string
+  commune: string
+  option: string
+}
+
+export function createCodOrderSchema(
+  requireVariant: boolean,
+  messages: CodOrderValidationMessages,
+) {
   return z
     .object({
-      first_name: z.string().trim().min(2, "Le prénom est requis."),
-      last_name: z.string().trim().min(2, "Le nom est requis."),
+      first_name: z.string().trim().min(2, messages.firstName),
+      last_name: z.string().trim().min(2, messages.lastName),
       phone_number: z
         .string()
         .trim()
-        .regex(/^0[567]\d{8}$/, "Numéro invalide (ex : 0550 12 34 56)."),
+        .regex(/^0[567]\d{8}$/, messages.phone),
       provider_wilaya_id: z.number().nullable(),
       wilaya_id: z.number().nullable(),
       provider_commune_id: z.number().nullable(),
@@ -18,19 +31,19 @@ export function createCodOrderSchema(requireVariant: boolean) {
       quantity: z.number().int().min(1).max(MAX_ORDER_QUANTITY),
     })
     .refine((data) => data.provider_wilaya_id !== null, {
-      message: "La wilaya est requise.",
+      message: messages.wilaya,
       path: ["provider_wilaya_id"],
     })
     .refine((data) => data.provider_wilaya_id === null || data.wilaya_id !== null, {
-      message: "Wilaya introuvable, veuillez en choisir une autre.",
+      message: messages.wilayaNotFound,
       path: ["provider_wilaya_id"],
     })
     .refine((data) => data.provider_commune_id !== null, {
-      message: "La commune est requise.",
+      message: messages.commune,
       path: ["provider_commune_id"],
     })
     .refine((data) => !requireVariant || data.variant_id !== null, {
-      message: "Choisissez une option.",
+      message: messages.option,
       path: ["variant_id"],
     })
 }

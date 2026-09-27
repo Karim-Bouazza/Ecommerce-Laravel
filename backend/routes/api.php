@@ -24,6 +24,7 @@ use App\Http\Controllers\Api\ReturnEntryController;
 use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\SiteSettingColorsThemeController;
 use App\Http\Controllers\Api\SiteSettingLogoController;
+use App\Http\Controllers\Api\SiteSettingLanguageController;
 use App\Http\Controllers\Api\StockAlertController;
 use App\Http\Controllers\Api\StockController;
 use App\Http\Controllers\Api\StockMovementController;
@@ -62,6 +63,7 @@ Route::prefix('v1')->group(function () {
     Route::post('/orders', [OrderController::class, 'store']);
     Route::get('/site-settings/colors-theme', [SiteSettingColorsThemeController::class, 'show']);
     Route::get('/site-settings/logo', [SiteSettingLogoController::class, 'show']);
+    Route::get('/site-settings/language', [SiteSettingLanguageController::class, 'show']);
     Route::get('/site-settings/hero-categories', [StorefrontHeroCategoryController::class, 'index']);
     Route::get('/storefront/products', [StorefrontProductController::class, 'index']);
     Route::get('/storefront/products/deals-of-the-day', [StorefrontProductController::class, 'deals']);
@@ -107,6 +109,7 @@ Route::prefix('v1')->group(function () {
         Route::delete('/product-reviews/{productReview}', [ProductReviewController::class, 'destroy']);
         Route::put('/site-settings/colors-theme', [SiteSettingColorsThemeController::class, 'update']);
         Route::put('/site-settings/logo', [SiteSettingLogoController::class, 'update']);
+        Route::put('/site-settings/language', [SiteSettingLanguageController::class, 'update']);
         Route::post('/site-settings/hero-categories', [StorefrontHeroCategoryController::class, 'store']);
         Route::put('/site-settings/hero-categories/{heroCategory}', [StorefrontHeroCategoryController::class, 'update']);
         Route::delete('/site-settings/hero-categories/{heroCategory}', [StorefrontHeroCategoryController::class, 'destroy']);
