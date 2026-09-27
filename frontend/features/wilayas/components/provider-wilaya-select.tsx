@@ -2,7 +2,6 @@
 
 import * as React from "react"
 import { cn } from "cn"
-
 import {
   Select,
   SelectContent,
@@ -14,7 +13,7 @@ import { useProviderWilayas } from "@/features/wilayas/hooks/use-provider-wilaya
 
 type ProviderWilayaSelectProps = {
   value: number | null
-  onChange: (providerWilayaId: number, matchedWilayaId: number | null) => void
+  onChange: (providerWilayaId: number | null, matchedWilayaId: number | null) => void
   placeholder?: string
   disabled?: boolean
   invalid?: boolean
@@ -47,7 +46,12 @@ export function ProviderWilayaSelect({
       }}
       disabled={disabled}
     >
-      <SelectTrigger dir={arabic ? "rtl" : "ltr"} className={cn("w-full", className)} aria-invalid={invalid}>
+      <SelectTrigger
+        aria-labelledby="provider_wilaya_label"
+        dir={arabic ? "rtl" : "ltr"}
+        className={cn("h-12 w-full text-base", className)}
+        aria-invalid={invalid}
+      >
         <SelectValue placeholder={placeholder}>
           {(selected: string | null) => {
             const item = selected ? byId.get(selected) : undefined
@@ -55,9 +59,17 @@ export function ProviderWilayaSelect({
           }}
         </SelectValue>
       </SelectTrigger>
-      <SelectContent dir={arabic ? "rtl" : "ltr"}>
+      <SelectContent
+        dir={arabic ? "rtl" : "ltr"}
+        className="max-h-[65dvh] touch-pan-y overscroll-contain"
+        align="start"
+      >
         {providerWilayas.map((wilaya) => (
-          <SelectItem key={wilaya.id} value={String(wilaya.id)} className="py-2.5 text-base">
+          <SelectItem
+            key={wilaya.id}
+            value={String(wilaya.id)}
+            className="min-h-12 py-3 text-base"
+          >
             {arabic ? wilaya.name_ar ?? wilaya.name : wilaya.name}
           </SelectItem>
         ))}

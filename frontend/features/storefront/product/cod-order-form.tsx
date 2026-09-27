@@ -176,7 +176,7 @@ function CodOrderFormContent({ product }: { product: StorefrontProductDetail }) 
   );
 
   const { data: homeDeliveryPrice = null } = useProviderHomeDeliveryPrice(providerWilayaId);
-  const stopDeskPrice = providerCommuneId !== null ? stopDeskPriceFor(selectedWilaya) : null;
+  const stopDeskPrice = stopDeskPriceFor(selectedWilaya);
 
   const subtotal = product.price * quantity;
   const deliveryPrice = deliveryType === "home" ? homeDeliveryPrice : stopDeskPrice;
@@ -363,7 +363,7 @@ function CodOrderFormContent({ product }: { product: StorefrontProductDetail }) 
         </Field>
 
         <Field data-invalid={!!errors.provider_wilaya_id}>
-          <FieldLabel htmlFor="provider_wilaya_id">{t("wilaya")}</FieldLabel>
+          <FieldLabel id="provider_wilaya_label" htmlFor="provider_wilaya_id">{t("wilaya")}</FieldLabel>
           <Controller
             control={control}
             name="provider_wilaya_id"
@@ -378,7 +378,7 @@ function CodOrderFormContent({ product }: { product: StorefrontProductDetail }) 
                 placeholder={t("wilayaPlaceholder")}
                 arabic={isArabic}
                 invalid={!!errors.provider_wilaya_id}
-                className="data-[size=default]:h-11"
+                className="data-[size=default]:h-12"
               />
             )}
           />
@@ -388,7 +388,7 @@ function CodOrderFormContent({ product }: { product: StorefrontProductDetail }) 
         </Field>
 
         <Field data-invalid={!!errors.provider_commune_id}>
-          <FieldLabel htmlFor="provider_commune_id">{t("commune")}</FieldLabel>
+          <FieldLabel id="provider_commune_label" htmlFor="provider_commune_id">{t("commune")}</FieldLabel>
           <Controller
             control={control}
             name="provider_commune_id"
@@ -400,7 +400,7 @@ function CodOrderFormContent({ product }: { product: StorefrontProductDetail }) 
                 placeholder={t("communePlaceholder")}
                 arabic={isArabic}
                 invalid={!!errors.provider_commune_id}
-                className="data-[size=default]:h-11"
+                className="data-[size=default]:h-12"
               />
             )}
           />

@@ -46,24 +46,33 @@ export function ProviderCommuneSelect({
     <Select
       value={value !== null ? String(value) : null}
       onValueChange={(next) => {
-        if (next === null) return;
-        onChange(Number(next));
+        if (next === null) return
+        onChange(Number(next))
       }}
       disabled={providerWilayaId === null}
     >
-      <SelectTrigger dir={arabic ? "rtl" : "ltr"} className={cn("w-full", className)} aria-invalid={invalid}>
+      <SelectTrigger
+        aria-labelledby="provider_commune_label"
+        dir={arabic ? "rtl" : "ltr"}
+        className={cn("h-12 w-full text-base", className)}
+        aria-invalid={invalid}
+      >
         <SelectValue placeholder={placeholder}>
           {(selected: string | null) =>
             selected ? (nameById.get(selected) ?? selected) : placeholder
           }
         </SelectValue>
       </SelectTrigger>
-      <SelectContent dir={arabic ? "rtl" : "ltr"}>
+      <SelectContent
+        dir={arabic ? "rtl" : "ltr"}
+        className="max-h-[65dvh] touch-pan-y overscroll-contain"
+        align="start"
+      >
         {providerCommunes.map((commune) => (
           <SelectItem
             key={commune.id}
             value={String(commune.id)}
-            className="py-2.5 text-base"
+            className="min-h-12 py-3 text-base"
           >
             {arabic ? commune.name_ar ?? commune.name : commune.name}
           </SelectItem>
