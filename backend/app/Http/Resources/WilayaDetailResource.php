@@ -18,6 +18,7 @@ class WilayaDetailResource extends JsonResource
             'id' => $this->id,
             'code' => $this->code,
             'name' => $this->name,
+            'ar_name' => $this->ar_name,
 
             'communes' => CommuneResource::collection($this->whenLoaded('communes')),
         ];

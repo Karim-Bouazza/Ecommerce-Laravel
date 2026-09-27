@@ -10,6 +10,8 @@ class Communes extends Model
     protected $fillable = [
         'wilaya_id',
         'name',
+        'ar_name',
+        'provider_id',
     ];
 
     public function Wilaya(): BelongsTo

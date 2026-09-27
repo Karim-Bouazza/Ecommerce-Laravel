@@ -4,23 +4,8 @@ import { useState, type FormEvent } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Bell, LogOut, Package, Search, ShoppingBag, User } from "lucide-react"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+import { Search } from "lucide-react"
 import { useStorefrontLogo } from "@/features/storefront/lib/logo-context"
-
-// TODO: remplacer par les données réelles (session + panier)
-const CURRENT_USER = {
-  name: "Karim Bouazza",
-  avatar: "https://picsum.photos/seed/codavenir-user/80/80",
-}
-const CART_COUNT = 2
-const HAS_NOTIFICATIONS = true
 
 function SearchBar() {
   const router = useRouter()
@@ -90,63 +75,6 @@ export function Navbar() {
 
         <div className="min-w-0 flex-1">
           <SearchBar />
-        </div>
-
-        <div className="flex shrink-0 items-center gap-2 sm:gap-4">
-          <Link
-            href="/notifications"
-            aria-label="Notifications"
-            className="relative flex size-10 items-center justify-center rounded-full transition-colors hover:bg-muted"
-          >
-            <Bell className="size-5" />
-            {HAS_NOTIFICATIONS && (
-              <span className="absolute top-2 right-2.5 size-2 rounded-full bg-red-500 ring-2 ring-background" />
-            )}
-          </Link>
-
-          <Link
-            href="/cart"
-            aria-label={`Panier, ${CART_COUNT} articles`}
-            className="flex h-10 items-center gap-2 rounded-full bg-muted px-3 text-sm font-semibold transition-colors hover:bg-muted/70 sm:px-4"
-          >
-            <ShoppingBag className="size-4" />
-            <span>
-              {CART_COUNT}
-              <span className="hidden sm:inline"> articles</span>
-            </span>
-          </Link>
-
-          <span className="hidden h-6 w-px bg-border sm:block" aria-hidden />
-
-          <DropdownMenu>
-            <DropdownMenuTrigger className="flex items-center gap-2.5 rounded-full p-1 outline-none transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring sm:pr-3">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={CURRENT_USER.avatar}
-                alt=""
-                className="size-8 rounded-full object-cover"
-              />
-              <span className="hidden text-sm font-semibold sm:inline">
-                {CURRENT_USER.name}
-              </span>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem render={<Link href="/profile" />}>
-                <User />
-                Mon profil
-              </DropdownMenuItem>
-              <DropdownMenuItem render={<Link href="/orders" />}>
-                <Package />
-                Mes commandes
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              {/* TODO: brancher sur la déconnexion */}
-              <DropdownMenuItem variant="destructive">
-                <LogOut />
-                Déconnexion
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
         </div>
       </div>
     </header>

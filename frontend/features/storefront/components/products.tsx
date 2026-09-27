@@ -1,7 +1,14 @@
 "use client";
 
-import { Fragment, useState } from "react";
+import { useState } from "react";
+import Link from "next/link";
+import { useQuery } from "@tanstack/react-query";
 import { Star } from "lucide-react";
+import { formatPrice } from "@/shared/lib/format-price";
+import {
+  getStorefrontProducts,
+  type StorefrontProduct,
+} from "@/features/storefront/catalog/api/products-api";
 
 type ProductTag = "latest" | "bestseller" | "featured";
 
@@ -14,7 +21,6 @@ type Product = {
   discountPercent: number;
   rating: number;
   tags: ProductTag[];
-  countdownLabel?: string;
 };
 
 const PRODUCTS: Product[] = [
@@ -27,7 +33,6 @@ const PRODUCTS: Product[] = [
     discountPercent: 50,
     rating: 4.9,
     tags: ["latest", "bestseller"],
-    countdownLabel: "05 : 12 : 30 : 25",
   },
   {
     name: "Wireless Alarm Panel Kit",
@@ -108,12 +113,131 @@ const FILTERS: { label: string; value: "all" | ProductTag }[] = [
   { label: "Featured Products", value: "featured" },
 ];
 
+const LATEST_LIMIT = 8;
+
+function LatestProductsGrid() {
+  const { data, isLoading, isError, refetch } = useQuery({
+    queryKey: ["storefront-products", "latest", LATEST_LIMIT],
+    queryFn: () =>
+      getStorefrontProducts({ sort: "newest", per_page: LATEST_LIMIT }),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  if (isLoading) {
+    return (
+      <div className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 lg:gap-6">
+        {Array.from({ length: LATEST_LIMIT }).map((_, i) => (
+          <div
+            key={i}
+            className="animate-pulse overflow-hidden rounded-2xl border border-border bg-card"
+          >
+            <div className="aspect-square w-full bg-muted" />
+            <div className="space-y-2 p-3">
+              <div className="h-3 w-2/3 rounded bg-muted" />
+              <div className="h-3 w-1/3 rounded bg-muted" />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="mt-10 flex flex-col items-center gap-3 text-center">
+        <p className="text-sm text-muted-foreground">
+          Failed to load the latest products.
+        </p>
+        <button
+          type="button"
+          onClick={() => refetch()}
+          className="rounded-full border border-border px-5 py-2.5 text-sm font-medium transition-colors hover:bg-muted"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+
+  const products: StorefrontProduct[] = data?.data ?? [];
+
+  if (products.length === 0) {
+    return (
+      <p className="mt-10 text-center text-sm text-muted-foreground">
+        No products yet.
+      </p>
+    );
+  }
+
+  return (
+    <div className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 lg:gap-6">
+      {products.map((product) => (
+        <div
+          key={product.id}
+          className="group overflow-hidden rounded-2xl border border-border bg-card"
+        >
+          <div className="relative bg-muted/50">
+            {product.discount_percentage !== null ? (
+              <span className="absolute top-4 left-4 z-10 rounded-full bg-primary px-4 py-1.5 text-sm font-semibold text-primary-foreground">
+                {product.discount_percentage}% off
+              </span>
+            ) : product.is_new ? (
+              <span className="absolute top-4 left-4 z-10 rounded-full bg-primary px-4 py-1.5 text-sm font-semibold text-primary-foreground">
+                New
+              </span>
+            ) : null}
+
+            <Link href={`/products/${product.id}`} aria-label={product.name}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={
+                  product.image ??
+                  `https://picsum.photos/seed/product-${product.id}/400/400`
+                }
+                alt={product.name}
+                loading="lazy"
+                className="aspect-square w-full object-cover"
+              />
+            </Link>
+
+            {!product.in_stock ? (
+              <span className="absolute inset-x-2 bottom-2 rounded-full bg-background/90 py-1.5 text-center text-xs font-medium text-muted-foreground">
+                Out of stock
+              </span>
+            ) : null}
+          </div>
+
+          <div className="p-3">
+            <p className="text-xs text-muted-foreground">
+              {product.category ?? "—"}
+            </p>
+            <p className="mt-1 truncate text-sm font-semibold text-foreground">
+              <Link href={`/products/${product.id}`}>{product.name}</Link>
+            </p>
+            <div className="mt-1 flex items-center gap-2">
+              <span className="text-sm font-bold text-foreground">
+                {formatPrice(product.price)}
+              </span>
+              {product.compare_price !== null &&
+              product.compare_price > product.price ? (
+                <span className="text-xs text-muted-foreground line-through">
+                  {formatPrice(product.compare_price)}
+                </span>
+              ) : null}
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function Products() {
   const [activeFilter, setActiveFilter] = useState<"all" | ProductTag>("all");
 
   const filteredProducts =
     activeFilter === "all"
-      ? PRODUCTS
+      ? []
       : PRODUCTS.filter((product) => product.tags.includes(activeFilter));
 
   return (
@@ -145,68 +269,54 @@ export function Products() {
         ))}
       </div>
 
-      <div className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 lg:gap-6">
-        {filteredProducts.map((product) => (
-          <div
-            key={product.name}
-            className="group overflow-hidden rounded-2xl border border-border bg-card"
-          >
-            <div className="relative bg-muted/50">
-              <span className="absolute top-4 left-4 rounded-full bg-primary px-4 py-1.5 text-sm font-semibold text-primary-foreground">
-                {product.discountPercent}% off
-              </span>
+      {activeFilter === "all" ? (
+        <LatestProductsGrid />
+      ) : (
+        <div className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 lg:gap-6">
+          {filteredProducts.map((product) => (
+            <div
+              key={product.name}
+              className="group overflow-hidden rounded-2xl border border-border bg-card"
+            >
+              <div className="relative bg-muted/50">
+                <span className="absolute top-4 left-4 rounded-full bg-primary px-4 py-1.5 text-sm font-semibold text-primary-foreground">
+                  {product.discountPercent}% off
+                </span>
 
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={product.image}
-                alt={product.name}
-                className="aspect-square w-full object-cover"
-              />
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={product.image}
+                  alt={product.name}
+                  className="aspect-square w-full object-cover"
+                />
+              </div>
 
-              {product.countdownLabel ? (
-                <div className="absolute right-2 bottom-1 left-2 flex items-center justify-around rounded-xl bg-background/95 px-3 py-2.5 text-center text-sm font-semibold text-foreground shadow-sm">
-                  {product.countdownLabel.split(" : ").map((part, i, arr) => (
-                    <Fragment key={i}>
-                      <span className="flex flex-col items-center">
-                        {part}
-                        <span className="text-[10px] font-normal text-muted-foreground">
-                          {["Days", "Hours", "Mins", "Sec"][i]}
-                        </span>
-                      </span>
-                      {i < arr.length - 1 ? (
-                        <span className="text-muted-foreground">:</span>
-                      ) : null}
-                    </Fragment>
-                  ))}
+              <div className="p-3">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-xs text-muted-foreground">
+                    {product.category}
+                  </p>
+                  <div className="flex items-center gap-1 text-xs font-medium text-foreground">
+                    {product.rating.toFixed(1)}
+                    <Star className="size-3.5 fill-primary text-primary" />
+                  </div>
                 </div>
-              ) : null}
-            </div>
-
-            <div className="p-3">
-              <div className="flex items-center justify-between gap-2">
-                <p className="text-xs text-muted-foreground">
-                  {product.category}
+                <p className="mt-1 truncate text-sm font-semibold text-foreground">
+                  {product.name}
                 </p>
-                <div className="flex items-center gap-1 text-xs font-medium text-foreground">
-                  {product.rating.toFixed(1)}
-                  <Star className="size-3.5 fill-primary text-primary" />
+                <div className="mt-1 flex items-center gap-2">
+                  <span className="text-sm font-bold text-foreground">
+                    ${product.price.toFixed(2)}
+                  </span>
+                  <span className="text-xs text-muted-foreground line-through">
+                    ${product.originalPrice.toFixed(2)}
+                  </span>
                 </div>
               </div>
-              <p className="mt-1 truncate text-sm font-semibold text-foreground">
-                {product.name}
-              </p>
-              <div className="mt-1 flex items-center gap-2">
-                <span className="text-sm font-bold text-foreground">
-                  ${product.price.toFixed(2)}
-                </span>
-                <span className="text-xs text-muted-foreground line-through">
-                  ${product.originalPrice.toFixed(2)}
-                </span>
-              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </section>
   );
 }

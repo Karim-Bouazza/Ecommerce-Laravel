@@ -11,6 +11,8 @@ class Wilaya extends Model
     protected $fillable = [
         'code',
         'name',
+        'ar_name',
+        'provider_id',
         'price_domicile',
         'price_stop_desk',
     ];

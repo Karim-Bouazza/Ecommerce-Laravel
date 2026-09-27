@@ -52,7 +52,7 @@ export function ProviderWilayaSelect({
       </SelectTrigger>
       <SelectContent>
         {providerWilayas.map((wilaya) => (
-          <SelectItem key={wilaya.id} value={String(wilaya.id)}>
+          <SelectItem key={wilaya.id} value={String(wilaya.id)} className="py-1.5 text-sm">
             {wilaya.name}
           </SelectItem>
         ))}
