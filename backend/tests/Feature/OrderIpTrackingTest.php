@@ -73,7 +73,11 @@ test('a storefront order stores the server detected IP and hides it from the pub
         ->assertJsonStructure(['id', 'reference'])
         ->assertJsonMissingPath('ip_address');
 
-    expect(Order::query()->latest('id')->value('ip_address'))->toBe('203.0.113.10');
+    $order = Order::query()->latest('id')->first();
+
+    expect($order->ip_address)->toBe('203.0.113.10')
+        ->and($order->name)->toBe('Test product')
+        ->and($order->provider_order_id)->toBe('Test product');
 });
 
 test('a manual order does not automatically receive an IP', function () {
