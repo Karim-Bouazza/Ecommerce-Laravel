@@ -44,12 +44,16 @@ class CreateOrderService
                 ]
             );
 
+            $reference = $this->generateReference();
+            $orderType = $data['type'] ?? OrderType::Ads->value;
+            $isStorefrontOrder = $orderType === OrderType::Ads || $orderType === OrderType::Ads->value;
+
             $order = Order::create([
                 'client_id' => $client->id,
-                'reference' => $this->generateReference(),
+                'reference' => $reference,
                 'ip_address' => $data['ip_address'] ?? null,
                 'status' => OrderStatus::New,
-                'type' => $data['type'] ?? OrderType::Ads,
+                'type' => $orderType,
                 'subtotal' => 0,
                 'delivery_price' => $data['delivery_price'] ?? 0,
                 'delivery_type' => $data['delivery_type'] ?? DeliveryType::Express->value,
@@ -59,8 +63,8 @@ class CreateOrderService
                 'provider_commune_id' => $data['provider_commune_id'] ?? null,
                 'provider_office_id' => $data['provider_office_id'] ?? null,
                 'delivery_note' => $data['delivery_note'] ?? null,
-                'name' => $data['name'] ?? null,
-                'provider_order_id' => $data['provider_order_id'] ?? null,
+                'name' => $data['name'] ?? ($isStorefrontOrder ? "Commande {$reference}" : null),
+                'provider_order_id' => $data['provider_order_id'] ?? ($isStorefrontOrder ? $reference : null),
                 'free_delivery' => $data['free_delivery'] ?? false,
                 'can_be_opened' => $data['can_be_opened'] ?? false,
                 'total_price' => 0,

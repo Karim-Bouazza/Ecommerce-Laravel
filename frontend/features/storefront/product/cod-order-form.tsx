@@ -133,7 +133,6 @@ function CodOrderFormContent({
   const isArabic = locale === "ar";
   const [confirmed, setConfirmed] = useState<{
     values: CodOrderSchema;
-    reference: string;
   } | null>(null);
   const confirmationRef = useRef<HTMLDivElement>(null);
 
@@ -273,7 +272,7 @@ function CodOrderFormContent({
         quantity: values.quantity,
       });
 
-      setConfirmed({ values, reference: order.reference });
+      setConfirmed({ values });
       toast.success(t("orderSent"));
     } catch (error) {
       toast.error(isArabic ? t("orderFailed") : getErrorMessage(error));
@@ -297,9 +296,6 @@ function CodOrderFormContent({
         </h2>
         <p className="mt-2 max-w-sm text-sm text-muted-foreground">
           {t("confirmationStart")}{" "}
-          <span className="font-medium text-foreground">
-            #{confirmed.reference}
-          </span>{" "}
           {t("confirmationDetails", {
             quantity: confirmed.values.quantity,
             product: product.name,
