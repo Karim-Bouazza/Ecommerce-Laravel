@@ -135,6 +135,19 @@ function CodOrderFormContent({
     values: CodOrderSchema;
     reference: string;
   } | null>(null);
+  const confirmationRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!confirmed) {
+      return;
+    }
+
+    confirmationRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+    confirmationRef.current?.focus({ preventScroll: true });
+  }, [confirmed]);
 
   const hasVariants = product.variants.length > 0;
   const schema = useMemo(
@@ -270,6 +283,8 @@ function CodOrderFormContent({
   if (confirmed) {
     return (
       <div
+        ref={confirmationRef}
+        tabIndex={-1}
         lang={locale}
         dir={isArabic ? "rtl" : "ltr"}
         className="flex flex-col items-center rounded-3xl border border-border bg-card p-6 text-center shadow-xs sm:p-8"
@@ -326,7 +341,9 @@ function CodOrderFormContent({
       <FieldGroup className="gap-4">
         <div className="grid gap-4 sm:grid-cols-2">
           <Field data-invalid={!!errors.last_name}>
-            <FieldLabel htmlFor="last_name" className="text-base">{t("lastName")}</FieldLabel>
+            <FieldLabel htmlFor="last_name" className="text-base">
+              {t("lastName")}
+            </FieldLabel>
             <InputGroup dir={isArabic ? "rtl" : "ltr"} className="h-11">
               <InputGroupAddon
                 align="inline-start"
@@ -348,7 +365,9 @@ function CodOrderFormContent({
           </Field>
 
           <Field data-invalid={!!errors.first_name}>
-            <FieldLabel htmlFor="first_name" className="text-base">{t("firstName")}</FieldLabel>
+            <FieldLabel htmlFor="first_name" className="text-base">
+              {t("firstName")}
+            </FieldLabel>
             <InputGroup dir={isArabic ? "rtl" : "ltr"} className="h-11">
               <InputGroupAddon
                 align="inline-start"
@@ -371,7 +390,9 @@ function CodOrderFormContent({
         </div>
 
         <Field data-invalid={!!errors.phone_number}>
-          <FieldLabel htmlFor="phone_number" className="text-base">{t("phone")}</FieldLabel>
+          <FieldLabel htmlFor="phone_number" className="text-base">
+            {t("phone")}
+          </FieldLabel>
           <InputGroup dir={isArabic ? "rtl" : "ltr"} className="h-11">
             <InputGroupAddon
               align="inline-start"
@@ -397,7 +418,11 @@ function CodOrderFormContent({
         </Field>
 
         <Field data-invalid={!!errors.provider_wilaya_id}>
-          <FieldLabel id="provider_wilaya_label" htmlFor="provider_wilaya_id" className="text-base">
+          <FieldLabel
+            id="provider_wilaya_label"
+            htmlFor="provider_wilaya_id"
+            className="text-base"
+          >
             {t("wilaya")}
           </FieldLabel>
           <Controller
@@ -428,7 +453,11 @@ function CodOrderFormContent({
         </Field>
 
         <Field data-invalid={!!errors.provider_commune_id}>
-          <FieldLabel id="provider_commune_label" htmlFor="provider_commune_id" className="text-base">
+          <FieldLabel
+            id="provider_commune_label"
+            htmlFor="provider_commune_id"
+            className="text-base"
+          >
             {t("commune")}
           </FieldLabel>
           <Controller
@@ -470,7 +499,7 @@ function CodOrderFormContent({
                   const selected = field.value === option.value;
                   const price =
                     option.value === "home" ? homeDeliveryPrice : stopDeskPrice;
-                    const formattedPrice = formatPrice(price);
+                  const formattedPrice = formatPrice(price);
                   return (
                     <button
                       key={option.value}
@@ -499,8 +528,8 @@ function CodOrderFormContent({
                             : t("stopDesk")}
                         </span>
                         <span className="block text-xs text-muted-foreground">
-                            {formattedPrice !== null
-                              ? t("deliveryPrice", { price: formattedPrice })
+                          {formattedPrice !== null
+                            ? t("deliveryPrice", { price: formattedPrice })
                             : option.value === "home"
                               ? t("homeDeliveryHint")
                               : t("stopDeskHint")}
