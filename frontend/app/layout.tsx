@@ -4,6 +4,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { QueryProvider } from "@/components/query-provider";
 import { Toaster } from "@/components/ui/sonner";
 import ClarityProvider from "@/components/Clarity";
+import GoogleAnalytics from "@/components/google-analytics";
 import { TrackingPixels } from "@/features/pixels/components/tracking-pixels";
 import "./globals.css";
 
@@ -35,6 +36,7 @@ export default function RootLayout({
         >
           <QueryProvider>
             <ClarityProvider />
+            <GoogleAnalytics />
             <TrackingPixels />
             {children}
             <Toaster />

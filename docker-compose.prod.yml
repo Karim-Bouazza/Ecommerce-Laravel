@@ -57,6 +57,7 @@ services:
         # rebuild, not just a restart.
         NEXT_PUBLIC_API_URL: https://api.${DOMAIN}
         NEXT_PUBLIC_CLARITY_PROJECT_ID: ${NEXT_PUBLIC_CLARITY_PROJECT_ID}
+        NEXT_PUBLIC_GA_ID: ${NEXT_PUBLIC_GA_ID:?NEXT_PUBLIC_GA_ID is required}
     restart: unless-stopped
     init: true
     environment:
