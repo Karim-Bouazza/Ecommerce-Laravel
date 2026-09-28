@@ -1,7 +1,6 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "cn";
 
 export function ProductGallery({
@@ -72,24 +71,13 @@ export function ProductGallery({
         />
 
         {count > 1 && (
-          <>
-            <button
-              type="button"
-              onClick={() => go(-1)}
-              aria-label="Image précédente"
-              className="absolute top-1/2 left-3 flex size-10 -translate-y-1/2 items-center justify-center rounded-xl bg-foreground text-background shadow-sm transition-opacity hover:opacity-90"
-            >
-              <ChevronLeft className="size-5" />
-            </button>
-            <button
-              type="button"
-              onClick={() => go(1)}
-              aria-label="Image suivante"
-              className="absolute top-1/2 right-3 flex size-10 -translate-y-1/2 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm transition-opacity hover:opacity-90"
-            >
-              <ChevronRight className="size-5" />
-            </button>
-          </>
+          <span
+            aria-live="polite"
+            aria-label={`Image ${active + 1} sur ${count}`}
+            className="absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full bg-foreground/75 px-3 py-1 text-sm font-semibold tabular-nums text-background backdrop-blur-sm"
+          >
+            {active + 1} / {count}
+          </span>
         )}
       </div>
 
