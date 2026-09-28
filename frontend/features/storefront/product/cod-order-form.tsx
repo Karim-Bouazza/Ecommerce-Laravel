@@ -318,7 +318,7 @@ function CodOrderFormContent({
       className="rounded-3xl border border-border bg-card p-4 shadow-xs sm:p-6"
     >
       <div className="mb-5">
-        <h2 id="cod-form-title" className="text-base font-semibold text-center">
+        <h2 id="cod-form-title" className="text-lg font-semibold text-center">
           {t("title")}
         </h2>
       </div>
