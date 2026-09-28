@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import {
@@ -60,9 +60,28 @@ function copyLink() {
 
 export function ProductPage({ product }: { product: StorefrontProductDetail }) {
   const inStock = product.in_stock;
+  const orderFormRef = useRef<HTMLDivElement>(null);
+  const [showFloatingOrderButton, setShowFloatingOrderButton] = useState(true);
   const subtitle = [product.category, product.brand]
     .filter(Boolean)
     .join(" · ");
+
+  useEffect(() => {
+    const orderForm = orderFormRef.current;
+
+    if (!inStock || !orderForm || !("IntersectionObserver" in window)) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setShowFloatingOrderButton(!entry.isIntersecting),
+      { rootMargin: "-72px 0px 0px 0px" },
+    );
+
+    observer.observe(orderForm);
+
+    return () => observer.disconnect();
+  }, [inStock]);
 
   useEffect(() => {
     trackViewContent({
@@ -147,7 +166,9 @@ export function ProductPage({ product }: { product: StorefrontProductDetail }) {
           )}
 
           {inStock ? (
-            <CodOrderForm product={product} />
+            <div ref={orderFormRef} className="scroll-mt-24">
+              <CodOrderForm product={product} />
+            </div>
           ) : (
             <div className="rounded-3xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
               Ce produit est momentanément indisponible.
@@ -197,6 +218,21 @@ export function ProductPage({ product }: { product: StorefrontProductDetail }) {
           </dl>
         </div>
       </div>
+
+      {inStock && showFloatingOrderButton && (
+        <button
+          type="button"
+          onClick={() =>
+            orderFormRef.current?.scrollIntoView({
+              behavior: "smooth",
+              block: "start",
+            })
+          }
+          className="fixed inset-x-4 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-40 h-12 rounded-full bg-primary px-6 text-lg font-semibold text-primary-foreground shadow-lg transition-opacity hover:opacity-90 md:hidden"
+        >
+          أطلب الآن
+        </button>
+      )}
 
       <section
         aria-labelledby="product-details"
