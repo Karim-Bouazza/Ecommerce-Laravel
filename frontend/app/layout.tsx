@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { QueryProvider } from "@/components/query-provider";
 import { Toaster } from "@/components/ui/sonner";
+import ClarityProvider from "@/components/Clarity";
 import { TrackingPixels } from "@/features/pixels/components/tracking-pixels";
 import "./globals.css";
 
@@ -14,7 +15,8 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "CodAvenir - E-ecommerece management",
-  description: "CodAvenir is a management platform for cash-on-delivery e-commerce operations.",
+  description:
+    "CodAvenir is a management platform for cash-on-delivery e-commerce operations.",
 };
 
 export default function RootLayout({
@@ -32,6 +34,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <QueryProvider>
+            <ClarityProvider />
             <TrackingPixels />
             {children}
             <Toaster />
