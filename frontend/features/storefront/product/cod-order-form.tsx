@@ -595,7 +595,7 @@ function CodOrderFormContent({
       <button
         type="submit"
         disabled={isSubmitting}
-        className="mt-5 flex h-12 w-full items-center justify-center gap-2 rounded-full bg-primary text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
+        className="mt-5 flex h-12 w-full items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
       >
         {isSubmitting && <Loader2 className="size-4 animate-spin" />}
         {t("confirmOrder")}
