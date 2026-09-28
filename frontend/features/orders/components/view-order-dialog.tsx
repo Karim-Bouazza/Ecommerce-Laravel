@@ -1,9 +1,9 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Info } from "lucide-react"
+import * as React from "react";
+import { Info } from "lucide-react";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -11,7 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
 import {
   Table,
   TableBody,
@@ -19,30 +19,36 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import type { Order } from "@/features/orders/types"
+} from "@/components/ui/table";
+import type { Order } from "@/features/orders/types";
 
 type ViewOrderDialogProps = {
-  order: Order
-}
+  order: Order;
+};
 
-const amountFormatter = new Intl.NumberFormat("fr-FR")
+const amountFormatter = new Intl.NumberFormat("fr-FR");
 
 function formatAmount(value: number): string {
-  return `${amountFormatter.format(value)} DZD`
+  return `${amountFormatter.format(value)} DZD`;
 }
 
-function DetailField({ label, value }: { label: string; value: React.ReactNode }) {
+function DetailField({
+  label,
+  value,
+}: {
+  label: string;
+  value: React.ReactNode;
+}) {
   return (
     <div className="flex flex-col gap-1">
       <span className="text-sm text-muted-foreground">{label}</span>
       <span className="text-sm font-medium">{value}</span>
     </div>
-  )
+  );
 }
 
 export function ViewOrderDialog({ order }: ViewOrderDialogProps) {
-  const [open, setOpen] = React.useState(false)
+  const [open, setOpen] = React.useState(false);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -66,6 +72,7 @@ export function ViewOrderDialog({ order }: ViewOrderDialogProps) {
         <div className="flex flex-col gap-4 py-2">
           <div className="grid gap-4 sm:grid-cols-2">
             <DetailField label="Nom de la commande" value={order.name || "—"} />
+            <DetailField label="Adresse IP" value={order.ip_address || "—"} />
             <DetailField
               label="N° de commande prestataire"
               value={order.provider_order_id || "—"}
@@ -74,7 +81,11 @@ export function ViewOrderDialog({ order }: ViewOrderDialogProps) {
             <DetailField label="Téléphone" value={order.phone_number || "—"} />
             <DetailField
               label="Wilaya / Commune"
-              value={[order.wilaya_name, order.commune_name].filter(Boolean).join(" / ") || "—"}
+              value={
+                [order.wilaya_name, order.commune_name]
+                  .filter(Boolean)
+                  .join(" / ") || "—"
+              }
             />
             <DetailField label="Adresse" value={order.address || "—"} />
             <DetailField label="Statut" value={order.status_label} />
@@ -89,10 +100,15 @@ export function ViewOrderDialog({ order }: ViewOrderDialogProps) {
               label="Livraison"
               value={
                 order.delivery_type_label +
-                (order.stop_desk_company_name ? ` — ${order.stop_desk_company_name}` : "")
+                (order.stop_desk_company_name
+                  ? ` — ${order.stop_desk_company_name}`
+                  : "")
               }
             />
-            <DetailField label="Note pour le livreur" value={order.delivery_note || "—"} />
+            <DetailField
+              label="Note pour le livreur"
+              value={order.delivery_note || "—"}
+            />
           </div>
 
           <div className="rounded-lg border">
@@ -110,7 +126,10 @@ export function ViewOrderDialog({ order }: ViewOrderDialogProps) {
               <TableBody>
                 {order.items.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center text-muted-foreground">
+                    <TableCell
+                      colSpan={6}
+                      className="text-center text-muted-foreground"
+                    >
                       Aucun produit.
                     </TableCell>
                   </TableRow>
@@ -147,11 +166,15 @@ export function ViewOrderDialog({ order }: ViewOrderDialogProps) {
         </div>
 
         <DialogFooter>
-          <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setOpen(false)}
+          >
             Fermer
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

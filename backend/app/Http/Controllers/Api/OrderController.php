@@ -30,17 +30,21 @@ class OrderController extends Controller
         private readonly CreateOrderService $createOrderService,
         private readonly UpdateOrderService $updateOrderService,
         private readonly OrderStatusService $orderStatusService,
-    )
-    {
-    }
+    ) {}
 
     public function store(CreateOrderRequest $request)
     {
         $order = $this->createOrderService->execute(
-            $request->validated()
+            [
+                ...$request->validated(),
+                'ip_address' => $request->ip(),
+            ]
         );
 
-        return response()->json($order, 201);
+        return response()->json([
+            'id' => $order->id,
+            'reference' => $order->reference,
+        ], 201);
     }
 
     public function index(Request $request): AnonymousResourceCollection
@@ -73,18 +77,18 @@ class OrderController extends Controller
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($query) use ($search) {
                     $query->where('reference', 'like', "%{$search}%")
-                        ->orWhereHas('client', fn ($query) => $query
+                        ->orWhereHas('client', fn($query) => $query
                             ->where('first_name', 'like', "%{$search}%")
                             ->orWhere('last_name', 'like', "%{$search}%")
                             ->orWhere('phone_number', 'like', "%{$search}%"));
                 });
             })
             ->orderByDesc(
-                DB::raw('coalesce(('.OrderStatusHistory::select('created_at')
+                DB::raw('coalesce((' . OrderStatusHistory::select('created_at')
                     ->whereColumn('order_id', 'orders.id')
                     ->latest('created_at')
                     ->limit(1)
-                    ->toSql().'), created_at)')
+                    ->toSql() . '), created_at)')
             )
             ->paginate($perPage)
             ->withQueryString();
@@ -138,7 +142,7 @@ class OrderController extends Controller
 
         $allowedStatuses = array_filter(
             $order->status->allowedTransitions(),
-            fn (OrderStatus $candidate) => $candidate !== OrderStatus::Scheduled
+            fn(OrderStatus $candidate) => $candidate !== OrderStatus::Scheduled
         );
 
         abort_unless(in_array($status, $allowedStatuses, true), 409, "Cette transition de statut n'est pas autorisée.");

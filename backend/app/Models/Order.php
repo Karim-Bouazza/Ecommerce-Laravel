@@ -17,6 +17,7 @@ class Order extends Model
     protected $fillable = [
         'client_id',
         'reference',
+        'ip_address',
         'status',
         'scheduled_at',
         'date_report',
@@ -82,6 +83,6 @@ class Order extends Model
 
     public function scopeForClient(Builder $query, ?int $clientId): Builder
     {
-        return $query->when($clientId, fn (Builder $query, int $clientId) => $query->where('client_id', $clientId));
+        return $query->when($clientId, fn(Builder $query, int $clientId) => $query->where('client_id', $clientId));
     }
 }

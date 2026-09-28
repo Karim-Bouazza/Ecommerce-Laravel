@@ -16,14 +16,15 @@ class OrderResource extends JsonResource
         return [
             'id' => $this->id,
             'reference' => $this->reference,
+            'ip_address' => $this->ip_address,
 
             'status' => $this->status->value,
             'status_label' => $this->status->label(),
             'status_color' => $this->status->color(),
             'is_editable' => $this->status->isEditable(),
             'status_transitions' => collect($this->status->allowedTransitions())
-                ->reject(fn (OrderStatus $status) => $status === OrderStatus::Scheduled)
-                ->map(fn (OrderStatus $status) => ['value' => $status->value, 'label' => $status->label()])
+                ->reject(fn(OrderStatus $status) => $status === OrderStatus::Scheduled)
+                ->map(fn(OrderStatus $status) => ['value' => $status->value, 'label' => $status->label()])
                 ->values(),
 
             'payment_status' => $this->payment_status->value,
@@ -40,7 +41,7 @@ class OrderResource extends JsonResource
             'client_id' => $this->client_id,
             'first_name' => $this->client?->first_name,
             'last_name' => $this->client?->last_name,
-            'client_name' => trim(($this->client?->first_name ?? '').' '.($this->client?->last_name ?? '')),
+            'client_name' => trim(($this->client?->first_name ?? '') . ' ' . ($this->client?->last_name ?? '')),
             'phone_number' => $this->client?->phone_number,
             'wilaya_id' => $this->client?->wilaya_id,
             'wilaya_name' => $this->client?->wilaya?->name,
@@ -65,7 +66,7 @@ class OrderResource extends JsonResource
             'created_at' => $this->created_at?->toIso8601String(),
             'status_changed_at' => ($this->latestStatusHistory?->created_at ?? $this->created_at)?->toIso8601String(),
 
-            'items' => $this->items->map(fn ($item) => [
+            'items' => $this->items->map(fn($item) => [
                 'id' => $item->id,
                 'product_id' => $item->product_id,
                 'product_name' => $item->product_name,

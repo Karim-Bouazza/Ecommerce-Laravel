@@ -18,9 +18,7 @@ use Illuminate\Support\Facades\Notification;
 
 class CreateOrderService
 {
-    public function __construct(private readonly ZimouWilayaService $zimouWilayaService)
-    {
-    }
+    public function __construct(private readonly ZimouWilayaService $zimouWilayaService) {}
 
     public function execute(array $data): Order
     {
@@ -49,6 +47,7 @@ class CreateOrderService
             $order = Order::create([
                 'client_id' => $client->id,
                 'reference' => $this->generateReference(),
+                'ip_address' => $data['ip_address'] ?? null,
                 'status' => OrderStatus::New,
                 'type' => $data['type'] ?? OrderType::Ads,
                 'subtotal' => 0,
