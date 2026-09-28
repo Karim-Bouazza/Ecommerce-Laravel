@@ -22,9 +22,9 @@ class ProductResource extends JsonResource
             'description' => $this->description,
             'short_description' => $this->short_description,
             'category_id' => $this->category_id,
-            'category' => $this->whenLoaded('category', fn () => $this->category?->name),
+            'category' => $this->whenLoaded('category', fn() => $this->category?->name),
             'brand_id' => $this->brand_id,
-            'brand' => $this->whenLoaded('brand', fn () => $this->brand?->name),
+            'brand' => $this->whenLoaded('brand', fn() => $this->brand?->name),
             'tags' => TagResource::collection($this->whenLoaded('tags')),
             'specs' => ProductSpecResource::collection($this->whenLoaded('specs')),
             'variants' => ProductVariantResource::collection($this->whenLoaded('variants')),
@@ -35,6 +35,9 @@ class ProductResource extends JsonResource
             'is_active' => $this->is_active,
             'is_new' => $this->is_new,
             'image' => $this->image_1 ? Storage::url($this->image_1) : null,
+            'images' => collect([$this->image_1, $this->image_2, $this->image_3, $this->image_4])
+                ->map(fn(?string $image) => $image ? Storage::url($image) : null)
+                ->values(),
         ];
     }
 }

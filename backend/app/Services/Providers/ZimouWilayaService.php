@@ -21,7 +21,7 @@ class ZimouWilayaService
                 ->throw();
 
             return collect($response->json('data', []))
-                ->map(fn (array $wilaya) => [
+                ->map(fn(array $wilaya) => [
                     'id' => (int) $wilaya['id'],
                     'name' => (string) $wilaya['name'],
                 ])
@@ -31,15 +31,16 @@ class ZimouWilayaService
     }
 
     /**
-     * @return array<int, array{id: int, name: string, name_ar: string|null, wilaya_id: int|null}>
+     * @return array<int, array{id: int, name: string, name_ar: string|null, code: string|null, wilaya_id: int|null}>
      */
     public function listWithLocalMatch(): array
     {
         return collect($this->fetchWilayas())
-            ->map(fn (array $wilaya) => [
+            ->map(fn(array $wilaya) => [
                 ...$wilaya,
                 'wilaya_id' => $this->matchLocalWilayaId($wilaya['name']),
                 'name_ar' => Wilaya::where('provider_id', $wilaya['id'])->value('ar_name'),
+                'code' => Wilaya::where('provider_id', $wilaya['id'])->value('code'),
             ])
             ->all();
     }

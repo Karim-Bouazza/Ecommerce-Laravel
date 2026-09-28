@@ -1,9 +1,9 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Pencil } from "lucide-react"
+import * as React from "react";
+import { Pencil } from "lucide-react";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -11,25 +11,27 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { useUpdateProduct } from "@/features/products/hooks/use-update-product"
-import { ProductFormFields } from "@/features/products/components/product-form-fields"
-import type { Product } from "@/features/products/types"
+} from "@/components/ui/dialog";
+import { useUpdateProduct } from "@/features/products/hooks/use-update-product";
+import { ProductFormFields } from "@/features/products/components/product-form-fields";
+import type { Product } from "@/features/products/types";
 
 type EditProductDialogProps = {
-  product: Product
-}
+  product: Product;
+};
 
 export function EditProductDialog({ product }: EditProductDialogProps) {
-  const [open, setOpen] = React.useState(false)
-  const { form, onSubmit, isSubmitting } = useUpdateProduct(product, () => setOpen(false))
-  const { reset } = form
+  const [open, setOpen] = React.useState(false);
+  const { form, onSubmit, isSubmitting } = useUpdateProduct(product, () =>
+    setOpen(false),
+  );
+  const { reset } = form;
 
   return (
     <Dialog
       open={open}
       onOpenChange={(nextOpen) => {
-        setOpen(nextOpen)
+        setOpen(nextOpen);
         if (nextOpen) {
           reset({
             name: product.name,
@@ -44,14 +46,22 @@ export function EditProductDialog({ product }: EditProductDialogProps) {
             is_active: product.is_active,
             is_new: product.is_new,
             tags: product.tags.map((tag) => tag.id),
-            specs: product.specs.map((spec) => ({ label: spec.label, value: spec.value })),
+            specs: product.specs.map((spec) => ({
+              label: spec.label,
+              value: spec.value,
+            })),
             variants: (product.variants ?? []).map((variant) => variant.label),
-            image: null,
-          })
+            image_1: null,
+            image_2: null,
+            image_3: null,
+            image_4: null,
+          });
         }
       }}
     >
-      <DialogTrigger render={<Button variant="ghost" size="icon" aria-label="Modifier" />}>
+      <DialogTrigger
+        render={<Button variant="ghost" size="icon" aria-label="Modifier" />}
+      >
         <Pencil className="size-4" />
       </DialogTrigger>
       <DialogContent className="sm:max-w-2xl">
@@ -60,10 +70,18 @@ export function EditProductDialog({ product }: EditProductDialogProps) {
             <DialogTitle>Modifier le produit</DialogTitle>
           </DialogHeader>
 
-          <ProductFormFields form={form} idPrefix="edit-product" currentImageUrl={product.image} />
+          <ProductFormFields
+            form={form}
+            idPrefix="edit-product"
+            currentImageUrls={product.images}
+          />
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setOpen(false)}
+            >
               Fermer
             </Button>
             <Button type="submit" disabled={isSubmitting}>
@@ -73,5 +91,5 @@ export function EditProductDialog({ product }: EditProductDialogProps) {
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

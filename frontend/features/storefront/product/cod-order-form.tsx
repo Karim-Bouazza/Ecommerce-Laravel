@@ -30,7 +30,10 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group";
 import { getErrorMessage } from "@/lib/api";
-import { trackInitiateCheckout, trackPurchase } from "@/features/pixels/lib/track-events";
+import {
+  trackInitiateCheckout,
+  trackPurchase,
+} from "@/features/pixels/lib/track-events";
 import { ProviderWilayaSelect } from "@/features/wilayas/components/provider-wilaya-select";
 import { ProviderCommuneSelect } from "@/features/wilayas/components/provider-commune-select";
 import { useWilayas } from "@/features/wilayas/hooks/use-wilayas";
@@ -46,8 +49,8 @@ import frenchMessages from "./messages/fr.json";
 import arabicMessages from "./messages/ar.json";
 
 function stopDeskPriceFor(wilaya: Wilaya | undefined): number | null {
-  if (!wilaya) return null
-  return wilaya.price_stop_desk
+  if (!wilaya) return null;
+  return wilaya.price_stop_desk;
 }
 
 const DELIVERY_OPTIONS: {
@@ -120,7 +123,11 @@ export function CodOrderForm({
   );
 }
 
-function CodOrderFormContent({ product }: { product: StorefrontProductDetail }) {
+function CodOrderFormContent({
+  product,
+}: {
+  product: StorefrontProductDetail;
+}) {
   const locale = useLocale();
   const t = useTranslations("OrderForm");
   const isArabic = locale === "ar";
@@ -130,15 +137,19 @@ function CodOrderFormContent({ product }: { product: StorefrontProductDetail }) 
   } | null>(null);
 
   const hasVariants = product.variants.length > 0;
-  const schema = useMemo(() => createCodOrderSchema(hasVariants, {
-    firstName: t("validation.firstName"),
-    lastName: t("validation.lastName"),
-    phone: t("validation.phone"),
-    wilaya: t("validation.wilaya"),
-    wilayaNotFound: t("validation.wilayaNotFound"),
-    commune: t("validation.commune"),
-    option: t("validation.option"),
-  }), [hasVariants, t]);
+  const schema = useMemo(
+    () =>
+      createCodOrderSchema(hasVariants, {
+        firstName: t("validation.firstName"),
+        lastName: t("validation.lastName"),
+        phone: t("validation.phone"),
+        wilaya: t("validation.wilaya"),
+        wilayaNotFound: t("validation.wilayaNotFound"),
+        commune: t("validation.commune"),
+        option: t("validation.option"),
+      }),
+    [hasVariants, t],
+  );
 
   const form = useForm<CodOrderSchema>({
     resolver: zodResolver(schema),
@@ -163,9 +174,21 @@ function CodOrderFormContent({ product }: { product: StorefrontProductDetail }) 
     formState: { errors, isSubmitting },
   } = form;
 
-  const [quantity, providerWilayaId, wilayaId, providerCommuneId, deliveryType] = useWatch({
+  const [
+    quantity,
+    providerWilayaId,
+    wilayaId,
+    providerCommuneId,
+    deliveryType,
+  ] = useWatch({
     control,
-    name: ["quantity", "provider_wilaya_id", "wilaya_id", "provider_commune_id", "delivery_type"],
+    name: [
+      "quantity",
+      "provider_wilaya_id",
+      "wilaya_id",
+      "provider_commune_id",
+      "delivery_type",
+    ],
   });
   const maxQuantity = Math.min(MAX_ORDER_QUANTITY, product.stock);
 
@@ -175,16 +198,21 @@ function CodOrderFormContent({ product }: { product: StorefrontProductDetail }) 
     [wilayas, wilayaId],
   );
 
-  const { data: homeDeliveryPrice = null } = useProviderHomeDeliveryPrice(providerWilayaId);
+  const { data: homeDeliveryPrice = null } =
+    useProviderHomeDeliveryPrice(providerWilayaId);
   const stopDeskPrice = stopDeskPriceFor(selectedWilaya);
 
   const subtotal = product.price * quantity;
-  const deliveryPrice = deliveryType === "home" ? homeDeliveryPrice : stopDeskPrice;
+  const deliveryPrice =
+    deliveryType === "home" ? homeDeliveryPrice : stopDeskPrice;
   const total = subtotal + (deliveryPrice ?? 0);
 
   const lastTrackedCommuneId = useRef<number | null>(null);
   useEffect(() => {
-    if (providerCommuneId === null || providerCommuneId === lastTrackedCommuneId.current) {
+    if (
+      providerCommuneId === null ||
+      providerCommuneId === lastTrackedCommuneId.current
+    ) {
       return;
     }
     lastTrackedCommuneId.current = providerCommuneId;
@@ -200,7 +228,9 @@ function CodOrderFormContent({ product }: { product: StorefrontProductDetail }) 
   const orderMutation = useMutation({ mutationFn: createStorefrontOrder });
 
   const onSubmit = handleSubmit(async (values) => {
-    const selectedVariant = product.variants.find((v) => v.id === values.variant_id);
+    const selectedVariant = product.variants.find(
+      (v) => v.id === values.variant_id,
+    );
 
     try {
       const order = await orderMutation.mutateAsync({
@@ -210,7 +240,8 @@ function CodOrderFormContent({ product }: { product: StorefrontProductDetail }) 
         wilaya_id: values.wilaya_id as number,
         provider_wilaya_id: values.provider_wilaya_id as number,
         provider_commune_id: values.provider_commune_id as number,
-        delivery_type: values.delivery_type === "home" ? "express" : "point_relais",
+        delivery_type:
+          values.delivery_type === "home" ? "express" : "point_relais",
         delivery_price: deliveryPrice ?? undefined,
         items: [
           {
@@ -238,7 +269,11 @@ function CodOrderFormContent({ product }: { product: StorefrontProductDetail }) 
 
   if (confirmed) {
     return (
-      <div lang={locale} dir={isArabic ? "rtl" : "ltr"} className="flex flex-col items-center rounded-3xl border border-border bg-card p-6 text-center shadow-xs sm:p-8">
+      <div
+        lang={locale}
+        dir={isArabic ? "rtl" : "ltr"}
+        className="flex flex-col items-center rounded-3xl border border-border bg-card p-6 text-center shadow-xs sm:p-8"
+      >
         <div className="flex size-14 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-500/15">
           <CheckCircle2 className="size-7" />
         </div>
@@ -333,7 +368,6 @@ function CodOrderFormContent({ product }: { product: StorefrontProductDetail }) 
               errors={errors.first_name ? [errors.first_name] : undefined}
             />
           </Field>
-
         </div>
 
         <Field data-invalid={!!errors.phone_number}>
@@ -363,7 +397,9 @@ function CodOrderFormContent({ product }: { product: StorefrontProductDetail }) 
         </Field>
 
         <Field data-invalid={!!errors.provider_wilaya_id}>
-          <FieldLabel id="provider_wilaya_label" htmlFor="provider_wilaya_id">{t("wilaya")}</FieldLabel>
+          <FieldLabel id="provider_wilaya_label" htmlFor="provider_wilaya_id">
+            {t("wilaya")}
+          </FieldLabel>
           <Controller
             control={control}
             name="provider_wilaya_id"
@@ -383,12 +419,18 @@ function CodOrderFormContent({ product }: { product: StorefrontProductDetail }) 
             )}
           />
           <FieldError
-            errors={errors.provider_wilaya_id ? [errors.provider_wilaya_id] : undefined}
+            errors={
+              errors.provider_wilaya_id
+                ? [errors.provider_wilaya_id]
+                : undefined
+            }
           />
         </Field>
 
         <Field data-invalid={!!errors.provider_commune_id}>
-          <FieldLabel id="provider_commune_label" htmlFor="provider_commune_id">{t("commune")}</FieldLabel>
+          <FieldLabel id="provider_commune_label" htmlFor="provider_commune_id">
+            {t("commune")}
+          </FieldLabel>
           <Controller
             control={control}
             name="provider_commune_id"
@@ -405,7 +447,11 @@ function CodOrderFormContent({ product }: { product: StorefrontProductDetail }) 
             )}
           />
           <FieldError
-            errors={errors.provider_commune_id ? [errors.provider_commune_id] : undefined}
+            errors={
+              errors.provider_commune_id
+                ? [errors.provider_commune_id]
+                : undefined
+            }
           />
         </Field>
 
@@ -422,7 +468,9 @@ function CodOrderFormContent({ product }: { product: StorefrontProductDetail }) 
               >
                 {DELIVERY_OPTIONS.map((option) => {
                   const selected = field.value === option.value;
-                  const price = option.value === "home" ? homeDeliveryPrice : stopDeskPrice;
+                  const price =
+                    option.value === "home" ? homeDeliveryPrice : stopDeskPrice;
+                    const formattedPrice = formatPrice(price);
                   return (
                     <button
                       key={option.value}
@@ -446,14 +494,16 @@ function CodOrderFormContent({ product }: { product: StorefrontProductDetail }) 
                       />
                       <span className="min-w-0">
                         <span className="block text-sm font-semibold">
-                          {isArabic
+                          {option.value === "home"
                             ? t("homeDelivery")
                             : t("stopDesk")}
                         </span>
                         <span className="block text-xs text-muted-foreground">
-                          {price !== null ? formatPrice(price) : option.value === "home"
-                            ? t("homeDeliveryHint")
-                            : t("stopDeskHint")}
+                            {formattedPrice !== null
+                              ? t("deliveryPrice", { price: formattedPrice })
+                            : option.value === "home"
+                              ? t("homeDeliveryHint")
+                              : t("stopDeskHint")}
                         </span>
                       </span>
                     </button>
@@ -504,7 +554,6 @@ function CodOrderFormContent({ product }: { product: StorefrontProductDetail }) 
             />
           </Field>
         )}
-
       </FieldGroup>
 
       <div className="mt-5 flex items-center justify-between gap-3">

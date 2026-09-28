@@ -3,13 +3,12 @@
 namespace App\Services\Products;
 
 use App\Models\Product;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Storage;
 
 class UpdateProductService
 {
-    public function execute(Product $product, array $data, ?UploadedFile $image = null): Product
+    public function execute(Product $product, array $data, array $images = []): Product
     {
         $product->update(Arr::only($data, [
             'category_id',
@@ -25,12 +24,15 @@ class UpdateProductService
             'is_new',
         ]));
 
-        if ($image) {
-            $previousImage = $product->image_1;
-            $product->update(['image_1' => $image->store('products', 'public')]);
+        foreach ([1, 2, 3, 4] as $imageNumber) {
+            $field = "image_{$imageNumber}";
+            if (isset($images[$field])) {
+                $previousImage = $product->{$field};
+                $product->update([$field => $images[$field]->store('products', 'public')]);
 
-            if ($previousImage) {
-                Storage::disk('public')->delete($previousImage);
+                if ($previousImage) {
+                    Storage::disk('public')->delete($previousImage);
+                }
             }
         }
 

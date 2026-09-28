@@ -1,25 +1,28 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { cn } from "cn"
+import * as React from "react";
+import { cn } from "cn";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { useProviderWilayas } from "@/features/wilayas/hooks/use-provider-wilayas"
+} from "@/components/ui/select";
+import { useProviderWilayas } from "@/features/wilayas/hooks/use-provider-wilayas";
 
 type ProviderWilayaSelectProps = {
-  value: number | null
-  onChange: (providerWilayaId: number | null, matchedWilayaId: number | null) => void
-  placeholder?: string
-  disabled?: boolean
-  invalid?: boolean
-  className?: string
-  arabic?: boolean
-}
+  value: number | null;
+  onChange: (
+    providerWilayaId: number | null,
+    matchedWilayaId: number | null,
+  ) => void;
+  placeholder?: string;
+  disabled?: boolean;
+  invalid?: boolean;
+  className?: string;
+  arabic?: boolean;
+};
 
 export function ProviderWilayaSelect({
   value,
@@ -30,19 +33,23 @@ export function ProviderWilayaSelect({
   className,
   arabic = false,
 }: ProviderWilayaSelectProps) {
-  const { data: providerWilayas = [] } = useProviderWilayas()
+  const { data: providerWilayas = [] } = useProviderWilayas();
   const byId = React.useMemo(
     () => new Map(providerWilayas.map((wilaya) => [String(wilaya.id), wilaya])),
-    [providerWilayas]
-  )
+    [providerWilayas],
+  );
+  const formatWilayaName = (wilaya: (typeof providerWilayas)[number]) => {
+    const name = arabic ? (wilaya.name_ar ?? wilaya.name) : wilaya.name;
+    return wilaya.code ? `${wilaya.code} - ${name}` : name;
+  };
 
   return (
     <Select
       value={value !== null ? String(value) : null}
       onValueChange={(next) => {
-        if (next === null) return
-        const selected = byId.get(next)
-        onChange(Number(next), selected?.wilaya_id ?? null)
+        if (next === null) return;
+        const selected = byId.get(next);
+        onChange(Number(next), selected?.wilaya_id ?? null);
       }}
       disabled={disabled}
     >
@@ -54,8 +61,8 @@ export function ProviderWilayaSelect({
       >
         <SelectValue placeholder={placeholder}>
           {(selected: string | null) => {
-            const item = selected ? byId.get(selected) : undefined
-            return item ? (arabic ? item.name_ar ?? item.name : item.name) : placeholder
+            const item = selected ? byId.get(selected) : undefined;
+            return item ? formatWilayaName(item) : placeholder;
           }}
         </SelectValue>
       </SelectTrigger>
@@ -70,10 +77,10 @@ export function ProviderWilayaSelect({
             value={String(wilaya.id)}
             className="min-h-12 py-3 text-base"
           >
-            {arabic ? wilaya.name_ar ?? wilaya.name : wilaya.name}
+            {formatWilayaName(wilaya)}
           </SelectItem>
         ))}
       </SelectContent>
     </Select>
-  )
+  );
 }

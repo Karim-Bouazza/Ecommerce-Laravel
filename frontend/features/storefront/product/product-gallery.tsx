@@ -1,31 +1,38 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { ChevronLeft, ChevronRight } from "lucide-react"
-import { cn } from "cn"
+import { useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { cn } from "cn";
 
-export function ProductGallery({ images, name }: { images: string[]; name: string }) {
-  const [active, setActive] = useState(0)
-  const count = images.length
-  const go = (step: number) => setActive((i) => (i + step + count) % count)
+export function ProductGallery({
+  images,
+  name,
+}: {
+  images: string[];
+  name: string;
+}) {
+  const [active, setActive] = useState(0);
+  const count = images.length;
+  const go = (step: number) => setActive((i) => (i + step + count) % count);
 
   if (count === 0) {
     return (
       <div className="flex aspect-square w-full items-center justify-center rounded-3xl bg-muted/60 text-sm text-muted-foreground">
         Aucune image
       </div>
-    )
+    );
   }
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="relative overflow-hidden rounded-3xl bg-muted/60">
+      <div className="relative aspect-square w-full overflow-hidden rounded-3xl bg-muted/60">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={images[active]}
           alt={`${name} – image ${active + 1} sur ${count}`}
-          className="aspect-square w-full object-cover"
+          className="absolute inset-0 h-full w-full object-contain"
         />
+
         {count > 1 && (
           <>
             <button
@@ -58,14 +65,21 @@ export function ProductGallery({ images, name }: { images: string[]; name: strin
             aria-current={index === active}
             className={cn(
               "overflow-hidden rounded-2xl border-2 bg-muted/60 transition-colors",
-              index === active ? "border-primary" : "border-transparent hover:border-border"
+              index === active
+                ? "border-primary"
+                : "border-transparent hover:border-border",
             )}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={src} alt="" loading="lazy" className="aspect-square w-full object-cover" />
+            <img
+              src={src}
+              alt=""
+              loading="lazy"
+              className="aspect-square w-full object-contain"
+            />
           </button>
         ))}
       </div>
     </div>
-  )
+  );
 }

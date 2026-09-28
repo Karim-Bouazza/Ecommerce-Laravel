@@ -1,20 +1,20 @@
-"use client"
+"use client";
 
-import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { toast } from "sonner"
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
 
-import { createProduct } from "@/features/products/api/product-api"
+import { createProduct } from "@/features/products/api/product-api";
 import {
   productSchema,
   type ProductFormInput,
   type ProductFormOutput,
-} from "@/features/products/schemas/product-schema"
-import { getErrorMessage } from "@/lib/api"
+} from "@/features/products/schemas/product-schema";
+import { getErrorMessage } from "@/lib/api";
 
 export function useCreateProduct(onSuccess?: () => void) {
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
   const form = useForm<ProductFormInput, unknown, ProductFormOutput>({
     resolver: zodResolver(productSchema),
@@ -33,30 +33,33 @@ export function useCreateProduct(onSuccess?: () => void) {
       tags: [],
       specs: [],
       variants: [],
-      image: null,
+      image_1: null,
+      image_2: null,
+      image_3: null,
+      image_4: null,
     },
-  })
+  });
 
   const mutation = useMutation({
     mutationFn: createProduct,
     onSuccess: () => {
-      toast.success("Produit créé.")
-      queryClient.invalidateQueries({ queryKey: ["products"] })
-      form.reset()
-      onSuccess?.()
+      toast.success("Produit créé.");
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+      form.reset();
+      onSuccess?.();
     },
     onError: (error) => {
-      toast.error(getErrorMessage(error))
+      toast.error(getErrorMessage(error));
     },
-  })
+  });
 
   const onSubmit = form.handleSubmit((values) => {
-    mutation.mutate(values)
-  })
+    mutation.mutate(values);
+  });
 
   return {
     form,
     onSubmit,
     isSubmitting: mutation.isPending,
-  }
+  };
 }

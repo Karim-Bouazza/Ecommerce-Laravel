@@ -23,7 +23,7 @@ class ProductController extends Controller
 
         $products = Product::query()
             ->with(['category', 'brand', 'tags', 'specs', 'variants'])
-            ->when($search !== '', fn ($query) => $query->where('name', 'like', "%{$search}%"))
+            ->when($search !== '', fn($query) => $query->where('name', 'like', "%{$search}%"))
             ->paginate($perPage);
 
         return ProductResource::collection($products);
@@ -36,14 +36,14 @@ class ProductController extends Controller
 
     public function store(StoreProductRequest $request): ProductResource
     {
-        $product = app(CreateProductService::class)->execute($request->validated(), $request->file('image'));
+        $product = app(CreateProductService::class)->execute($request->validated(), $request->allFiles());
 
         return new ProductResource($product->load(['category', 'brand', 'tags', 'specs', 'variants']));
     }
 
     public function update(UpdateProductRequest $request, Product $product): ProductResource
     {
-        $product = app(UpdateProductService::class)->execute($product, $request->validated(), $request->file('image'));
+        $product = app(UpdateProductService::class)->execute($product, $request->validated(), $request->allFiles());
 
         return new ProductResource($product->load(['category', 'brand', 'tags', 'specs', 'variants']));
     }

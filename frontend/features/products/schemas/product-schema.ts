@@ -1,9 +1,9 @@
-import { z } from "zod"
+import { z } from "zod";
 
 const specSchema = z.object({
   label: z.string(),
   value: z.string(),
-})
+});
 
 const baseProductFields = {
   name: z.string().min(1, "Le nom est requis.").max(255),
@@ -20,40 +20,46 @@ const baseProductFields = {
   tags: z.array(z.number()),
   specs: z.array(specSchema),
   variants: z.array(z.string()),
-}
+};
 
 function checkComparePrice(
   values: { price: number; compare_price?: number | null },
-  ctx: z.RefinementCtx
+  ctx: z.RefinementCtx,
 ) {
   if (values.compare_price != null && values.compare_price <= values.price) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       path: ["compare_price"],
       message: "Le prix comparé doit être supérieur au prix de vente.",
-    })
+    });
   }
 }
 
 export const productSchema = z
   .object({
     ...baseProductFields,
-    image: z
+    image_1: z
       .instanceof(File)
       .nullable()
       .refine((file) => file !== null, { message: "L'image est requise." }),
+    image_2: z.instanceof(File).nullable(),
+    image_3: z.instanceof(File).nullable(),
+    image_4: z.instanceof(File).nullable(),
   })
-  .superRefine(checkComparePrice)
+  .superRefine(checkComparePrice);
 
 export const productUpdateSchema = z
   .object({
     ...baseProductFields,
-    image: z.instanceof(File).nullable(),
+    image_1: z.instanceof(File).nullable(),
+    image_2: z.instanceof(File).nullable(),
+    image_3: z.instanceof(File).nullable(),
+    image_4: z.instanceof(File).nullable(),
   })
-  .superRefine(checkComparePrice)
+  .superRefine(checkComparePrice);
 
-export type ProductFormInput = z.input<typeof productSchema>
-export type ProductFormOutput = z.output<typeof productSchema>
+export type ProductFormInput = z.input<typeof productSchema>;
+export type ProductFormOutput = z.output<typeof productSchema>;
 
-export type ProductUpdateFormInput = z.input<typeof productUpdateSchema>
-export type ProductUpdateFormOutput = z.output<typeof productUpdateSchema>
+export type ProductUpdateFormInput = z.input<typeof productUpdateSchema>;
+export type ProductUpdateFormOutput = z.output<typeof productUpdateSchema>;

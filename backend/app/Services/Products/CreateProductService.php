@@ -3,11 +3,10 @@
 namespace App\Services\Products;
 
 use App\Models\Product;
-use Illuminate\Http\UploadedFile;
 
 class CreateProductService
 {
-    public function execute(array $data, UploadedFile $image): Product
+    public function execute(array $data, array $images): Product
     {
         $product = Product::create([
             'category_id' => $data['category_id'] ?? null,
@@ -21,7 +20,10 @@ class CreateProductService
             'compare_price' => $data['compare_price'] ?? null,
             'is_active' => $data['is_active'] ?? true,
             'is_new' => $data['is_new'] ?? false,
-            'image_1' => $image->store('products', 'public'),
+            'image_1' => $images['image_1']->store('products', 'public'),
+            'image_2' => ($images['image_2'] ?? null)?->store('products', 'public'),
+            'image_3' => ($images['image_3'] ?? null)?->store('products', 'public'),
+            'image_4' => ($images['image_4'] ?? null)?->store('products', 'public'),
         ]);
 
         $product->tags()->sync($data['tags'] ?? []);
