@@ -326,7 +326,7 @@ function CodOrderFormContent({
       <FieldGroup className="gap-4">
         <div className="grid gap-4 sm:grid-cols-2">
           <Field data-invalid={!!errors.last_name}>
-            <FieldLabel htmlFor="last_name">{t("lastName")}</FieldLabel>
+            <FieldLabel htmlFor="last_name" className="text-base">{t("lastName")}</FieldLabel>
             <InputGroup dir={isArabic ? "rtl" : "ltr"} className="h-11">
               <InputGroupAddon
                 align="inline-start"
@@ -348,7 +348,7 @@ function CodOrderFormContent({
           </Field>
 
           <Field data-invalid={!!errors.first_name}>
-            <FieldLabel htmlFor="first_name">{t("firstName")}</FieldLabel>
+            <FieldLabel htmlFor="first_name" className="text-base">{t("firstName")}</FieldLabel>
             <InputGroup dir={isArabic ? "rtl" : "ltr"} className="h-11">
               <InputGroupAddon
                 align="inline-start"
@@ -371,7 +371,7 @@ function CodOrderFormContent({
         </div>
 
         <Field data-invalid={!!errors.phone_number}>
-          <FieldLabel htmlFor="phone_number">{t("phone")}</FieldLabel>
+          <FieldLabel htmlFor="phone_number" className="text-base">{t("phone")}</FieldLabel>
           <InputGroup dir={isArabic ? "rtl" : "ltr"} className="h-11">
             <InputGroupAddon
               align="inline-start"
@@ -397,7 +397,7 @@ function CodOrderFormContent({
         </Field>
 
         <Field data-invalid={!!errors.provider_wilaya_id}>
-          <FieldLabel id="provider_wilaya_label" htmlFor="provider_wilaya_id">
+          <FieldLabel id="provider_wilaya_label" htmlFor="provider_wilaya_id" className="text-base">
             {t("wilaya")}
           </FieldLabel>
           <Controller
@@ -428,7 +428,7 @@ function CodOrderFormContent({
         </Field>
 
         <Field data-invalid={!!errors.provider_commune_id}>
-          <FieldLabel id="provider_commune_label" htmlFor="provider_commune_id">
+          <FieldLabel id="provider_commune_label" htmlFor="provider_commune_id" className="text-base">
             {t("commune")}
           </FieldLabel>
           <Controller
@@ -456,7 +456,7 @@ function CodOrderFormContent({
         </Field>
 
         <Field>
-          <FieldLabel>{t("deliveryMode")}</FieldLabel>
+          <FieldLabel className="text-base">{t("deliveryMode")}</FieldLabel>
           <Controller
             control={control}
             name="delivery_type"
@@ -516,7 +516,7 @@ function CodOrderFormContent({
 
         {hasVariants && (
           <Field data-invalid={!!errors.variant_id}>
-            <FieldLabel>{t("chooseOption")}</FieldLabel>
+            <FieldLabel className="text-base">{t("chooseOption")}</FieldLabel>
             <Controller
               control={control}
               name="variant_id"
@@ -557,7 +557,7 @@ function CodOrderFormContent({
       </FieldGroup>
 
       <div className="mt-5 flex items-center justify-between gap-3">
-        <span className="text-sm font-medium">{t("quantity")}</span>
+        <span className="text-base font-medium">{t("quantity")}</span>
         <Controller
           control={control}
           name="quantity"
