@@ -14,6 +14,10 @@ class CalculateChargeAmountService
 {
     public function execute(Charge $charge): int
     {
+        if (! $charge->is_active) {
+            return 0;
+        }
+
         return match ($charge->type) {
             ChargeType::Normal => (int) $charge->amount,
             ChargeType::PerOrder => $charge->amount * $this->matchingOrderItemsQuantity($charge),
@@ -36,7 +40,7 @@ class CalculateChargeAmountService
 
         $query = OrderItem::query()
             ->whereHas('order', function ($query) use ($charge, $status) {
-                $query->whereHas('statusHistories', fn ($q) => $q->where('status', $status));
+                $query->whereHas('statusHistories', fn($q) => $q->where('status', $status));
 
                 if ($charge->starts_at) {
                     $query->whereDate('created_at', '>=', $charge->starts_at);

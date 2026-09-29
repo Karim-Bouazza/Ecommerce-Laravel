@@ -136,6 +136,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/charges/stats', [ChargeController::class, 'stats']);
         Route::post('/charges', [ChargeController::class, 'store']);
         Route::put('/charges/{charge}', [ChargeController::class, 'update']);
+        Route::post('/charges/{charge}/toggle-active', [ChargeController::class, 'toggleActive']);
         Route::delete('/charges/{charge}', [ChargeController::class, 'destroy']);
         Route::get('/charges/{charge}/versements', [ChargeController::class, 'versements']);
         Route::post('/charges/{charge}/versements', [ChargeController::class, 'createVersement']);

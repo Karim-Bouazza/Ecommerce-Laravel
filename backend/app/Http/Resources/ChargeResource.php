@@ -26,6 +26,7 @@ class ChargeResource extends JsonResource
             'amount' => $this->amount,
             'starts_at' => $this->starts_at?->format('Y-m-d'),
             'ends_at' => $this->ends_at?->format('Y-m-d'),
+            'is_active' => (bool) $this->is_active,
             'all_products' => (bool) $this->all_products,
             'product_ids' => $this->products->pluck('id'),
             'product_names' => $this->products->pluck('name'),

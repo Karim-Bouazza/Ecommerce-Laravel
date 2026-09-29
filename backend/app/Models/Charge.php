@@ -26,6 +26,7 @@ class Charge extends Model
         'all_products',
         'starts_at',
         'ends_at',
+        'is_active',
     ];
 
     protected $casts = [
@@ -37,6 +38,7 @@ class Charge extends Model
         'all_products' => 'boolean',
         'starts_at' => 'date',
         'ends_at' => 'date',
+        'is_active' => 'boolean',
     ];
 
     public function products(): BelongsToMany

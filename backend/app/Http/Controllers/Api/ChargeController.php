@@ -46,16 +46,16 @@ class ChargeController extends Controller
             ->when($search !== '', function ($query) use ($search) {
                 $query->where('name', 'like', "%{$search}%");
             })
-            ->when($dateFrom, fn ($query) => $query->whereDate('created_at', '>=', $dateFrom))
-            ->when($dateTo, fn ($query) => $query->whereDate('created_at', '<=', $dateTo))
+            ->when($dateFrom, fn($query) => $query->whereDate('created_at', '>=', $dateFrom))
+            ->when($dateTo, fn($query) => $query->whereDate('created_at', '<=', $dateTo))
             ->when($productId, function ($query) use ($productId) {
                 $query->where(function ($query) use ($productId) {
                     $query->where('all_products', true)
-                        ->orWhereHas('products', fn ($query) => $query->where('products.id', $productId));
+                        ->orWhereHas('products', fn($query) => $query->where('products.id', $productId));
                 });
             })
-            ->when($type, fn ($query) => $query->where('type', $type))
-            ->when($category, fn ($query) => $query->where('category', $category))
+            ->when($type, fn($query) => $query->where('type', $type))
+            ->when($category, fn($query) => $query->where('category', $category))
             ->when($paymentStatus, function ($query) use ($paymentStatus) {
                 match ($paymentStatus) {
                     'unpaid' => $query->havingRaw('COALESCE(paid_amount_sum, 0) <= 0'),
@@ -114,6 +114,15 @@ class ChargeController extends Controller
         }
 
         return new ChargeResource($charge->load('products:id,name'));
+    }
+
+    public function toggleActive(Charge $charge): ChargeResource
+    {
+        abort_unless(auth()->user()->hasPermission('charges.edit'), 403);
+
+        $charge->update(['is_active' => ! $charge->is_active]);
+
+        return new ChargeResource($charge->fresh()->load('products:id,name'));
     }
 
     public function destroy(Charge $charge): JsonResponse
