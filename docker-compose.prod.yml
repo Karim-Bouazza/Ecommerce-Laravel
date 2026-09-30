@@ -62,6 +62,7 @@ services:
     init: true
     environment:
       NODE_ENV: production
+      SANCTUM_SESSION_COOKIE: ${SANCTUM_SESSION_COOKIE:-ecommerce-session}
     expose:
       - "3000"
     networks:
