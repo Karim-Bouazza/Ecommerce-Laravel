@@ -264,13 +264,15 @@ function CodOrderFormContent({
         ],
       });
 
-      trackPurchase({
-        orderId: order.id,
-        productId: product.id,
-        productName: product.name,
-        value: total,
-        quantity: values.quantity,
-      });
+      if (order.track_purchase) {
+        trackPurchase({
+          orderId: order.id,
+          productId: product.id,
+          productName: product.name,
+          value: total,
+          quantity: values.quantity,
+        });
+      }
 
       setConfirmed({ values });
       toast.success(t("orderSent"));

@@ -70,7 +70,8 @@ test('a storefront order stores the server detected IP and hides it from the pub
 
     $response
         ->assertCreated()
-        ->assertJsonStructure(['id', 'reference'])
+        ->assertJsonStructure(['id', 'reference', 'track_purchase'])
+        ->assertJsonPath('track_purchase', true)
         ->assertJsonMissingPath('ip_address');
 
     $order = Order::query()->latest('id')->first();
@@ -78,6 +79,34 @@ test('a storefront order stores the server detected IP and hides it from the pub
     expect($order->ip_address)->toBe('203.0.113.10')
         ->and($order->name)->toBe('Test product')
         ->and($order->provider_order_id)->toBe('Test product');
+});
+
+test('a storefront order from the excluded IP does not track a purchase', function () {
+    /** @var Tests\TestCase $this */
+    Notification::fake();
+
+    $product = orderIpTestProduct();
+    $wilaya = orderIpTestWilaya();
+
+    $originalRemoteAddress = $_SERVER['REMOTE_ADDR'] ?? null;
+    $_SERVER['REMOTE_ADDR'] = '105.235.133.10';
+
+    try {
+        $response = $this->postJson('/api/v1/orders', orderIpTestData($product, $wilaya));
+    } finally {
+        if ($originalRemoteAddress === null) {
+            unset($_SERVER['REMOTE_ADDR']);
+        } else {
+            $_SERVER['REMOTE_ADDR'] = $originalRemoteAddress;
+        }
+    }
+
+    $response
+        ->assertCreated()
+        ->assertJsonPath('track_purchase', false)
+        ->assertJsonMissingPath('ip_address');
+
+    expect(Order::query()->exists())->toBeTrue();
 });
 
 test('a manual order does not automatically receive an IP', function () {
