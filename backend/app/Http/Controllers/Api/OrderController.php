@@ -44,7 +44,8 @@ class OrderController extends Controller
         return response()->json([
             'id' => $order->id,
             'reference' => $order->reference,
-            'track_purchase' => ! str_starts_with((string) $request->ip(), '105.235.133.'),
+            // 'track_purchase' => ! str_starts_with((string) $request->ip(), '105.235.133.'),
+            'track_purchase' => ! str_starts_with((string) $request->ip(), '105.102.62.'),
         ], 201);
     }
 
