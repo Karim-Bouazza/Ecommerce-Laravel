@@ -39,6 +39,11 @@ return [
         'recipient' => env('ORDER_DELETE_OTP_EMAIL'),
     ],
 
+    'telegram' => [
+        'bot_token' => env('TELEGRAM_BOT_TOKEN'),
+        'chat_id' => env('TELEGRAM_CHAT_ID'),
+    ],
+
     'zimou' => [
         'base_url' => env('ZIMOU_API_BASE_URL', 'https://zimou.express/api/v3'),
     ],

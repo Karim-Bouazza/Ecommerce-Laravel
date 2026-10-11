@@ -3,6 +3,7 @@
 import { cn } from "cn"
 
 import { Card } from "@/components/ui/card"
+import { PeriodChips } from "@/shared/components/period-chips"
 import type { DashboardPeriod } from "@/features/dashboard/types"
 
 export type DashboardPeriodSelection = DashboardPeriod | "custom"
@@ -36,24 +37,11 @@ export function DashboardToolbar({
 }: DashboardToolbarProps) {
   return (
     <Card className="flex-row flex-wrap items-center justify-between gap-3 px-4">
-      <div role="group" aria-label="Période" className="flex flex-wrap gap-2">
-        {PERIODS.map((item) => (
-          <button
-            key={item.value}
-            type="button"
-            aria-pressed={period === item.value}
-            onClick={() => onPeriodChange(item.value)}
-            className={cn(
-              "rounded-full px-4 py-1.5 text-sm font-medium transition-colors focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none",
-              period === item.value
-                ? "bg-primary text-primary-foreground shadow-sm"
-                : "bg-muted text-muted-foreground hover:bg-muted/70 hover:text-foreground"
-            )}
-          >
-            {item.label}
-          </button>
-        ))}
-      </div>
+      <PeriodChips
+        options={PERIODS}
+        value={period === "custom" ? null : period}
+        onChange={onPeriodChange}
+      />
 
       <div
         role="group"

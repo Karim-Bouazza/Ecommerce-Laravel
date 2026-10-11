@@ -10,6 +10,7 @@ enum DashboardPeriod: string
     case Today = 'today';
     case Yesterday = 'yesterday';
     case LastWeek = 'last_week';
+    case ThisMonth = 'this_month';
     case LastMonth = 'last_month';
 
     /**
@@ -24,6 +25,7 @@ enum DashboardPeriod: string
             self::Today => [$now->startOfDay(), $now->endOfDay()],
             self::Yesterday => [$now->subDay()->startOfDay(), $now->subDay()->endOfDay()],
             self::LastWeek => [$now->subWeek()->startOfWeek(), $now->subWeek()->endOfWeek()],
+            self::ThisMonth => [$now->startOfMonth(), $now->endOfMonth()],
             self::LastMonth => [$now->subMonthNoOverflow()->startOfMonth(), $now->subMonthNoOverflow()->endOfMonth()],
         };
     }

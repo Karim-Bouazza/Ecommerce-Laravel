@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AdministratorController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BrandController;
 use App\Http\Controllers\Api\CategoryController;
@@ -54,6 +55,7 @@ Route::prefix('v1')->group(function () {
         Route::put('/wilayas/{wilaya}', [WilayaController::class, 'update']);
         Route::get('/dashboard', [DashboardController::class, 'index']);
         Route::get('/performance/revenue', [PerformanceController::class, 'revenue']);
+        Route::get('/performance/sales-evolution', [PerformanceController::class, 'salesEvolution']);
     });
 
     Route::get('/products/{product}', [ProductController::class, 'show']);
@@ -151,6 +153,12 @@ Route::prefix('v1')->group(function () {
         Route::put('/warehouses/{warehouse}', [WarehouseController::class, 'update']);
         Route::delete('/warehouses/{warehouse}', [WarehouseController::class, 'destroy']);
         Route::post('/warehouses/{warehouse}/toggle-active', [WarehouseController::class, 'toggleActive']);
+        Route::get('/administrators', [AdministratorController::class, 'index']);
+        Route::get('/administrators/role-options', [AdministratorController::class, 'roleOptions']);
+        Route::post('/administrators', [AdministratorController::class, 'store']);
+        Route::put('/administrators/{administrator}', [AdministratorController::class, 'update']);
+        Route::post('/administrators/{administrator}/toggle-active', [AdministratorController::class, 'toggleActive']);
+        Route::delete('/administrators/{administrator}', [AdministratorController::class, 'destroy']);
         Route::get('/roles', [RoleController::class, 'index']);
         Route::post('/roles', [RoleController::class, 'store']);
         Route::get('/roles/permissions', [RoleController::class, 'permissions']);

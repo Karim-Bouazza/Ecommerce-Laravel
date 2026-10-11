@@ -11,6 +11,7 @@ use App\Http\Requests\UpdateManualOrderRequest;
 use App\Http\Requests\UpdateOrderStatusRequest;
 use App\Http\Resources\OrderResource;
 use App\Http\Resources\OrderStatusHistoryResource;
+use App\Jobs\SendOrderToTelegram;
 use App\Models\Order;
 use App\Models\OrderStatusHistory;
 use App\Models\Product;
@@ -40,6 +41,8 @@ class OrderController extends Controller
                 'ip_address' => $request->ip(),
             ]
         );
+
+        SendOrderToTelegram::dispatchAfterResponse($order);
 
         return response()->json([
             'id' => $order->id,

@@ -1,5 +1,5 @@
-import { ComingSoon } from "@/components/shared/coming-soon"
+import { AdministratorsPage } from "@/features/administrators/pages/administrators-page"
 
-export default function AdministratorsPage() {
-  return <ComingSoon />
+export default function Page() {
+  return <AdministratorsPage />
 }

@@ -14,7 +14,7 @@ class AuthController extends Controller
 {
     public function login(LoginRequest $request)
     {
-        if (! Auth::attempt($request->only('email', 'password'), $request->boolean('remember'))) {
+        if (! Auth::attempt([...$request->only('email', 'password'), 'is_active' => true], $request->boolean('remember'))) {
             return response()->json([
                 'message' => 'Invalid credentials.',
             ], 401);
