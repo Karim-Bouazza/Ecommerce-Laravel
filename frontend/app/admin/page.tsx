@@ -1,3 +1,5 @@
-export default function AdminDashboardPage() {
-  return <h1>Tableau de bord</h1>
+import { DashboardPage } from "@/features/dashboard/pages/dashboard-page"
+
+export default function Page() {
+  return <DashboardPage />
 }

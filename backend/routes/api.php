@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\BrandController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\ChargeController;
 use App\Http\Controllers\Api\ClientController;
+use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\DeliveryCompanyIntegrationController;
 use App\Http\Controllers\Api\DeliveryCompanyOptionController;
 use App\Http\Controllers\Api\FournisseurController;
@@ -51,6 +52,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/products/analytics/chart', [ProductAnalyticsController::class, 'chart']);
         Route::get('/wilayas/analytics', [WilayaAnalyticsController::class, 'index']);
         Route::put('/wilayas/{wilaya}', [WilayaController::class, 'update']);
+        Route::get('/dashboard', [DashboardController::class, 'index']);
         Route::get('/performance/revenue', [PerformanceController::class, 'revenue']);
     });
 
