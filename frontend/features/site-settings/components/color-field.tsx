@@ -38,7 +38,7 @@ export function ColorField<T extends FieldValues>({
                 aria-label={`${label} — sélecteur`}
                 value={HEX_PATTERN.test(value) ? value : "#000000"}
                 onChange={(event) => field.onChange(event.target.value)}
-                className="size-8 shrink-0 cursor-pointer rounded-md border border-input bg-transparent p-0.5"
+                className="size-10 shrink-0 cursor-pointer rounded-lg border border-input bg-transparent p-0.5 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
               />
               <Input
                 id={name}
@@ -48,7 +48,7 @@ export function ColorField<T extends FieldValues>({
                 placeholder="#007FFF"
                 aria-invalid={!!error}
                 maxLength={7}
-                className="font-mono uppercase"
+                className="max-w-40 font-mono uppercase"
               />
             </div>
             {description && <p className="text-sm text-muted-foreground">{description}</p>}

@@ -31,7 +31,14 @@ export function LogoUploader({ logo }: { logo: SiteLogo }) {
 
   return (
     <div className="space-y-4">
-      <div className="flex h-32 items-center justify-center rounded-lg border border-dashed bg-muted/40 p-4">
+      <div
+        className="flex h-40 items-center justify-center rounded-xl border border-dashed p-6"
+        style={{
+          backgroundImage:
+            "conic-gradient(var(--muted) 25%, transparent 0 50%, var(--muted) 0 75%, transparent 0)",
+          backgroundSize: "16px 16px",
+        }}
+      >
         {logo.logo_url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -40,7 +47,9 @@ export function LogoUploader({ logo }: { logo: SiteLogo }) {
             className="max-h-full max-w-full object-contain"
           />
         ) : (
-          <span className="text-sm text-muted-foreground">Aucun logo configuré</span>
+          <span className="rounded-md bg-background px-3 py-1.5 text-sm text-muted-foreground">
+            Aucun logo configuré
+          </span>
         )}
       </div>
 
@@ -52,9 +61,9 @@ export function LogoUploader({ logo }: { logo: SiteLogo }) {
         onChange={handleFileChange}
       />
 
-      <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()}>
+      <Button type="button" onClick={() => fileInputRef.current?.click()}>
         <ImagePlus />
-        Changer le logo
+        {logo.logo_url ? "Changer le logo" : "Ajouter un logo"}
       </Button>
 
       <LogoCropperDialog

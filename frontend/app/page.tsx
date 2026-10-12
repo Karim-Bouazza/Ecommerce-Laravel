@@ -1,4 +1,9 @@
 import { getHeroCategories } from "@/features/site-settings/api/hero-categories-api"
+import {
+  getStorefrontFeatures,
+  getStorefrontPromoBanners,
+  getStorefrontSectionProducts,
+} from "@/features/site-settings/api/storefront-content-api"
 import { StorefrontTheme } from "@/features/storefront/components/storefront-theme"
 import { Navbar } from "@/features/storefront/components/navbar"
 import { Hero } from "@/features/storefront/components/hero"
@@ -16,7 +21,16 @@ import { Footer } from "@/features/storefront/components/footer"
 export const dynamic = "force-dynamic"
 
 export default async function Home() {
-  const heroCategories = await getHeroCategories().catch(() => [])
+  // Each block is optional: a failed request just hides its section.
+  const [heroCategories, bestOffers, features, newArrivals, stylePicks, promoBanners] =
+    await Promise.all([
+      getHeroCategories().catch(() => []),
+      getStorefrontSectionProducts("best_offers").catch(() => []),
+      getStorefrontFeatures().catch(() => []),
+      getStorefrontSectionProducts("new_arrivals").catch(() => []),
+      getStorefrontSectionProducts("style_picks").catch(() => []),
+      getStorefrontPromoBanners().catch(() => []),
+    ])
 
   return (
     <StorefrontTheme>
@@ -25,11 +39,11 @@ export default async function Home() {
       <Categories items={heroCategories} />
       <Products />
       <FeaturedCarousel />
-      <DealsOfTheDay />
-      <ProductFeatures />
-      <NewArrivals />
-      <ChooseYourStyle />
-      <PromoBanners />
+      <DealsOfTheDay offers={bestOffers} />
+      <ProductFeatures features={features} />
+      <NewArrivals items={newArrivals} />
+      <ChooseYourStyle products={stylePicks} />
+      <PromoBanners banners={promoBanners} />
       <CtaBanner />
       <Footer />
     </StorefrontTheme>

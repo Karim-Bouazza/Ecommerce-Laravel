@@ -2,76 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion, type PanInfo } from "framer-motion";
+import Link from "next/link";
 import { ShoppingBag } from "lucide-react";
 import { cn } from "cn";
 
-type StyleProduct = {
-  name: string;
-  badge: string;
-  description: string;
-  price: number;
-  image: string;
-  variants: string[];
-};
-
-const STYLE_PRODUCTS: StyleProduct[] = [
-  {
-    name: "Caméra Dôme D200",
-    badge: "Meilleur Prix",
-    description: "Compacte et discrète pour l'intérieur",
-    price: 89.99,
-    image: "https://picsum.photos/seed/style-dome-d200/500/500",
-    variants: ["style-dome-d200-a", "style-dome-d200-b", "style-dome-d200-c"],
-  },
-  {
-    name: "Bullet Cam B360",
-    badge: "Léger",
-    description: "Vision longue portée et boîtier robuste",
-    price: 115.49,
-    image: "https://picsum.photos/seed/style-bullet-b360/500/500",
-    variants: ["style-bullet-b360-a", "style-bullet-b360-b", "style-bullet-b360-c"],
-  },
-  {
-    name: "Vision Pro LX 500",
-    badge: "Meilleure Vente",
-    description: "Conçue pour l'extérieur avec rotation 360° et vision nocturne.",
-    price: 139.99,
-    image: "https://picsum.photos/seed/style-vision-pro-lx500/500/500",
-    variants: ["style-lx500-a", "style-lx500-b", "style-lx500-c"],
-  },
-  {
-    name: "Sonnette Vidéo S2",
-    badge: "Favori",
-    description: "Voyez et parlez à vos visiteurs à distance",
-    price: 129.5,
-    image: "https://picsum.photos/seed/style-doorbell-s2/500/500",
-    variants: ["style-doorbell-s2-a", "style-doorbell-s2-b", "style-doorbell-s2-c"],
-  },
-  {
-    name: "Alarme Core X2",
-    badge: "Nouveau",
-    description: "Centrale sans fil et sirène intégrée",
-    price: 105.99,
-    image: "https://picsum.photos/seed/style-alarm-core-x2/500/500",
-    variants: ["style-alarm-x2-a", "style-alarm-x2-b", "style-alarm-x2-c"],
-  },
-  {
-    name: "Serrure Smart K7",
-    badge: "Pro",
-    description: "Déverrouillage par empreinte et code",
-    price: 159.0,
-    image: "https://picsum.photos/seed/style-smart-lock-k7/500/500",
-    variants: ["style-lock-k7-a", "style-lock-k7-b", "style-lock-k7-c"],
-  },
-  {
-    name: "Détecteur Eco M1",
-    badge: "Éco",
-    description: "Autonomie de 5 ans, pose sans outils",
-    price: 39.9,
-    image: "https://picsum.photos/seed/style-motion-eco-m1/500/500",
-    variants: ["style-eco-m1-a", "style-eco-m1-b", "style-eco-m1-c"],
-  },
-];
+import type { SectionProduct } from "@/features/site-settings/types";
+import { formatPrice } from "@/shared/lib/format-price";
 
 const AUTOPLAY_MS = 4500;
 const SWIPE_THRESHOLD = 60;
@@ -88,60 +24,70 @@ function StyleCard({
   product,
   isActive,
 }: {
-  product: StyleProduct;
+  product: SectionProduct;
   isActive: boolean;
 }) {
   return (
     <div className="flex flex-col rounded-3xl bg-muted p-5 shadow-sm">
       <div className="flex items-start justify-between gap-3">
         <h3 className="text-lg font-medium text-foreground">{product.name}</h3>
-        <span className="shrink-0 rounded-full bg-foreground px-2.5 py-1 text-[10px] font-medium text-background">
-          {product.badge}
-        </span>
+        {product.label && (
+          <span className="shrink-0 rounded-full bg-foreground px-2.5 py-1 text-[10px] font-medium text-background">
+            {product.label}
+          </span>
+        )}
       </div>
-      <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
-        {product.description}
-      </p>
-      <p className="mt-2 text-base font-medium text-primary">
-        ${product.price.toFixed(2)}
-      </p>
+      {product.short_description && (
+        <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
+          {product.short_description}
+        </p>
+      )}
+      <p className="mt-2 text-base font-medium text-primary">{formatPrice(product.price)}</p>
 
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={product.image}
-        alt={product.name}
-        draggable={false}
-        className="mt-4 h-44 w-full rounded-2xl object-cover sm:h-52"
-      />
+      {product.image ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={product.image}
+          alt={product.name}
+          draggable={false}
+          className="mt-4 h-44 w-full rounded-2xl object-cover sm:h-52"
+        />
+      ) : (
+        <div className="mt-4 flex h-44 w-full items-center justify-center rounded-2xl bg-background text-4xl font-semibold text-muted-foreground sm:h-52">
+          {product.name.charAt(0).toUpperCase()}
+        </div>
+      )}
 
       <div className="mt-4 flex items-center justify-between gap-2">
         <div className="flex gap-1.5">
-          {product.variants.map((seed) => (
+          {product.images.slice(1, 4).map((src) => (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              key={seed}
-              src={`https://picsum.photos/seed/${seed}/80/80`}
+              key={src}
+              src={src}
               alt=""
               draggable={false}
               className="size-8 rounded-md border border-border object-cover"
             />
           ))}
         </div>
-        <button
-          type="button"
+        <Link
+          href={`/products/${product.product_id}`}
           tabIndex={isActive ? 0 : -1}
+          draggable={false}
+          aria-label={`Commander ${product.name}`}
           className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3.5 py-2 text-xs font-medium text-primary-foreground shadow-sm transition-transform hover:scale-105"
         >
-          Ajouter
-          <ShoppingBag className="size-3.5" />
-        </button>
+          Commander
+          <ShoppingBag aria-hidden="true" className="size-3.5" />
+        </Link>
       </div>
     </div>
   );
 }
 
-export function ChooseYourStyle() {
-  const total = STYLE_PRODUCTS.length;
+export function ChooseYourStyle({ products }: { products: SectionProduct[] }) {
+  const total = products.length;
   const [active, setActive] = useState(Math.floor(total / 2));
   const [paused, setPaused] = useState(false);
   const [spacing, setSpacing] = useState(260);
@@ -162,10 +108,16 @@ export function ChooseYourStyle() {
   }, []);
 
   useEffect(() => {
-    if (paused) return;
+    // No autoplay with a single card, while hovered/focused, or when motion is reduced.
+    if (paused || total < 2) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const id = setInterval(() => setActive((i) => (i + 1) % total), AUTOPLAY_MS);
     return () => clearInterval(id);
   }, [paused, total]);
+
+  if (total === 0) {
+    return null;
+  }
 
   const handleDragEnd = (_: unknown, info: PanInfo) => {
     if (info.offset.x < -SWIPE_THRESHOLD) next();
@@ -182,9 +134,11 @@ export function ChooseYourStyle() {
         ref={trackRef}
         onMouseEnter={() => setPaused(true)}
         onMouseLeave={() => setPaused(false)}
+        onFocus={() => setPaused(true)}
+        onBlur={() => setPaused(false)}
         className="relative mt-10 h-110 overflow-hidden sm:h-120"
       >
-        {STYLE_PRODUCTS.map((product, index) => {
+        {products.map((product, index) => {
           const offset = getOffset(index, active, total);
           const distance = Math.abs(offset);
           const isActive = offset === 0;
@@ -195,7 +149,7 @@ export function ChooseYourStyle() {
 
           return (
             <motion.div
-              key={product.name}
+              key={product.id}
               initial={false}
               animate={{
                 x,
@@ -223,9 +177,9 @@ export function ChooseYourStyle() {
       </div>
 
       <div className="mt-6 flex justify-center gap-2">
-        {STYLE_PRODUCTS.map((product, index) => (
+        {products.map((product, index) => (
           <button
-            key={product.name}
+            key={product.id}
             type="button"
             aria-label={`Afficher ${product.name}`}
             onClick={() => setActive(index)}

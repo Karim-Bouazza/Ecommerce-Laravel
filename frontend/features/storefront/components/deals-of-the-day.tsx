@@ -1,57 +1,10 @@
-"use client";
-
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { cn } from "cn";
+import type { SectionProduct } from "@/features/site-settings/types";
+import { formatPrice } from "@/shared/lib/format-price";
 
-type Deal = {
-  name: string;
-  image: string;
-  price: number;
-  specs: string[];
-  colors: string[];
-};
-
-const FEATURED_DEAL: Deal = {
-  name: "Système de Sécurité Pro 4K",
-  image: "https://picsum.photos/seed/security-system-pro-4k/700/700",
-  price: 249,
-  specs: ["4K", "8 ch", "Wi-Fi"],
-  colors: ["#111111", "#6b7c75", "#2d9cdb", "#f97316"],
-};
-
-const SMALL_DEALS: Deal[] = [
-  {
-    name: "Caméra Extérieure 360°",
-    image: "https://picsum.photos/seed/outdoor-camera-360/300/300",
-    price: 79,
-    specs: ["2K", "IP67", "Wi-Fi"],
-    colors: ["#1e2a44", "#4b4b45", "#111111", "#c8574f"],
-  },
-  {
-    name: "Détecteur de Fumée Connecté",
-    image: "https://picsum.photos/seed/smoke-detector-connected/300/300",
-    price: 35,
-    specs: ["Zigbee", "10 ans", "85 dB"],
-    colors: ["#1e2a44", "#d9d4cc", "#f97316", "#c8574f"],
-  },
-  {
-    name: "Sirène d'Alarme Extérieure",
-    image: "https://picsum.photos/seed/outdoor-alarm-siren/300/300",
-    price: 59,
-    specs: ["110 dB", "IP65", "LED"],
-    colors: ["#f97316", "#6b7c75", "#c9c9c0", "#b8e986"],
-  },
-  {
-    name: "Interphone Vidéo Compact",
-    image: "https://picsum.photos/seed/compact-video-intercom/300/300",
-    price: 65,
-    specs: ["1080p", "7\"", "PoE"],
-    colors: ["#6b7280", "#5b6ad0", "#111111", "#2f3a56"],
-  },
-];
-
-function DealCard({ deal, featured = false }: { deal: Deal; featured?: boolean }) {
+function DealCard({ deal, featured = false }: { deal: SectionProduct; featured?: boolean }) {
   return (
     <div className="relative flex h-full flex-col overflow-hidden rounded-3xl bg-muted/60">
       <div
@@ -71,11 +24,16 @@ function DealCard({ deal, featured = false }: { deal: Deal; featured?: boolean }
           </h3>
           <p
             className={cn(
-              "mt-1 font-medium text-primary",
+              "mt-1 flex flex-wrap items-baseline gap-x-2 font-medium text-primary",
               featured ? "text-2xl sm:text-3xl" : "text-sm sm:text-base"
             )}
           >
-            ${deal.price.toFixed(2)}
+            {formatPrice(deal.price)}
+            {deal.compare_price !== null && (
+              <span className="text-xs font-normal text-muted-foreground line-through">
+                {formatPrice(deal.compare_price)}
+              </span>
+            )}
           </p>
         </div>
       </div>
@@ -86,12 +44,23 @@ function DealCard({ deal, featured = false }: { deal: Deal; featured?: boolean }
           featured ? "h-48 sm:h-56 lg:h-64" : "h-28 sm:h-32"
         )}
       >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={deal.image}
-          alt={deal.name}
-          className="absolute inset-0 h-full w-full object-cover"
-        />
+        {deal.image ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={deal.image}
+            alt={deal.name}
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center bg-muted text-4xl font-semibold text-muted-foreground">
+            {deal.name.charAt(0).toUpperCase()}
+          </div>
+        )}
+        {deal.discount_percentage !== null && (
+          <span className="absolute top-2 left-2 rounded-full bg-primary px-2 py-0.5 text-xs font-semibold text-primary-foreground">
+            -{deal.discount_percentage}%
+          </span>
+        )}
       </div>
 
       <div
@@ -114,19 +83,10 @@ function DealCard({ deal, featured = false }: { deal: Deal; featured?: boolean }
               </span>
             ))}
           </div>
-          <div className="flex gap-1.5">
-            {deal.colors.map((color) => (
-              <span
-                key={color}
-                className={cn("rounded-full", featured ? "size-6" : "size-2.5")}
-                style={{ backgroundColor: color }}
-              />
-            ))}
-          </div>
         </div>
 
         <Link
-          href="/products"
+          href={`/products/${deal.product_id}`}
           aria-label={`Voir ${deal.name}`}
           className={cn(
             "flex shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm transition-transform hover:scale-105",
@@ -140,7 +100,13 @@ function DealCard({ deal, featured = false }: { deal: Deal; featured?: boolean }
   );
 }
 
-export function DealsOfTheDay() {
+export function DealsOfTheDay({ offers }: { offers: SectionProduct[] }) {
+  if (offers.length === 0) {
+    return null;
+  }
+
+  const [featured, ...others] = offers;
+
   return (
     <section className="mx-auto max-w-7xl px-4 py-16 sm:px-4 lg:px-6">
       <div className="flex items-center gap-2 text-sm font-medium text-primary">
@@ -152,13 +118,15 @@ export function DealsOfTheDay() {
       </h2>
 
       <div className="mt-8 grid grid-cols-1 gap-4 sm:gap-5 lg:grid-cols-2">
-        <DealCard deal={FEATURED_DEAL} featured />
+        <DealCard deal={featured} featured />
 
-        <div className="grid grid-cols-2 gap-4 sm:gap-5">
-          {SMALL_DEALS.map((deal) => (
-            <DealCard key={deal.name} deal={deal} />
-          ))}
-        </div>
+        {others.length > 0 && (
+          <div className="grid grid-cols-2 gap-4 sm:gap-5">
+            {others.map((deal) => (
+              <DealCard key={deal.id} deal={deal} />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
