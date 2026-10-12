@@ -124,8 +124,12 @@ export const NAV_SECTIONS: NavSection[] = [
         href: "/admin/analytics",
         icon: LineChart,
         items: [
-          { label: "Commandes", href: "/admin/analytics/orders" },
-          { label: "Canaux de vente", href: "/admin/analytics/sales-channels" },
+          { label: "Commandes", href: "/admin/analytics/orders", permission: "analytics_orders.view" },
+          {
+            label: "Canaux de vente",
+            href: "/admin/analytics/sales-channels",
+            permission: "analytics_sales_channels.view",
+          },
           { label: "Produits", href: "/admin/analytics/products" },
           { label: "Livraison", href: "/admin/analytics/delivery" },
           { label: "Wilayas", href: "/admin/analytics/wilayas" },

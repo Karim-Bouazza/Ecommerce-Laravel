@@ -1,4 +1,5 @@
 import { api, toApiError } from "@/lib/api"
+import type { OrderAnalysisPeriod } from "@/features/order-analysis/types"
 import type {
   PaginatedResponse,
   ProductAnalyticsChartItem,
@@ -10,6 +11,7 @@ export type GetProductAnalyticsParams = {
   page?: number
   per_page?: number
   search?: string
+  period?: OrderAnalysisPeriod
   date_from?: string
   date_to?: string
   wilaya_id?: number

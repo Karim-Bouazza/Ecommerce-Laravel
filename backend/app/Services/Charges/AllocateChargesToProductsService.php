@@ -2,35 +2,35 @@
 
 namespace App\Services\Charges;
 
-use App\Enums\ChargeOrderTrigger;
 use App\Enums\ChargeType;
 use App\Enums\OrderStatus;
 use App\Models\Charge;
 use App\Models\OrderItem;
+use Carbon\CarbonInterface;
 
 class AllocateChargesToProductsService
 {
-    public function __construct(private readonly CalculateChargeAmountService $calculator)
-    {
-    }
+    public function __construct(private readonly CalculateChargeAmountService $calculator) {}
 
     /**
+     * Charges allocated to each product, optionally restricted to the [$from, $to] period.
+     *
      * @return array<int, float> product_id => allocated charge amount
      */
-    public function execute(): array
+    public function execute(?CarbonInterface $from = null, ?CarbonInterface $to = null): array
     {
-        $deliveredQuantityByProduct = $this->deliveredQuantityByProduct();
+        $deliveredQuantityByProduct = $this->deliveredQuantityByProduct($from, $to);
         $totalDeliveredQuantity = array_sum($deliveredQuantityByProduct);
 
         $allocations = [];
 
         Charge::query()
-            ->with('products:id')
-            ->chunk(100, function ($charges) use (&$allocations, $deliveredQuantityByProduct, $totalDeliveredQuantity) {
+            ->with(['products:id', 'pauses'])
+            ->chunk(100, function ($charges) use (&$allocations, $deliveredQuantityByProduct, $totalDeliveredQuantity, $from, $to) {
                 foreach ($charges as $charge) {
                     $chargeAllocations = $charge->type === ChargeType::PerOrder
-                        ? $this->allocatePerOrderCharge($charge)
-                        : $this->allocateFlatCharge($charge, $deliveredQuantityByProduct, $totalDeliveredQuantity);
+                        ? $this->calculator->perOrderAllocation($charge, $from, $to)
+                        : $this->allocateFlatCharge($charge, $deliveredQuantityByProduct, $totalDeliveredQuantity, $from, $to);
 
                     foreach ($chargeAllocations as $productId => $amount) {
                         $allocations[$productId] = ($allocations[$productId] ?? 0) + $amount;
@@ -44,11 +44,13 @@ class AllocateChargesToProductsService
     /**
      * @return array<int, float>
      */
-    private function deliveredQuantityByProduct(): array
+    private function deliveredQuantityByProduct(?CarbonInterface $from, ?CarbonInterface $to): array
     {
         return OrderItem::query()
             ->join('orders', 'orders.id', '=', 'order_items.order_id')
             ->where('orders.status', OrderStatus::Delivered)
+            ->when($from, fn ($query, $from) => $query->where('orders.created_at', '>=', $from->startOfDay()))
+            ->when($to, fn ($query, $to) => $query->where('orders.created_at', '<=', $to->endOfDay()))
             ->groupBy('order_items.product_id')
             ->selectRaw('order_items.product_id, SUM(order_items.quantity) as qty')
             ->pluck('qty', 'product_id')
@@ -57,59 +59,12 @@ class AllocateChargesToProductsService
     }
 
     /**
-     * @return array<int, float>
-     */
-    private function allocatePerOrderCharge(Charge $charge): array
-    {
-        $status = match ($charge->order_trigger) {
-            ChargeOrderTrigger::NewOrder => OrderStatus::New,
-            ChargeOrderTrigger::ConfirmedOrder => OrderStatus::Confirmed,
-            ChargeOrderTrigger::DeliveredOrder => OrderStatus::Delivered,
-            default => null,
-        };
-
-        if ($status === null) {
-            return [];
-        }
-
-        $query = OrderItem::query()
-            ->whereHas('order', function ($query) use ($charge, $status) {
-                $query->whereHas('statusHistories', fn ($q) => $q->where('status', $status));
-
-                if ($charge->starts_at) {
-                    $query->whereDate('created_at', '>=', $charge->starts_at);
-                }
-
-                if ($charge->ends_at) {
-                    $query->whereDate('created_at', '<=', $charge->ends_at);
-                }
-            });
-
-        if (! $charge->all_products) {
-            $productIds = $charge->products->pluck('id');
-
-            if ($productIds->isEmpty()) {
-                return [];
-            }
-
-            $query->whereIn('product_id', $productIds);
-        }
-
-        return $query
-            ->groupBy('product_id')
-            ->selectRaw('product_id, SUM(quantity) as qty')
-            ->pluck('qty', 'product_id')
-            ->map(fn ($qty) => (float) $charge->amount * (float) $qty)
-            ->all();
-    }
-
-    /**
      * @param  array<int, float>  $deliveredQuantityByProduct
      * @return array<int, float>
      */
-    private function allocateFlatCharge(Charge $charge, array $deliveredQuantityByProduct, float $totalDeliveredQuantity): array
+    private function allocateFlatCharge(Charge $charge, array $deliveredQuantityByProduct, float $totalDeliveredQuantity, ?CarbonInterface $from, ?CarbonInterface $to): array
     {
-        $amount = $this->calculator->execute($charge);
+        $amount = $this->calculator->execute($charge, $from, $to);
 
         if ($amount === 0) {
             return [];

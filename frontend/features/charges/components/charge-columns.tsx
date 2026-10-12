@@ -45,12 +45,8 @@ function PaymentStatusBadge({ charge }: { charge: Charge }) {
 function ChargeActionsCell({ charge }: { charge: Charge }) {
   return (
     <div className="flex items-center justify-center gap-1">
-      {charge.payment_status === "unpaid" && (
-        <>
-          <EditChargeDialog charge={charge} />
-          <DeleteChargeDialog charge={charge} />
-        </>
-      )}
+      <EditChargeDialog charge={charge} />
+      {charge.paid_amount === 0 && <DeleteChargeDialog charge={charge} />}
       {charge.remaining_amount > 0 && (
         <CreateChargeVersementDialog charge={charge} />
       )}

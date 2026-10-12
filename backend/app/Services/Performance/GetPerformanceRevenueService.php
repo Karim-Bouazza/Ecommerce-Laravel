@@ -16,8 +16,8 @@ class GetPerformanceRevenueService
     ) {}
 
     /**
-     * Charges are global expenses: the filters narrow sales, revenue and
-     * capital, but are not applied to the charges total.
+     * Charges follow the selected period (not the product or warehouse filters,
+     * since a charge is a global expense).
      *
      * @return array<string, float>
      */
@@ -28,9 +28,9 @@ class GetPerformanceRevenueService
         $revenus = $ventes - $capital;
 
         $charges = Charge::query()
-            ->with('products:id')
+            ->with(['products:id', 'pauses'])
             ->get()
-            ->sum(fn (Charge $charge) => $this->chargeCalculator->execute($charge));
+            ->sum(fn (Charge $charge) => $this->chargeCalculator->execute($charge, $filters->from, $filters->to));
 
         $benefices = $revenus - $charges;
 

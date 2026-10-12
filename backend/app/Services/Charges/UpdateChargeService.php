@@ -2,32 +2,32 @@
 
 namespace App\Services\Charges;
 
-use App\Enums\ChargePaymentStatus;
 use App\Models\Charge;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
 class UpdateChargeService
 {
+    /**
+     * A charge with payments stays editable (e.g. to set an end date), as long as
+     * what it owes does not fall below what was already paid.
+     *
+     * @param  array<string, mixed>  $data  Normalized by StoreChargeRequest::chargeData().
+     */
     public function execute(Charge $charge, array $data): Charge
     {
-        if ($charge->paymentStatus() !== ChargePaymentStatus::Unpaid) {
-            throw new RuntimeException('Une charge avec des versements ne peut pas être modifiée.');
-        }
+        return DB::transaction(function () use ($charge, $data): Charge {
+            $charge->update(Arr::except($data, 'product_ids'));
+            $charge->products()->sync($data['product_ids']);
 
-        $charge->update([
-            'category' => $data['category'],
-            'type' => $data['type'],
-            'order_trigger' => $data['order_trigger'] ?? null,
-            'recurrence_frequency' => $data['recurrence_frequency'] ?? null,
-            'name' => $data['name'],
-            'amount' => $data['amount'],
-            'all_products' => $data['all_products'] ?? false,
-            'starts_at' => $data['starts_at'] ?? null,
-            'ends_at' => $data['ends_at'] ?? null,
-        ]);
+            $charge->refresh()->refreshAmounts();
 
-        $charge->products()->sync($charge->all_products ? [] : ($data['product_ids'] ?? []));
+            if ($charge->paidAmount() > $charge->dueAmount()) {
+                throw new RuntimeException('Le montant dû deviendrait inférieur au montant déjà versé ('.$charge->paidAmount().' DA).');
+            }
 
-        return $charge;
+            return $charge;
+        });
     }
 }

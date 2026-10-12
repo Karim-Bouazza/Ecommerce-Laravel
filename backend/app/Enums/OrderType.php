@@ -15,6 +15,17 @@ enum OrderType: string
         };
     }
 
+    /**
+     * Kind of sales channel the orders come from.
+     */
+    public function channel(): string
+    {
+        return match ($this) {
+            self::Manuelle => 'Interne',
+            self::Ads => 'Boutique en ligne',
+        };
+    }
+
     public function color(): string
     {
         return match ($this) {

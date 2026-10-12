@@ -13,10 +13,13 @@ use App\Services\Charges\CalculateChargeAmountService;
 use App\Services\Charges\CreateChargeService;
 use App\Services\Charges\CreateChargeVersementService;
 use App\Services\Charges\DeleteChargeService;
+use App\Services\Charges\ToggleChargeActiveService;
 use App\Services\Charges\UpdateChargeService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 use RuntimeException;
 
 class ChargeController extends Controller
@@ -36,7 +39,7 @@ class ChargeController extends Controller
         $paymentStatus = $request->input('payment_status');
 
         $charges = Charge::query()
-            ->with('products:id,name')
+            ->with(['products:id,name', 'pauses'])
             ->withSum('versements as paid_amount_sum', 'amount')
             ->when($tab === 'recurring', function ($query) {
                 $query->whereIn('type', ['per_order', 'recurring']);
@@ -46,27 +49,27 @@ class ChargeController extends Controller
             ->when($search !== '', function ($query) use ($search) {
                 $query->where('name', 'like', "%{$search}%");
             })
-            ->when($dateFrom, fn($query) => $query->whereDate('created_at', '>=', $dateFrom))
-            ->when($dateTo, fn($query) => $query->whereDate('created_at', '<=', $dateTo))
+            ->when($dateFrom, fn ($query) => $query->whereRaw('COALESCE(starts_at, DATE(created_at)) >= ?', [$dateFrom]))
+            ->when($dateTo, fn ($query) => $query->whereRaw('COALESCE(starts_at, DATE(created_at)) <= ?', [$dateTo]))
             ->when($productId, function ($query) use ($productId) {
                 $query->where(function ($query) use ($productId) {
                     $query->where('all_products', true)
-                        ->orWhereHas('products', fn($query) => $query->where('products.id', $productId));
+                        ->orWhereHas('products', fn ($query) => $query->where('products.id', $productId));
                 });
             })
-            ->when($type, fn($query) => $query->where('type', $type))
-            ->when($category, fn($query) => $query->where('category', $category))
-            ->when($paymentStatus, function ($query) use ($paymentStatus) {
-                match ($paymentStatus) {
-                    'unpaid' => $query->havingRaw('COALESCE(paid_amount_sum, 0) <= 0'),
-                    'partial' => $query->havingRaw('COALESCE(paid_amount_sum, 0) > 0 AND COALESCE(paid_amount_sum, 0) < amount'),
-                    'paid' => $query->havingRaw('COALESCE(paid_amount_sum, 0) >= amount'),
-                    default => null,
-                };
-            })
-            ->orderByDesc('created_at')
-            ->paginate($perPage)
-            ->withQueryString();
+            ->when($type, fn ($query) => $query->where('type', $type))
+            ->when($category, fn ($query) => $query->where('category', $category))
+            ->orderByDesc('created_at');
+
+        // The amount owed by per-order and recurring charges is computed, so the
+        // payment status cannot be filtered in SQL.
+        $charges = $paymentStatus
+            ? $this->paginateCollection(
+                $charges->get()->filter(fn (Charge $charge) => $charge->paymentStatus()->value === $paymentStatus),
+                $perPage,
+                $request,
+            )
+            : $charges->paginate($perPage)->withQueryString();
 
         return ChargeResource::collection($charges);
     }
@@ -81,7 +84,7 @@ class ChargeController extends Controller
         $total = 0;
 
         Charge::query()
-            ->with('products:id')
+            ->with(['products:id', 'pauses'])
             ->chunk(100, function ($charges) use ($calculator, &$byCategory, &$total) {
                 foreach ($charges as $charge) {
                     $amount = $calculator->execute($charge);
@@ -100,7 +103,7 @@ class ChargeController extends Controller
 
     public function store(StoreChargeRequest $request): ChargeResource
     {
-        $charge = app(CreateChargeService::class)->execute($request->validated());
+        $charge = app(CreateChargeService::class)->execute($request->chargeData());
 
         return new ChargeResource($charge->load('products:id,name'));
     }
@@ -108,7 +111,7 @@ class ChargeController extends Controller
     public function update(UpdateChargeRequest $request, Charge $charge): ChargeResource|JsonResponse
     {
         try {
-            $charge = app(UpdateChargeService::class)->execute($charge, $request->validated());
+            $charge = app(UpdateChargeService::class)->execute($charge, $request->chargeData());
         } catch (RuntimeException $exception) {
             return response()->json(['message' => $exception->getMessage()], 422);
         }
@@ -120,9 +123,9 @@ class ChargeController extends Controller
     {
         abort_unless(auth()->user()->hasPermission('charges.edit'), 403);
 
-        $charge->update(['is_active' => ! $charge->is_active]);
+        $charge = app(ToggleChargeActiveService::class)->execute($charge);
 
-        return new ChargeResource($charge->fresh()->load('products:id,name'));
+        return new ChargeResource($charge->load('products:id,name'));
     }
 
     public function destroy(Charge $charge): JsonResponse
@@ -160,5 +163,21 @@ class ChargeController extends Controller
             ->get();
 
         return ChargeVersementResource::collection($versements);
+    }
+
+    /**
+     * @param  Collection<int, Charge>  $items
+     */
+    private function paginateCollection(Collection $items, int $perPage, Request $request): LengthAwarePaginator
+    {
+        $page = max(1, (int) $request->input('page', 1));
+
+        return (new LengthAwarePaginator(
+            $items->forPage($page, $perPage)->values(),
+            $items->count(),
+            $perPage,
+            $page,
+            ['path' => $request->url()],
+        ))->withQueryString();
     }
 }

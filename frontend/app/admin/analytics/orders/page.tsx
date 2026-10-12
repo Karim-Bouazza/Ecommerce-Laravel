@@ -1,5 +1,5 @@
-import { ComingSoon } from "@/components/shared/coming-soon"
+import { OrderAnalysisPage } from "@/features/order-analysis/pages/order-analysis-page"
 
 export default function AnalyticsOrdersPage() {
-  return <ComingSoon />
+  return <OrderAnalysisPage />
 }

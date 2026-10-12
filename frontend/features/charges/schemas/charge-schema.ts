@@ -28,5 +28,9 @@ export const chargeSchema = z
     message: "La fréquence est requise.",
     path: ["recurrence_frequency"],
   })
+  .refine((data) => data.all_products || data.product_ids.length > 0, {
+    message: "Choisissez au moins un produit, ou appliquez la charge à tous les produits.",
+    path: ["product_ids"],
+  })
 
 export type ChargeSchema = z.infer<typeof chargeSchema>

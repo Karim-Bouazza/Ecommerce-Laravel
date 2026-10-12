@@ -44,11 +44,11 @@ class ProductAnalyticsResource extends JsonResource
                 'quantity' => (int) $this->returned_quantity,
             ],
             'taux_confirmation' => OrderRateCalculator::confirmationRate(
-                (int) $this->confirmed_or_later_count,
+                (int) $this->confirmed_count,
                 (int) $this->total_orders_count,
             ),
             'performance_confirmation' => OrderRateCalculator::confirmationPerformance(
-                (int) $this->confirmed_or_later_count,
+                (int) $this->confirmed_count,
                 (int) $this->total_orders_count,
                 (int) $this->pending_count,
             ),

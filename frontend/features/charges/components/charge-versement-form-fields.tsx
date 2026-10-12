@@ -34,8 +34,8 @@ export function ChargeVersementFormFields({ charge, form, idPrefix }: ChargeVers
     <FieldGroup className="gap-4 py-4">
       <div className="grid grid-cols-3 gap-2">
         <div className="rounded-lg border p-3 text-center">
-          <p className="text-xs text-muted-foreground">MONTANT</p>
-          <p className="font-heading text-sm font-semibold">{formatPrice(charge.amount)}</p>
+          <p className="text-xs text-muted-foreground">{charge.type === "normal" ? "MONTANT" : "MONTANT DÛ"}</p>
+          <p className="font-heading text-sm font-semibold">{formatPrice(charge.due_amount)}</p>
         </div>
         <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-center">
           <p className="text-xs text-emerald-600 dark:text-emerald-400">PAYÉ</p>

@@ -9,7 +9,7 @@ import {
 
 export function useProductAnalyticsChart(params: GetProductAnalyticsChartParams) {
   return useQuery({
-    queryKey: ["product-analytics-chart", params],
+    queryKey: ["product-analytics", "chart", params],
     queryFn: () => getProductAnalyticsChart(params),
     placeholderData: keepPreviousData,
   })

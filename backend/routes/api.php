@@ -12,6 +12,8 @@ use App\Http\Controllers\Api\DeliveryCompanyOptionController;
 use App\Http\Controllers\Api\FournisseurController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\PaiementController;
+use App\Http\Controllers\Api\OrderAnalysisController;
+use App\Http\Controllers\Api\SalesChannelAnalysisController;
 use App\Http\Controllers\Api\PerformanceController;
 use App\Http\Controllers\Api\PixelController;
 use App\Http\Controllers\Api\ProductAnalyticsController;
@@ -56,6 +58,10 @@ Route::prefix('v1')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index']);
         Route::get('/performance/revenue', [PerformanceController::class, 'revenue']);
         Route::get('/performance/sales-evolution', [PerformanceController::class, 'salesEvolution']);
+        Route::get('/order-analysis', [OrderAnalysisController::class, 'overview']);
+        Route::get('/order-analysis/statuses', [OrderAnalysisController::class, 'statuses']);
+        Route::get('/sales-channel-analysis', [SalesChannelAnalysisController::class, 'index']);
+        Route::get('/sales-channel-analysis/chart', [SalesChannelAnalysisController::class, 'chart']);
     });
 
     Route::get('/products/{product}', [ProductController::class, 'show']);

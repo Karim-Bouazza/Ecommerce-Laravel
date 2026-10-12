@@ -3,25 +3,22 @@
 namespace App\Services\Charges;
 
 use App\Models\Charge;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 
 class CreateChargeService
 {
+    /**
+     * @param  array<string, mixed>  $data  Normalized by StoreChargeRequest::chargeData().
+     */
     public function execute(array $data): Charge
     {
-        $charge = Charge::create([
-            'category' => $data['category'],
-            'type' => $data['type'],
-            'order_trigger' => $data['order_trigger'] ?? null,
-            'recurrence_frequency' => $data['recurrence_frequency'] ?? null,
-            'name' => $data['name'],
-            'amount' => $data['amount'],
-            'all_products' => $data['all_products'] ?? false,
-            'starts_at' => $data['starts_at'] ?? null,
-            'ends_at' => $data['ends_at'] ?? null,
-        ]);
+        return DB::transaction(function () use ($data): Charge {
+            $charge = Charge::create(Arr::except($data, 'product_ids'));
 
-        $charge->products()->sync($charge->all_products ? [] : ($data['product_ids'] ?? []));
+            $charge->products()->sync($data['product_ids']);
 
-        return $charge;
+            return $charge;
+        });
     }
 }

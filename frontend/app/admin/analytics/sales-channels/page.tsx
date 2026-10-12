@@ -1,5 +1,5 @@
-import { ComingSoon } from "@/components/shared/coming-soon"
+import { SalesChannelAnalysisPage } from "@/features/sales-channel-analysis/pages/sales-channel-analysis-page"
 
 export default function AnalyticsSalesChannelsPage() {
-  return <ComingSoon />
+  return <SalesChannelAnalysisPage />
 }

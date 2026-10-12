@@ -30,6 +30,7 @@ class ChargeResource extends JsonResource
             'all_products' => (bool) $this->all_products,
             'product_ids' => $this->products->pluck('id'),
             'product_names' => $this->products->pluck('name'),
+            'due_amount' => $this->dueAmount(),
             'paid_amount' => $this->paidAmount(),
             'remaining_amount' => $this->remainingAmount(),
             'payment_status' => $this->paymentStatus()->value,

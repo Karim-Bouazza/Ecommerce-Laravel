@@ -20,6 +20,7 @@ export interface Charge {
   all_products: boolean;
   product_ids: number[];
   product_names: string[];
+  due_amount: number;
   paid_amount: number;
   remaining_amount: number;
   payment_status: "unpaid" | "partial" | "paid";

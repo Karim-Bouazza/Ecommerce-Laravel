@@ -14,6 +14,8 @@ class PermissionRegistry
                 'dashboard.view' => 'Voir le Dashboard',
                 'tableau_de_bord.view' => 'Voir le Tableau de Bord',
                 'performance_kpi.view' => 'Voir la Performance (KPI)',
+                'analytics_orders.view' => "Voir l'analyse des commandes",
+                'analytics_sales_channels.view' => "Voir l'analyse des canaux de vente",
             ],
             'Clients' => [
                 'clients.view' => 'Voir les clients',

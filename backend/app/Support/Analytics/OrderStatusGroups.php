@@ -57,4 +57,51 @@ class OrderStatusGroups
             OrderStatus::ReturnInProgress,
         ];
     }
+
+    /**
+     * Orders waiting for a first decision or still being called.
+     *
+     * @return array<int, OrderStatus>
+     */
+    public static function awaitingConfirmation(): array
+    {
+        return [
+            OrderStatus::New,
+            OrderStatus::Call1,
+            OrderStatus::Call2,
+            OrderStatus::Call3,
+            OrderStatus::Unreachable,
+            OrderStatus::ToCheck,
+        ];
+    }
+
+    /**
+     * Orders put aside for later.
+     *
+     * @return array<int, OrderStatus>
+     */
+    public static function postponed(): array
+    {
+        return [OrderStatus::Reported, OrderStatus::Scheduled];
+    }
+
+    /**
+     * Fake numbers and duplicates, left out of the valid orders.
+     *
+     * @return array<int, OrderStatus>
+     */
+    public static function invalid(): array
+    {
+        return [OrderStatus::FakeOrder, OrderStatus::Duplicated];
+    }
+
+    /**
+     * Statuses of an order handed over to delivery.
+     *
+     * @return array<int, OrderStatus>
+     */
+    public static function inDelivery(): array
+    {
+        return [OrderStatus::Assigned, OrderStatus::Shipped];
+    }
 }
