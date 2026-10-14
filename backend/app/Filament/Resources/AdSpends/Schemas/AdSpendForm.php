@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\AdSpends\Schemas;
 
-use App\Models\Product;
+use App\Models\Catalog\Product;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;

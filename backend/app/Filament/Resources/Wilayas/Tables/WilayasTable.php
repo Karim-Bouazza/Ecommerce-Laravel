@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\Wilayas\Tables;
 
-use App\Models\Wilaya;
+use App\Models\Delivery\Wilaya;
 use Filament\Actions\Action;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\TextInput;

@@ -2,9 +2,9 @@
 
 namespace App\Services\Versements;
 
-use App\Models\Fournisseur;
-use App\Models\Wallet;
-use App\Models\WalletTransaction;
+use App\Models\Purchasing\Fournisseur;
+use App\Models\Finance\Wallet;
+use App\Models\Finance\WalletTransaction;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 

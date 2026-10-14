@@ -2,7 +2,7 @@
 
 namespace App\Services\Orders\StatusTransitions;
 
-use App\Enums\OrderStatus;
+use App\Enums\Order\OrderStatus;
 use App\Exceptions\InvalidOrderTransitionException;
 use App\Services\Orders\StatusTransitions\Handlers\AssignedOrderTransitionHandler;
 use App\Services\Orders\StatusTransitions\Handlers\DefaultOrderTransitionHandler;

@@ -2,15 +2,15 @@
 
 namespace App\Filament\Resources\Orders\Tables;
 
-use App\Enums\OrderStatus;
-use App\Enums\OrderType;
-use App\Enums\PaymentStatus;
+use App\Enums\Order\OrderStatus;
+use App\Enums\Order\OrderType;
+use App\Enums\Order\PaymentStatus;
 use App\Filament\Resources\Orders\Actions\OrderDeleteAction;
 use App\Filament\Resources\Orders\Actions\OrderPaymentActions;
 use App\Filament\Resources\Orders\Actions\OrderStatusActions;
 use App\Filament\Resources\Orders\OrderResource;
-use App\Models\Client;
-use App\Models\Order;
+use App\Models\Order\Client;
+use App\Models\Order\Order;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Hidden;

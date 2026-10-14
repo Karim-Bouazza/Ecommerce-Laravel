@@ -2,9 +2,9 @@
 
 namespace App\Filament\Pages\Inventaire\Concerns;
 
-use App\Models\Product;
-use App\Models\Warehouse;
-use App\Models\Wilaya;
+use App\Models\Catalog\Product;
+use App\Models\Inventory\Warehouse;
+use App\Models\Delivery\Wilaya;
 use App\Services\Warehouses\CreateWarehouseService;
 use App\Services\Warehouses\DeleteWarehouseService;
 use App\Services\Warehouses\UpdateWarehouseService;

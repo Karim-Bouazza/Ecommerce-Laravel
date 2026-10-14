@@ -2,8 +2,8 @@
 
 namespace App\Queries\Products;
 
-use App\Enums\OrderStatus;
-use App\Models\Product;
+use App\Enums\Order\OrderStatus;
+use App\Models\Catalog\Product;
 use App\Support\Analytics\OrderStatusGroups;
 use Closure;
 use Illuminate\Database\Eloquent\Builder;

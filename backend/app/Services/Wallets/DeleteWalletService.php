@@ -2,7 +2,7 @@
 
 namespace App\Services\Wallets;
 
-use App\Models\Wallet;
+use App\Models\Finance\Wallet;
 use Illuminate\Support\Facades\DB;
 
 class DeleteWalletService

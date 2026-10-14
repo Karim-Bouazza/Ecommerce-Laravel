@@ -2,7 +2,7 @@
 
 namespace App\Services\Partners;
 
-use App\Models\DeliveryCompanyIntegration;
+use App\Models\Delivery\DeliveryCompanyIntegration;
 
 class DeleteDeliveryCompanyIntegrationService
 {

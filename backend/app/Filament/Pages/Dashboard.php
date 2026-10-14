@@ -2,9 +2,9 @@
 
 namespace App\Filament\Pages;
 
-use App\Enums\OrderStatus;
-use App\Models\Order;
-use App\Models\OrderItem;
+use App\Enums\Order\OrderStatus;
+use App\Models\Order\Order;
+use App\Models\Order\OrderItem;
 use Filament\Pages\Dashboard as BaseDashboard;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;

@@ -2,15 +2,15 @@
 
 namespace App\Services\Orders;
 
-use App\Enums\DeliveryType;
-use App\Enums\OrderStatus;
-use App\Enums\OrderType;
-use App\Models\Client;
-use App\Models\Order;
-use App\Models\OrderNote;
-use App\Models\OrderStatusHistory;
-use App\Models\Product;
-use App\Models\User;
+use App\Enums\Order\DeliveryType;
+use App\Enums\Order\OrderStatus;
+use App\Enums\Order\OrderType;
+use App\Models\Order\Client;
+use App\Models\Order\Order;
+use App\Models\Order\OrderNote;
+use App\Models\Order\OrderStatusHistory;
+use App\Models\Catalog\Product;
+use App\Models\Users\User;
 use App\Notifications\NewOrderPlaced;
 use App\Services\Providers\ZimouWilayaService;
 use Illuminate\Support\Facades\DB;

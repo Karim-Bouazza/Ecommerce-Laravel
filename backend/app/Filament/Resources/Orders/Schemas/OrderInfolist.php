@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources\Orders\Schemas;
 
-use App\Enums\DeliveryType;
-use App\Enums\OrderStatus;
-use App\Enums\PaymentStatus;
+use App\Enums\Order\DeliveryType;
+use App\Enums\Order\OrderStatus;
+use App\Enums\Order\PaymentStatus;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;

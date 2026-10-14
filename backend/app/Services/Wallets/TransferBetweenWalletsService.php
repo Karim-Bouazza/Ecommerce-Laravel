@@ -2,9 +2,9 @@
 
 namespace App\Services\Wallets;
 
-use App\Enums\WalletTransactionCategory;
-use App\Enums\WalletTransactionType;
-use App\Models\Wallet;
+use App\Enums\Wallet\WalletTransactionCategory;
+use App\Enums\Wallet\WalletTransactionType;
+use App\Models\Finance\Wallet;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use RuntimeException;

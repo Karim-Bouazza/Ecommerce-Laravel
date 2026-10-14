@@ -2,8 +2,8 @@
 
 namespace App\Filament\Resources\Orders\Actions;
 
-use App\Models\Order;
-use App\Services\OrderDeletionOtpService;
+use App\Models\Order\Order;
+use App\Services\Orders\OrderDeletionOtpService;
 use Filament\Actions\Action;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;

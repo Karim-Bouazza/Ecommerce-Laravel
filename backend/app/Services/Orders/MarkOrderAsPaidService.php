@@ -2,9 +2,9 @@
 
 namespace App\Services\Orders;
 
-use App\Enums\OrderStatus;
-use App\Enums\PaymentStatus;
-use App\Models\Order;
+use App\Enums\Order\OrderStatus;
+use App\Enums\Order\PaymentStatus;
+use App\Models\Order\Order;
 use RuntimeException;
 
 class MarkOrderAsPaidService

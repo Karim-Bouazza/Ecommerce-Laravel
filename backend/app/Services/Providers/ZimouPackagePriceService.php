@@ -2,7 +2,7 @@
 
 namespace App\Services\Providers;
 
-use App\Enums\DeliveryType;
+use App\Enums\Order\DeliveryType;
 use App\Services\Providers\Concerns\CallsZimouApi;
 
 class ZimouPackagePriceService

@@ -2,7 +2,7 @@
 
 namespace App\Services\Fournisseurs;
 
-use App\Models\Fournisseur;
+use App\Models\Purchasing\Fournisseur;
 
 class DeleteFournisseurService
 {

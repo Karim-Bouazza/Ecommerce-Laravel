@@ -3,9 +3,9 @@
 namespace App\Filament\Pages\Clients\Concerns;
 
 use App\Filament\Resources\Orders\OrderResource;
-use App\Models\Client;
-use App\Models\Communes;
-use App\Models\Wilaya;
+use App\Models\Order\Client;
+use App\Models\Delivery\Communes;
+use App\Models\Delivery\Wilaya;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;

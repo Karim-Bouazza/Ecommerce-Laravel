@@ -2,7 +2,7 @@
 
 namespace App\Filament\Pages\Inventaire\Concerns;
 
-use App\Models\Fournisseur;
+use App\Models\Purchasing\Fournisseur;
 use App\Services\Fournisseurs\CreateFournisseurService;
 use App\Services\Fournisseurs\DeleteFournisseurService;
 use App\Services\Fournisseurs\UpdateFournisseurService;

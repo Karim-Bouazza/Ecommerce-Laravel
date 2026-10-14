@@ -2,10 +2,10 @@
 
 namespace App\Filament\Pages\Inventaire;
 
-use App\Enums\StockMovementType;
+use App\Enums\Stock\StockMovementType;
 use App\Filament\Pages\Inventaire\Concerns\InteractsWithWarehouseTabs;
-use App\Models\Warehouse;
-use App\Models\WarehouseStockMovement;
+use App\Models\Inventory\Warehouse;
+use App\Models\Inventory\WarehouseStockMovement;
 use BackedEnum;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;

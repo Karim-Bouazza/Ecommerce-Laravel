@@ -2,12 +2,12 @@
 
 namespace App\Filament\Pages\Inventaire\Concerns;
 
-use App\Enums\PurchaseEntryPaymentStatus;
-use App\Models\Fournisseur;
-use App\Models\Product;
-use App\Models\PurchaseEntry;
-use App\Models\Wallet;
-use App\Models\Warehouse;
+use App\Enums\Purchase\PurchaseEntryPaymentStatus;
+use App\Models\Purchasing\Fournisseur;
+use App\Models\Catalog\Product;
+use App\Models\Purchasing\PurchaseEntry;
+use App\Models\Finance\Wallet;
+use App\Models\Inventory\Warehouse;
 use App\Services\PurchaseEntries\ConfirmPurchaseEntryService;
 use App\Services\PurchaseEntries\CreatePurchaseEntryService;
 use App\Services\PurchaseEntries\CreatePurchaseEntryVersementService;

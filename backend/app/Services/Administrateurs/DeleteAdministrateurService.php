@@ -2,7 +2,7 @@
 
 namespace App\Services\Administrateurs;
 
-use App\Models\User;
+use App\Models\Users\User;
 use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 

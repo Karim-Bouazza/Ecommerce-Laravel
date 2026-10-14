@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\Warehouse;
+use App\Models\Inventory\Warehouse;
 use Illuminate\Database\Migrations\Migration;
 
 return new class extends Migration

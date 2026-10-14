@@ -2,11 +2,11 @@
 
 namespace App\Services\Charges;
 
-use App\Enums\WalletTransactionCategory;
-use App\Enums\WalletTransactionType;
-use App\Models\Charge;
-use App\Models\Wallet;
-use App\Models\WalletTransaction;
+use App\Enums\Wallet\WalletTransactionCategory;
+use App\Enums\Wallet\WalletTransactionType;
+use App\Models\Finance\Charge;
+use App\Models\Finance\Wallet;
+use App\Models\Finance\WalletTransaction;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 

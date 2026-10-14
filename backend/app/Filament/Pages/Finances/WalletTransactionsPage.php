@@ -2,9 +2,9 @@
 
 namespace App\Filament\Pages\Finances;
 
-use App\Enums\WalletTransactionCategory;
-use App\Models\Wallet;
-use App\Models\WalletTransaction;
+use App\Enums\Wallet\WalletTransactionCategory;
+use App\Models\Finance\Wallet;
+use App\Models\Finance\WalletTransaction;
 use Filament\Actions\Action;
 use Filament\Pages\Page;
 use Filament\Resources\Concerns\HasTabs;

@@ -3,7 +3,7 @@
 namespace App\Filament\Pages\Inventaire;
 
 use App\Filament\Pages\Inventaire\Concerns\InteractsWithWarehouseRecords;
-use App\Models\Warehouse;
+use App\Models\Inventory\Warehouse;
 use App\Services\Warehouses\UpdateWarehouseService;
 use BackedEnum;
 use Filament\Pages\Page;

@@ -2,7 +2,7 @@
 
 namespace App\Queries\Administrators;
 
-use App\Models\User;
+use App\Models\Users\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class AdministratorIndexQuery

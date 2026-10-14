@@ -2,10 +2,10 @@
 
 namespace App\Services\ReturnEntries;
 
-use App\Enums\ReturnEntryStatus;
-use App\Enums\StockMovementType;
-use App\Models\ReturnEntry;
-use App\Models\Stock;
+use App\Enums\Return\ReturnEntryStatus;
+use App\Enums\Stock\StockMovementType;
+use App\Models\Purchasing\ReturnEntry;
+use App\Models\Inventory\Stock;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 

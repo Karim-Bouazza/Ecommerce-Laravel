@@ -2,7 +2,7 @@
 
 namespace App\Services\ReturnEntries;
 
-use App\Models\ReturnEntry;
+use App\Models\Purchasing\ReturnEntry;
 use RuntimeException;
 
 class DeleteReturnEntryService

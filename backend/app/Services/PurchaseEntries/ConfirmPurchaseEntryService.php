@@ -2,10 +2,10 @@
 
 namespace App\Services\PurchaseEntries;
 
-use App\Enums\PurchaseEntryStatus;
-use App\Enums\StockMovementType;
-use App\Models\PurchaseEntry;
-use App\Models\Stock;
+use App\Enums\Purchase\PurchaseEntryStatus;
+use App\Enums\Stock\StockMovementType;
+use App\Models\Purchasing\PurchaseEntry;
+use App\Models\Inventory\Stock;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 

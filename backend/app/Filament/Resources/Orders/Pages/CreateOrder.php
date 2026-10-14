@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\Orders\Pages;
 
-use App\Enums\OrderType;
+use App\Enums\Order\OrderType;
 use App\Filament\Resources\Orders\OrderResource;
 use App\Filament\Resources\Orders\Schemas\ManualOrderForm;
 use App\Services\Orders\CreateOrderService;

@@ -2,7 +2,7 @@
 
 namespace App\Services\Providers\Concerns;
 
-use App\Models\DeliveryCompanyIntegration;
+use App\Models\Delivery\DeliveryCompanyIntegration;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
 use RuntimeException;

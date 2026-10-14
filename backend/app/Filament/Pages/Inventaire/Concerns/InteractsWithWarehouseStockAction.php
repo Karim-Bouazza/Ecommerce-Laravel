@@ -2,7 +2,7 @@
 
 namespace App\Filament\Pages\Inventaire\Concerns;
 
-use App\Models\Product;
+use App\Models\Catalog\Product;
 use App\Services\Warehouses\UpdateWarehouseStockService;
 use Filament\Actions\Action;
 use Filament\Forms\Components\TextInput;

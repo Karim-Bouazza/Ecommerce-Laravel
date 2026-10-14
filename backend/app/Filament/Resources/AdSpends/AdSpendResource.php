@@ -7,7 +7,7 @@ use App\Filament\Resources\AdSpends\Pages\EditAdSpend;
 use App\Filament\Resources\AdSpends\Pages\ListAdSpends;
 use App\Filament\Resources\AdSpends\Schemas\AdSpendForm;
 use App\Filament\Resources\AdSpends\Tables\AdSpendsTable;
-use App\Models\ProductAdSpend;
+use App\Models\Catalog\ProductAdSpend;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;

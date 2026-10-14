@@ -4,6 +4,7 @@ import type { ColumnDef } from "@tanstack/react-table"
 
 import { DeleteOrderDialog } from "@/features/orders/components/delete-order-dialog"
 import { EditOrderDialog } from "@/features/orders/components/edit-order-dialog"
+import { FraudScoreCell } from "@/features/fraud/components/fraud-score-cell"
 import { ElapsedTime } from "@/features/orders/components/elapsed-time"
 import { OrderStatusCell } from "@/features/orders/components/order-status-cell"
 import { OrderStatusHistoryDialog } from "@/features/orders/components/order-status-history-dialog"
@@ -39,6 +40,12 @@ export const orderColumns: ColumnDef<Order>[] = [
     header: "Téléphone",
     cell: ({ row }) => row.original.phone_number ?? "—",
     meta: { className: "min-w-[130px]" },
+  },
+  {
+    id: "fraud_risk",
+    header: "Score de risque",
+    cell: ({ row }) => <FraudScoreCell risk={row.original.fraud_risk} />,
+    meta: { className: "min-w-[150px]" },
   },
   {
     id: "location",

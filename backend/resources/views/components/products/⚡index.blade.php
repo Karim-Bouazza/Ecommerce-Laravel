@@ -2,7 +2,7 @@
 
 use Livewire\Component;
 use Livewire\WithPagination;
-use App\Models\Product;
+use App\Models\Catalog\Product;
 
 new class extends Component
 {

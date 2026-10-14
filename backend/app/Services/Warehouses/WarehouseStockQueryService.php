@@ -2,9 +2,9 @@
 
 namespace App\Services\Warehouses;
 
-use App\Models\Product;
-use App\Models\Stock;
-use App\Models\Warehouse;
+use App\Models\Catalog\Product;
+use App\Models\Inventory\Stock;
+use App\Models\Inventory\Warehouse;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\JoinClause;
 

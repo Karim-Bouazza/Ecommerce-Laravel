@@ -2,7 +2,7 @@
 
 namespace App\Filament\Pages\Inventaire\Concerns;
 
-use App\Models\Warehouse;
+use App\Models\Inventory\Warehouse;
 use Illuminate\Database\Eloquent\Builder;
 
 trait InteractsWithWarehouseTabs

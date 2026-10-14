@@ -1,0 +1,101 @@
+<?php
+
+namespace App\Models\Order;
+
+use App\Enums\Order\DeliveryType;
+use App\Enums\Order\OrderStatus;
+use App\Enums\Order\OrderType;
+use App\Enums\Order\PaymentStatus;
+use App\Models\Delivery\DeliveryCompany;
+use App\Models\Fraud\FraudAssessment;
+use App\Models\Fraud\FraudReview;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+
+class Order extends Model
+{
+    protected $fillable = [
+        'client_id',
+        'reference',
+        'ip_address',
+        'status',
+        'scheduled_at',
+        'date_report',
+        'payment_status',
+        'type',
+        'subtotal',
+        'delivery_price',
+        'delivery_type',
+        'stop_desk_company_id',
+        'address',
+        'provider_wilaya_id',
+        'provider_commune_id',
+        'provider_office_id',
+        'delivery_note',
+        'name',
+        'provider_order_id',
+        'free_delivery',
+        'can_be_opened',
+        'total_price',
+        'created_at',
+    ];
+
+    protected $casts = [
+        'status' => OrderStatus::class,
+        'scheduled_at' => 'datetime',
+        'date_report' => 'datetime',
+        'payment_status' => PaymentStatus::class,
+        'type' => OrderType::class,
+        'free_delivery' => 'boolean',
+        'can_be_opened' => 'boolean',
+        'delivery_type' => DeliveryType::class,
+    ];
+
+    public function client(): BelongsTo
+    {
+        return $this->belongsTo(Client::class);
+    }
+
+    public function stopDeskCompany(): BelongsTo
+    {
+        return $this->belongsTo(DeliveryCompany::class, 'stop_desk_company_id');
+    }
+
+    public function items(): HasMany
+    {
+        return $this->hasMany(OrderItem::class);
+    }
+
+    public function statusHistories(): HasMany
+    {
+        return $this->hasMany(OrderStatusHistory::class);
+    }
+
+    public function latestStatusHistory(): HasOne
+    {
+        return $this->hasOne(OrderStatusHistory::class)->latestOfMany();
+    }
+
+    public function notes(): HasMany
+    {
+        return $this->hasMany(OrderNote::class);
+    }
+
+    public function fraudAssessment(): HasOne
+    {
+        return $this->hasOne(FraudAssessment::class);
+    }
+
+    public function fraudReview(): HasOne
+    {
+        return $this->hasOne(FraudReview::class);
+    }
+
+    public function scopeForClient(Builder $query, ?int $clientId): Builder
+    {
+        return $query->when($clientId, fn(Builder $query, int $clientId) => $query->where('client_id', $clientId));
+    }
+}

@@ -2,8 +2,8 @@
 
 namespace App\Queries\Orders;
 
-use App\Enums\OrderStatus;
-use App\Models\Order;
+use App\Enums\Order\OrderStatus;
+use App\Models\Order\Order;
 use App\Support\OrderAnalysis\OrderAnalysisFilters;
 use Illuminate\Database\Eloquent\Builder;
 

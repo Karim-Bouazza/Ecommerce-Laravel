@@ -2,11 +2,11 @@
 
 namespace App\Filament\Resources\Orders\Schemas;
 
-use App\Enums\DeliveryType;
-use App\Models\Communes;
-use App\Models\DeliveryCompany;
-use App\Models\Product;
-use App\Models\Wilaya;
+use App\Enums\Order\DeliveryType;
+use App\Models\Delivery\Communes;
+use App\Models\Delivery\DeliveryCompany;
+use App\Models\Catalog\Product;
+use App\Models\Delivery\Wilaya;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Repeater;

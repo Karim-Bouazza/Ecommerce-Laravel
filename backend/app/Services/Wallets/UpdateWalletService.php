@@ -2,7 +2,7 @@
 
 namespace App\Services\Wallets;
 
-use App\Models\Wallet;
+use App\Models\Finance\Wallet;
 
 class UpdateWalletService
 {

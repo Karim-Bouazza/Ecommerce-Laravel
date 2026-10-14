@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources\Orders\Actions;
 
-use App\Enums\OrderStatus;
-use App\Enums\PaymentStatus;
-use App\Models\Order;
+use App\Enums\Order\OrderStatus;
+use App\Enums\Order\PaymentStatus;
+use App\Models\Order\Order;
 use App\Services\Orders\MarkOrderAsPaidService;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;

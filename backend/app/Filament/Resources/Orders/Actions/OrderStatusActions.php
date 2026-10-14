@@ -2,13 +2,13 @@
 
 namespace App\Filament\Resources\Orders\Actions;
 
-use App\Enums\OrderStatus;
-use App\Enums\StockMovementType;
-use App\Models\Order;
-use App\Models\OrderNote;
-use App\Models\OrderStatusHistory;
-use App\Models\Stock;
-use App\Models\Warehouse;
+use App\Enums\Order\OrderStatus;
+use App\Enums\Stock\StockMovementType;
+use App\Models\Order\Order;
+use App\Models\Order\OrderNote;
+use App\Models\Order\OrderStatusHistory;
+use App\Models\Inventory\Stock;
+use App\Models\Inventory\Warehouse;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;

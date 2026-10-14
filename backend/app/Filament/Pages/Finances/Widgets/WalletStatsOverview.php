@@ -2,9 +2,9 @@
 
 namespace App\Filament\Pages\Finances\Widgets;
 
-use App\Enums\WalletTransactionType;
-use App\Models\Wallet;
-use App\Models\WalletTransaction;
+use App\Enums\Wallet\WalletTransactionType;
+use App\Models\Finance\Wallet;
+use App\Models\Finance\WalletTransaction;
 use Filament\Support\Icons\Heroicon;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;

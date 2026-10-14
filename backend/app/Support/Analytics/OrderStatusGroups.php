@@ -2,7 +2,7 @@
 
 namespace App\Support\Analytics;
 
-use App\Enums\OrderStatus;
+use App\Enums\Order\OrderStatus;
 
 class OrderStatusGroups
 {

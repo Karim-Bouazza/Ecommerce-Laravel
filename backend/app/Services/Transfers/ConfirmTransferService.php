@@ -2,10 +2,10 @@
 
 namespace App\Services\Transfers;
 
-use App\Enums\StockMovementType;
-use App\Enums\TransferStatus;
-use App\Models\Stock;
-use App\Models\WarehouseTransfer;
+use App\Enums\Stock\StockMovementType;
+use App\Enums\Stock\TransferStatus;
+use App\Models\Inventory\Stock;
+use App\Models\Inventory\WarehouseTransfer;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 

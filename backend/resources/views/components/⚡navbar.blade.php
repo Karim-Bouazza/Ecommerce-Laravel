@@ -1,7 +1,7 @@
 <?php
 
 use Livewire\Component;
-use App\Models\Category;
+use App\Models\Catalog\Category;
 
 new class extends Component {
     public function with(): array

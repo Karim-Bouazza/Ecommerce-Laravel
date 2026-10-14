@@ -2,7 +2,7 @@
 
 namespace App\Services\Products;
 
-use App\Models\Product;
+use App\Models\Catalog\Product;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Storage;
 

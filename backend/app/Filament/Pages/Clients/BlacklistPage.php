@@ -3,7 +3,7 @@
 namespace App\Filament\Pages\Clients;
 
 use App\Filament\Pages\Clients\Concerns\InteractsWithClientRecords;
-use App\Models\Client;
+use App\Models\Order\Client;
 use BackedEnum;
 use Filament\Actions\DeleteAction;
 use Filament\Pages\Page;

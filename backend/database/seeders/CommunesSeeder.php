@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\Communes;
+use App\Models\Delivery\Communes;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\File;

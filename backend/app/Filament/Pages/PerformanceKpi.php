@@ -2,11 +2,11 @@
 
 namespace App\Filament\Pages;
 
-use App\Enums\OrderStatus;
-use App\Models\Order;
-use App\Models\OrderItem;
-use App\Models\Wallet;
-use App\Models\WalletTransaction;
+use App\Enums\Order\OrderStatus;
+use App\Models\Order\Order;
+use App\Models\Order\OrderItem;
+use App\Models\Finance\Wallet;
+use App\Models\Finance\WalletTransaction;
 use BackedEnum;
 use Carbon\CarbonPeriod;
 use Filament\Pages\Page;

@@ -2,8 +2,8 @@
 
 namespace App\Filament\Pages\Utilisateurs\Concerns;
 
-use App\Models\Role;
-use App\Models\User;
+use App\Models\Auth\Role;
+use App\Models\Users\User;
 use App\Services\Administrateurs\CreateAdministrateurService;
 use App\Services\Administrateurs\DeleteAdministrateurService;
 use App\Services\Administrateurs\UpdateAdministrateurService;

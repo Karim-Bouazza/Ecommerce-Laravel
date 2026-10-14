@@ -2,9 +2,9 @@
 
 namespace App\Support;
 
-use App\Enums\OrderStatus;
-use App\Models\OrderItem;
-use App\Models\Product;
+use App\Enums\Order\OrderStatus;
+use App\Models\Order\OrderItem;
+use App\Models\Catalog\Product;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 

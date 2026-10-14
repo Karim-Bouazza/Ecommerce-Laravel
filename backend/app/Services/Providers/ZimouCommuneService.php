@@ -2,7 +2,7 @@
 
 namespace App\Services\Providers;
 
-use App\Models\Communes;
+use App\Models\Delivery\Communes;
 use App\Services\Providers\Concerns\CallsZimouApi;
 use Illuminate\Support\Facades\Cache;
 

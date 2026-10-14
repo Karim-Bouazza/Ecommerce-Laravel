@@ -2,7 +2,7 @@
 
 namespace App\Queries\Performance;
 
-use App\Enums\OrderStatus;
+use App\Enums\Order\OrderStatus;
 use App\Support\Analytics\OrderStatusGroups;
 use App\Support\Performance\PerformanceFilters;
 use Illuminate\Database\Query\Builder;

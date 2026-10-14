@@ -3,7 +3,7 @@
 namespace App\Filament\Pages\Utilisateurs;
 
 use App\Filament\Pages\Utilisateurs\Concerns\InteractsWithRoleRecords;
-use App\Models\Role;
+use App\Models\Auth\Role;
 use BackedEnum;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;

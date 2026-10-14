@@ -1,5 +1,5 @@
 @php
-    $promoProducts = \App\Models\Product::with('category')
+    $promoProducts = \App\Models\Catalog\Product::with('category')
         ->where('is_active', true)
         ->whereColumn('compare_price', '>', 'price')
         ->orderByRaw('(compare_price - price) / compare_price DESC')

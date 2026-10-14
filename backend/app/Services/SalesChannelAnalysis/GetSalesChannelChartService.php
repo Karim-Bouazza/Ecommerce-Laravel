@@ -2,7 +2,7 @@
 
 namespace App\Services\SalesChannelAnalysis;
 
-use App\Enums\OrderType;
+use App\Enums\Order\OrderType;
 use App\Queries\SalesChannels\SalesChannelAnalysisQuery;
 use App\Support\SalesChannelAnalysis\SalesChannelFilters;
 use Carbon\CarbonImmutable;

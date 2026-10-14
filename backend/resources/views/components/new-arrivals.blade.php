@@ -1,5 +1,5 @@
 @php
-    $newArrivals = \App\Models\Product::with('category')
+    $newArrivals = \App\Models\Catalog\Product::with('category')
         ->where('is_active', true)
         ->latest()
         ->take(10)

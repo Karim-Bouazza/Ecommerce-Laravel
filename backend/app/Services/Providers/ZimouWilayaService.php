@@ -2,7 +2,7 @@
 
 namespace App\Services\Providers;
 
-use App\Models\Wilaya;
+use App\Models\Delivery\Wilaya;
 use App\Services\Providers\Concerns\CallsZimouApi;
 use Illuminate\Support\Facades\Cache;
 

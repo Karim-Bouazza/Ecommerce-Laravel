@@ -2,7 +2,7 @@
 
 namespace App\Exceptions;
 
-use App\Enums\OrderStatus;
+use App\Enums\Order\OrderStatus;
 use RuntimeException;
 
 class InvalidOrderTransitionException extends RuntimeException

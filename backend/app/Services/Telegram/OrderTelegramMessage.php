@@ -2,7 +2,7 @@
 
 namespace App\Services\Telegram;
 
-use App\Models\Order;
+use App\Models\Order\Order;
 
 class OrderTelegramMessage
 {

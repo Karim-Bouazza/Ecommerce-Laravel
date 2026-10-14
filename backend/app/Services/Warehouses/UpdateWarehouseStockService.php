@@ -2,10 +2,10 @@
 
 namespace App\Services\Warehouses;
 
-use App\Enums\StockMovementType;
-use App\Models\Product;
-use App\Models\Stock;
-use App\Models\Warehouse;
+use App\Enums\Stock\StockMovementType;
+use App\Models\Catalog\Product;
+use App\Models\Inventory\Stock;
+use App\Models\Inventory\Warehouse;
 use Illuminate\Support\Facades\DB;
 
 class UpdateWarehouseStockService

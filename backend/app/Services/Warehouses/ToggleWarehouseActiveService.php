@@ -2,7 +2,7 @@
 
 namespace App\Services\Warehouses;
 
-use App\Models\Warehouse;
+use App\Models\Inventory\Warehouse;
 
 class ToggleWarehouseActiveService
 {

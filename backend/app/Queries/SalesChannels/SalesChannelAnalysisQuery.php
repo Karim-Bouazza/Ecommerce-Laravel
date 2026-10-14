@@ -2,7 +2,7 @@
 
 namespace App\Queries\SalesChannels;
 
-use App\Enums\OrderStatus;
+use App\Enums\Order\OrderStatus;
 use App\Queries\Orders\OrderAnalysisQuery;
 use App\Support\OrderAnalysis\OrderAnalysisFilters;
 use Illuminate\Support\Collection;

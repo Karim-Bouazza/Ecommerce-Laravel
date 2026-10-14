@@ -2,7 +2,7 @@
 
 namespace App\Services\Charges;
 
-use App\Models\Charge;
+use App\Models\Finance\Charge;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 

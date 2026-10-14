@@ -2,9 +2,9 @@
 
 namespace App\Filament\Pages\Products;
 
-use App\Enums\OrderStatus;
-use App\Models\OrderItem;
-use App\Models\Stock;
+use App\Enums\Order\OrderStatus;
+use App\Models\Order\OrderItem;
+use App\Models\Inventory\Stock;
 use BackedEnum;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;

@@ -2,9 +2,9 @@
 
 namespace App\Services\ReturnEntries;
 
-use App\Models\PurchaseEntryItem;
-use App\Models\ReturnEntry;
-use App\Models\ReturnEntryItem;
+use App\Models\Purchasing\PurchaseEntryItem;
+use App\Models\Purchasing\ReturnEntry;
+use App\Models\Purchasing\ReturnEntryItem;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 

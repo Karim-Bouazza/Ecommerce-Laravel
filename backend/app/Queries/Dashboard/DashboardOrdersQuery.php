@@ -2,8 +2,8 @@
 
 namespace App\Queries\Dashboard;
 
-use App\Enums\OrderStatus;
-use App\Models\Order;
+use App\Enums\Order\OrderStatus;
+use App\Models\Order\Order;
 use App\Support\Analytics\OrderStatusGroups;
 use App\Support\Dashboard\DashboardFilters;
 use Illuminate\Database\Eloquent\Builder;

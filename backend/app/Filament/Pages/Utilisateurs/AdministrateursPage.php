@@ -3,7 +3,7 @@
 namespace App\Filament\Pages\Utilisateurs;
 
 use App\Filament\Pages\Utilisateurs\Concerns\InteractsWithAdministrateurRecords;
-use App\Models\User;
+use App\Models\Users\User;
 use BackedEnum;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;

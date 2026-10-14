@@ -2,8 +2,8 @@
 
 namespace App\Services\SalesChannelAnalysis;
 
-use App\Enums\OrderStatus;
-use App\Enums\OrderType;
+use App\Enums\Order\OrderStatus;
+use App\Enums\Order\OrderType;
 use App\Queries\SalesChannels\SalesChannelAnalysisQuery;
 use App\Support\Analytics\OrderRateCalculator;
 use App\Support\Analytics\OrderStatusGroups;

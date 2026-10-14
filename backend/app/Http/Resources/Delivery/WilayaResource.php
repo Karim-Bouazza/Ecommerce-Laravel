@@ -1,0 +1,27 @@
+<?php
+
+namespace App\Http\Resources\Delivery;
+
+use App\Models\Delivery\Wilaya;
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
+
+class WilayaResource extends JsonResource
+{
+    /**
+     * Transform the resource into an array.
+     *
+     * @return array<string, mixed>
+     */
+    public function toArray(Request $request): array
+    {
+        return [
+            "id" => $this->id,
+            'code' => $this->code,
+            'name' => $this->name,
+            'ar_name' => $this->ar_name,
+            'price_domicile' => $this->price_domicile,
+            'price_stop_desk' => $this->price_stop_desk,
+        ];
+    }
+}

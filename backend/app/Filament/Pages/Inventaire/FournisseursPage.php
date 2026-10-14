@@ -3,7 +3,7 @@
 namespace App\Filament\Pages\Inventaire;
 
 use App\Filament\Pages\Inventaire\Concerns\InteractsWithFournisseurRecords;
-use App\Models\Fournisseur;
+use App\Models\Purchasing\Fournisseur;
 use BackedEnum;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;

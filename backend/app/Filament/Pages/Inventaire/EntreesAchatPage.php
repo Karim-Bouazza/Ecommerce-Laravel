@@ -2,9 +2,9 @@
 
 namespace App\Filament\Pages\Inventaire;
 
-use App\Enums\PurchaseEntryPaymentStatus;
+use App\Enums\Purchase\PurchaseEntryPaymentStatus;
 use App\Filament\Pages\Inventaire\Concerns\InteractsWithPurchaseEntryRecords;
-use App\Models\PurchaseEntry;
+use App\Models\Purchasing\PurchaseEntry;
 use BackedEnum;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;

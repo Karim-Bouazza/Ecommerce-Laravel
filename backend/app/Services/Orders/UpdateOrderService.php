@@ -2,10 +2,10 @@
 
 namespace App\Services\Orders;
 
-use App\Enums\DeliveryType;
-use App\Models\Client;
-use App\Models\Order;
-use App\Models\Product;
+use App\Enums\Order\DeliveryType;
+use App\Models\Order\Client;
+use App\Models\Order\Order;
+use App\Models\Catalog\Product;
 use App\Services\Providers\ZimouWilayaService;
 use Illuminate\Support\Facades\DB;
 

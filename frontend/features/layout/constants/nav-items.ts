@@ -14,6 +14,7 @@ import {
   Radio,
   ScanBarcode,
   Settings,
+  ShieldAlert,
   Share2,
   Smartphone,
   Star,
@@ -33,6 +34,20 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [
       { label: "Tableau de bord", href: "/admin", icon: LayoutDashboard, permission: "tableau_de_bord.view" },
       { label: "Performance (KPI)", href: "/admin/performance", icon: Gauge },
+    ],
+  },
+  {
+    label: "Fraude",
+    items: [
+      {
+        label: "Détection de fraude",
+        href: "/admin/fraud",
+        icon: ShieldAlert,
+        items: [
+          { label: "Évaluations", href: "/admin/fraud", permission: "fraud.view" },
+          { label: "IP exclues du pixel", href: "/admin/fraud/excluded-ips", permission: "pixels.view" },
+        ],
+      },
     ],
   },
   {

@@ -3,7 +3,7 @@
 namespace App\Notifications;
 
 use App\Filament\Resources\Orders\OrderResource;
-use App\Models\Order;
+use App\Models\Order\Order;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification as FilamentNotification;
 use Illuminate\Notifications\Notification;

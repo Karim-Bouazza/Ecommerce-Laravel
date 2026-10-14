@@ -2,7 +2,7 @@
 
 namespace App\Services\OrderAnalysis;
 
-use App\Enums\OrderStatus;
+use App\Enums\Order\OrderStatus;
 use App\Queries\Orders\OrderAnalysisQuery;
 use App\Support\Analytics\OrderRateCalculator;
 use App\Support\OrderAnalysis\OrderAnalysisFilters;

@@ -2,7 +2,7 @@
 
 namespace App\Filament\Pages\Orders;
 
-use App\Enums\OrderStatus;
+use App\Enums\Order\OrderStatus;
 use App\Filament\Pages\Orders\Concerns\FiltersOrdersByStatus;
 use BackedEnum;
 use Filament\Pages\Page;

@@ -2,8 +2,8 @@
 
 namespace App\Services\Orders\StatusTransitions;
 
-use App\Enums\OrderStatus;
-use App\Models\Order;
+use App\Enums\Order\OrderStatus;
+use App\Models\Order\Order;
 
 interface OrderStatusTransitionHandler
 {

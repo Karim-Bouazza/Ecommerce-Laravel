@@ -2,7 +2,7 @@
 
 namespace App\Services\Clients;
 
-use App\Models\Client;
+use App\Models\Order\Client;
 
 class UpdateClientService
 {

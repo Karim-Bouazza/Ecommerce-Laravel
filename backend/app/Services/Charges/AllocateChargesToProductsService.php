@@ -2,10 +2,10 @@
 
 namespace App\Services\Charges;
 
-use App\Enums\ChargeType;
-use App\Enums\OrderStatus;
-use App\Models\Charge;
-use App\Models\OrderItem;
+use App\Enums\Charge\ChargeType;
+use App\Enums\Order\OrderStatus;
+use App\Models\Finance\Charge;
+use App\Models\Order\OrderItem;
 use Carbon\CarbonInterface;
 
 class AllocateChargesToProductsService

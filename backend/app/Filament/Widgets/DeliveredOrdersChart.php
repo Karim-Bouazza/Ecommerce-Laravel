@@ -2,9 +2,9 @@
 
 namespace App\Filament\Widgets;
 
-use App\Enums\OrderStatus;
+use App\Enums\Order\OrderStatus;
 use App\Filament\Widgets\Concerns\InteractsWithDashboardPeriod;
-use App\Models\Order;
+use App\Models\Order\Order;
 use Filament\Widgets\ChartWidget;
 use Carbon\CarbonPeriod;
 use Illuminate\Support\Carbon;

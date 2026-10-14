@@ -9,6 +9,8 @@ export type CreateStorefrontOrderPayload = {
   provider_commune_id?: number;
   delivery_type: "express" | "point_relais";
   delivery_price?: number;
+  /** Untrusted correlation hint for fraud scoring; omitted if unavailable. */
+  fingerprint?: string;
   items: {
     product_id: number;
     variant?: string;

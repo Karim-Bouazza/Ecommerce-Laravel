@@ -2,9 +2,9 @@
 
 namespace App\Filament\Pages\Orders\Concerns;
 
-use App\Enums\OrderStatus;
+use App\Enums\Order\OrderStatus;
 use App\Filament\Resources\Orders\Tables\OrdersTable;
-use App\Models\Order;
+use App\Models\Order\Order;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;

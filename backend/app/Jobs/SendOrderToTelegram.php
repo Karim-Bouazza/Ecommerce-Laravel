@@ -2,7 +2,7 @@
 
 namespace App\Jobs;
 
-use App\Models\Order;
+use App\Models\Order\Order;
 use App\Services\Telegram\OrderTelegramMessage;
 use App\Services\Telegram\TelegramClient;
 use Illuminate\Foundation\Bus\Dispatchable;

@@ -1,9 +1,9 @@
 <?php
 
-use App\Enums\OrderType;
-use App\Models\Order;
-use App\Models\Product;
-use App\Models\Wilaya;
+use App\Enums\Order\OrderType;
+use App\Models\Order\Order;
+use App\Models\Catalog\Product;
+use App\Models\Delivery\Wilaya;
 use App\Services\Orders\CreateOrderService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;

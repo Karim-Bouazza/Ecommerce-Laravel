@@ -1,9 +1,9 @@
 <?php
 
 use Livewire\Component;
-use App\Models\Product;
-use App\Models\Wilaya;
-use App\Models\Communes;
+use App\Models\Catalog\Product;
+use App\Models\Delivery\Wilaya;
+use App\Models\Delivery\Communes;
 use App\Services\Orders\CreateOrderService;
 use Illuminate\Support\Facades\Storage;
 

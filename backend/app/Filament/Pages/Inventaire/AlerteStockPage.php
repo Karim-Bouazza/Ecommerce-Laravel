@@ -4,7 +4,7 @@ namespace App\Filament\Pages\Inventaire;
 
 use App\Filament\Pages\Inventaire\Concerns\InteractsWithWarehouseStockAction;
 use App\Filament\Pages\Inventaire\Concerns\InteractsWithWarehouseTabs;
-use App\Models\Product;
+use App\Models\Catalog\Product;
 use App\Services\Warehouses\WarehouseStockQueryService;
 use BackedEnum;
 use Filament\Pages\Page;

@@ -2,11 +2,11 @@
 
 namespace App\Services\Orders\StatusTransitions\Handlers;
 
-use App\Enums\OrderStatus;
-use App\Enums\StockMovementType;
-use App\Models\Order;
-use App\Models\Stock;
-use App\Models\Warehouse;
+use App\Enums\Order\OrderStatus;
+use App\Enums\Stock\StockMovementType;
+use App\Models\Order\Order;
+use App\Models\Inventory\Stock;
+use App\Models\Inventory\Warehouse;
 use App\Services\Orders\StatusTransitions\OrderStatusTransitionHandler;
 
 class DeliveredOrderTransitionHandler implements OrderStatusTransitionHandler

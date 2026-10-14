@@ -80,7 +80,14 @@ export type Order = {
   date_report: string | null;
   created_at: string;
   status_changed_at: string;
+  fraud_risk: OrderFraudRisk | null;
   items: OrderItem[];
+};
+
+export type OrderFraudRisk = {
+  score: number;
+  level: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+  review_label: "UNKNOWN" | "LEGITIMATE" | "CONFIRMED_FAKE";
 };
 
 export type OrderStatusGroup =

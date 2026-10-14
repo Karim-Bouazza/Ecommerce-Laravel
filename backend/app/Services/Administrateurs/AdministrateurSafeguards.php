@@ -2,8 +2,8 @@
 
 namespace App\Services\Administrateurs;
 
-use App\Models\Role;
-use App\Models\User;
+use App\Models\Auth\Role;
+use App\Models\Users\User;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 

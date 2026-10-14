@@ -3,8 +3,8 @@
 use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\Attributes\Url;
-use App\Models\Product;
-use App\Models\Category;
+use App\Models\Catalog\Product;
+use App\Models\Catalog\Category;
 
 new class extends Component {
     use WithPagination;

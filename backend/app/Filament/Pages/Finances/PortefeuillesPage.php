@@ -2,10 +2,10 @@
 
 namespace App\Filament\Pages\Finances;
 
-use App\Enums\WalletTransactionType;
+use App\Enums\Wallet\WalletTransactionType;
 use App\Filament\Pages\Finances\Concerns\InteractsWithWalletRecords;
 use App\Filament\Pages\Finances\Widgets\WalletStatsOverview;
-use App\Models\Wallet;
+use App\Models\Finance\Wallet;
 use BackedEnum;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;

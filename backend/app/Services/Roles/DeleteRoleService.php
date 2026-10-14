@@ -2,7 +2,7 @@
 
 namespace App\Services\Roles;
 
-use App\Models\Role;
+use App\Models\Auth\Role;
 use RuntimeException;
 
 class DeleteRoleService

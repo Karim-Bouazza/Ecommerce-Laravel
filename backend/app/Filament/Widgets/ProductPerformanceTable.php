@@ -2,9 +2,9 @@
 
 namespace App\Filament\Widgets;
 
-use App\Enums\OrderStatus;
+use App\Enums\Order\OrderStatus;
 use App\Filament\Widgets\Concerns\InteractsWithDashboardPeriod;
-use App\Models\Product;
+use App\Models\Catalog\Product;
 use Closure;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;

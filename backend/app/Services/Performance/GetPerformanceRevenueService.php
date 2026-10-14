@@ -2,7 +2,7 @@
 
 namespace App\Services\Performance;
 
-use App\Models\Charge;
+use App\Models\Finance\Charge;
 use App\Queries\Performance\PerformanceRevenueQuery;
 use App\Services\Charges\CalculateChargeAmountService;
 use App\Support\Analytics\OrderRateCalculator;

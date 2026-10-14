@@ -2,15 +2,15 @@
 
 namespace App\Services\Charges;
 
-use App\Enums\ChargeOrderTrigger;
-use App\Enums\ChargeRecurrenceFrequency;
-use App\Enums\ChargeType;
-use App\Enums\OrderStatus;
-use App\Models\Charge;
-use App\Models\ChargePause;
-use App\Models\Order;
-use App\Models\OrderItem;
-use App\Models\OrderStatusHistory;
+use App\Enums\Charge\ChargeOrderTrigger;
+use App\Enums\Charge\ChargeRecurrenceFrequency;
+use App\Enums\Charge\ChargeType;
+use App\Enums\Order\OrderStatus;
+use App\Models\Finance\Charge;
+use App\Models\Finance\ChargePause;
+use App\Models\Order\Order;
+use App\Models\Order\OrderItem;
+use App\Models\Order\OrderStatusHistory;
 use App\Support\Analytics\OrderStatusGroups;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Query\Builder;

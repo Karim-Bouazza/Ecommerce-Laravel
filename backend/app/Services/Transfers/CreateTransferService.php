@@ -2,7 +2,7 @@
 
 namespace App\Services\Transfers;
 
-use App\Models\WarehouseTransfer;
+use App\Models\Inventory\WarehouseTransfer;
 use Illuminate\Support\Facades\DB;
 
 class CreateTransferService

@@ -2,7 +2,7 @@
 
 namespace App\Services\Products;
 
-use App\Models\Product;
+use App\Models\Catalog\Product;
 
 class DeleteProductService
 {

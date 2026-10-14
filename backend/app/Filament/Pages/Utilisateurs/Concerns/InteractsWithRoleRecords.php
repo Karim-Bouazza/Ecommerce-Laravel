@@ -2,7 +2,7 @@
 
 namespace App\Filament\Pages\Utilisateurs\Concerns;
 
-use App\Models\Role;
+use App\Models\Auth\Role;
 use App\Services\Roles\CreateRoleService;
 use App\Services\Roles\DeleteRoleService;
 use App\Services\Roles\UpdateRoleService;

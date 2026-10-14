@@ -7,7 +7,7 @@ use App\Filament\Resources\DeliveryCompanies\Pages\EditDeliveryCompany;
 use App\Filament\Resources\DeliveryCompanies\Pages\ListDeliveryCompanies;
 use App\Filament\Resources\DeliveryCompanies\Schemas\DeliveryCompanyForm;
 use App\Filament\Resources\DeliveryCompanies\Tables\DeliveryCompaniesTable;
-use App\Models\DeliveryCompany;
+use App\Models\Delivery\DeliveryCompany;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;

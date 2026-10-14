@@ -2,9 +2,9 @@
 
 namespace App\Queries\Wilayas;
 
-use App\Enums\OrderStatus;
-use App\Models\Order;
-use App\Models\Wilaya;
+use App\Enums\Order\OrderStatus;
+use App\Models\Order\Order;
+use App\Models\Delivery\Wilaya;
 use Closure;
 use Illuminate\Database\Eloquent\Builder;
 

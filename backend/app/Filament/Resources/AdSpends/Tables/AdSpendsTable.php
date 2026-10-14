@@ -2,8 +2,8 @@
 
 namespace App\Filament\Resources\AdSpends\Tables;
 
-use App\Models\Product;
-use App\Models\ProductAdSpend;
+use App\Models\Catalog\Product;
+use App\Models\Catalog\ProductAdSpend;
 use App\Support\ProductProfit;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;

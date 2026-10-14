@@ -3,8 +3,8 @@
 namespace App\Filament\Resources\Orders\Pages;
 
 use App\Filament\Resources\Orders\OrderResource;
-use App\Models\OrderItem;
-use App\Models\OrderNote;
+use App\Models\Order\OrderItem;
+use App\Models\Order\OrderNote;
 use App\Services\Orders\UpdateOrderService;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\EditRecord;

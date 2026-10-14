@@ -117,6 +117,11 @@ class PermissionRegistry
                 'charges.edit' => 'Modifier des charges',
                 'charges.delete' => 'Supprimer des charges',
             ],
+            'Détection de fraude' => [
+                'fraud.view' => 'Voir les évaluations de fraude',
+                'fraud.review' => 'Marquer les commandes (légitime / fausse)',
+                'fraud.view_sensitive' => 'Voir les téléphones et adresses IP complets',
+            ],
             'Utilisateurs' => [
                 'administrateurs.view' => 'Voir les administrateurs',
                 'administrateurs.create' => 'Créer des administrateurs',

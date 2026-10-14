@@ -2,7 +2,7 @@
 
 namespace App\Filament\Pages\Finances\Concerns;
 
-use App\Models\Wallet;
+use App\Models\Finance\Wallet;
 use App\Services\Wallets\CreateWalletService;
 use App\Services\Wallets\DeleteWalletService;
 use App\Services\Wallets\DepositToWalletService;

@@ -2,12 +2,12 @@
 
 namespace App\Filament\Widgets;
 
-use App\Enums\OrderStatus;
+use App\Enums\Order\OrderStatus;
 use App\Filament\Widgets\Concerns\InteractsWithDashboardPeriod;
-use App\Models\Order;
-use App\Models\OrderItem;
-use App\Models\Product;
-use App\Models\ProductAdSpend;
+use App\Models\Order\Order;
+use App\Models\Order\OrderItem;
+use App\Models\Catalog\Product;
+use App\Models\Catalog\ProductAdSpend;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Database\Eloquent\Builder;

@@ -1,8 +1,8 @@
 <?php
 
-use App\Models\Product;
-use App\Models\StorefrontFeature;
-use App\Models\User;
+use App\Models\Catalog\Product;
+use App\Models\Storefront\StorefrontFeature;
+use App\Models\Users\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;

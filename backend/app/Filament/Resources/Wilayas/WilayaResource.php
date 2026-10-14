@@ -7,7 +7,7 @@ use App\Filament\Resources\Wilayas\Pages\ViewWilaya;
 use App\Filament\Resources\Wilayas\RelationManagers\CommunesRelationManager;
 use App\Filament\Resources\Wilayas\Schemas\WilayaInfolist;
 use App\Filament\Resources\Wilayas\Tables\WilayasTable;
-use App\Models\Wilaya;
+use App\Models\Delivery\Wilaya;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;

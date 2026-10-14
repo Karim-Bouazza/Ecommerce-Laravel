@@ -2,9 +2,9 @@
 
 namespace App\Services\Orders;
 
-use App\Enums\OrderStatus;
-use App\Models\Order;
-use App\Models\OrderStatusHistory;
+use App\Enums\Order\OrderStatus;
+use App\Models\Order\Order;
+use App\Models\Order\OrderStatusHistory;
 use App\Services\Orders\StatusTransitions\OrderStatusTransition;
 use Illuminate\Support\Facades\DB;
 

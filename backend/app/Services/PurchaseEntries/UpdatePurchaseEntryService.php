@@ -2,7 +2,7 @@
 
 namespace App\Services\PurchaseEntries;
 
-use App\Models\PurchaseEntry;
+use App\Models\Purchasing\PurchaseEntry;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 

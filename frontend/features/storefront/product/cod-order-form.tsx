@@ -30,6 +30,7 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group";
 import { getErrorMessage } from "@/lib/api";
+import { getBrowserFingerprint } from "@/lib/fingerprint";
 import {
   trackInitiateCheckout,
   trackPurchase,
@@ -245,7 +246,9 @@ function CodOrderFormContent({
     );
 
     try {
+      const fingerprint = await getBrowserFingerprint();
       const order = await orderMutation.mutateAsync({
+        fingerprint: fingerprint ?? undefined,
         first_name: values.first_name,
         last_name: values.last_name,
         phone_number: values.phone_number,
