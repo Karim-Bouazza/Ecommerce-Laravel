@@ -1,5 +1,6 @@
 "use client"
 
+import type * as React from "react"
 import type { ColumnDef } from "@tanstack/react-table"
 
 import { DeleteOrderDialog } from "@/features/orders/components/delete-order-dialog"
@@ -23,73 +24,89 @@ function itemsSummary(order: Order, key: "product_name" | "variant"): string {
   return values.length > 0 ? values.join(", ") : "—"
 }
 
+function Stacked({ primary, secondary }: { primary: React.ReactNode; secondary?: React.ReactNode }) {
+  return (
+    <div className="flex flex-col gap-0.5">
+      <span className="truncate text-sm font-medium text-foreground">{primary}</span>
+      {secondary ? <span className="truncate text-xs text-muted-foreground">{secondary}</span> : null}
+    </div>
+  )
+}
+
 export const orderColumns: ColumnDef<Order>[] = [
   {
     accessorKey: "reference",
     header: "Réf",
-    meta: { className: "min-w-[110px]" },
+    cell: ({ row }) => <span className="text-sm font-medium tabular-nums">{row.original.reference}</span>,
+    meta: { align: "left", className: "min-w-[130px]" },
   },
   {
     id: "client",
     header: "Client",
-    cell: ({ row }) => row.original.client_name || "—",
-    meta: { className: "min-w-[140px]" },
-  },
-  {
-    accessorKey: "phone_number",
-    header: "Téléphone",
-    cell: ({ row }) => row.original.phone_number ?? "—",
-    meta: { className: "min-w-[130px]" },
-  },
-  {
-    id: "fraud_risk",
-    header: "Score de risque",
-    cell: ({ row }) => <FraudScoreCell risk={row.original.fraud_risk} />,
-    meta: { className: "min-w-[150px]" },
-  },
-  {
-    id: "location",
-    header: "Wilaya / Commune",
-    cell: ({ row }) => [row.original.wilaya_name, row.original.commune_name].filter(Boolean).join(" / ") || "—",
-    meta: { className: "min-w-[160px]" },
+    cell: ({ row }) => (
+      <Stacked primary={row.original.client_name || "—"} secondary={row.original.phone_number} />
+    ),
+    meta: { align: "left", className: "min-w-[170px]" },
   },
   {
     id: "product",
     header: "Produit",
-    cell: ({ row }) => itemsSummary(row.original, "product_name"),
-    meta: { className: "min-w-[160px]" },
+    cell: ({ row }) => {
+      const variant = itemsSummary(row.original, "variant")
+      return (
+        <Stacked
+          primary={itemsSummary(row.original, "product_name")}
+          secondary={variant !== "—" ? variant : undefined}
+        />
+      )
+    },
+    meta: { align: "left", className: "min-w-[180px] max-w-[240px]" },
   },
   {
-    id: "variant",
-    header: "Variante",
-    cell: ({ row }) => itemsSummary(row.original, "variant"),
-    meta: { className: "min-w-[130px]" },
+    id: "location",
+    header: "Destination",
+    cell: ({ row }) => (
+      <Stacked
+        primary={[row.original.wilaya_name, row.original.commune_name].filter(Boolean).join(" · ") || "—"}
+        secondary={
+          row.original.delivery_type_label +
+          (row.original.stop_desk_company_name ? ` — ${row.original.stop_desk_company_name}` : "")
+        }
+      />
+    ),
+    meta: { align: "left", className: "min-w-[180px]" },
   },
   {
     id: "total_price",
     header: "Total",
-    cell: ({ row }) => formatAmount(row.original.total_price),
-    meta: { className: "min-w-[110px]" },
+    cell: ({ row }) => (
+      <span className="text-sm font-semibold whitespace-nowrap tabular-nums">
+        {formatAmount(row.original.total_price)}
+      </span>
+    ),
+    meta: { align: "right", className: "min-w-[120px]" },
   },
   {
-    id: "delivery",
-    header: "Livraison",
-    cell: ({ row }) =>
-      row.original.delivery_type_label +
-      (row.original.stop_desk_company_name ? ` — ${row.original.stop_desk_company_name}` : ""),
-    meta: { className: "min-w-[150px]" },
+    id: "fraud_risk",
+    header: "Risque",
+    cell: ({ row }) => <FraudScoreCell risk={row.original.fraud_risk} />,
+    meta: { align: "left", className: "min-w-[140px]" },
   },
   {
     id: "elapsed",
-    header: "Temps écoulé",
-    cell: ({ row }) => <ElapsedTime since={row.original.status_changed_at} />,
-    meta: { sticky: "right", stickyWidth: 110, className: "min-w-[110px]" },
+    header: "Depuis",
+    cell: ({ row }) => (
+      <span className="text-sm whitespace-nowrap text-muted-foreground">
+        <ElapsedTime since={row.original.status_changed_at} />
+      </span>
+    ),
+    meta: { align: "left", className: "min-w-[100px]" },
   },
   {
     id: "status",
-    header: "Statut de confirmation",
+    header: "Statut",
     cell: ({ row }) => <OrderStatusCell order={row.original} />,
-    meta: { sticky: "right", stickyWidth: 160, className: "min-w-[160px]" },
+    meta: { align: "left", sticky: "right", stickyWidth: 180, className: "min-w-[180px]" },
   },
   {
     id: "actions",
@@ -103,6 +120,6 @@ export const orderColumns: ColumnDef<Order>[] = [
         <ViewOrderDialog order={row.original} />
       </div>
     ),
-    meta: { sticky: "right", stickyWidth: 144, className: "min-w-[144px]" },
+    meta: { sticky: "right", stickyWidth: 148, className: "min-w-[148px]" },
   },
 ]

@@ -110,4 +110,5 @@ export type PaginatedResponse<T> = {
   filters?: {
     statuses: { value: string; label: string }[];
   };
+  stats?: { value: string; label: string; color: BadgeColor; count: number }[];
 };

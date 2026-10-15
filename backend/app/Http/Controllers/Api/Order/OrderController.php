@@ -114,10 +114,24 @@ class OrderController extends Controller
             ->paginate($perPage)
             ->withQueryString();
 
+        $counts = $groupStatuses === []
+            ? collect()
+            : Order::query()
+                ->whereIn('status', array_column($groupStatuses, 'value'))
+                ->selectRaw('status, count(*) as total')
+                ->groupBy('status')
+                ->pluck('total', 'status');
+
         return OrderResource::collection($orders)->additional([
             'filters' => [
                 'statuses' => count($groupStatuses) > 1 ? OrderStatus::groupOptions($statusGroup) : [],
             ],
+            'stats' => array_map(fn(OrderStatus $group) => [
+                'value' => $group->value,
+                'label' => $group->label(),
+                'color' => $group->color(),
+                'count' => (int) ($counts[$group->value] ?? 0),
+            ], $groupStatuses),
         ]);
     }
 

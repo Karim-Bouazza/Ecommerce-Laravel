@@ -6,6 +6,7 @@ import { DataTable } from "@/components/data-table/data-table"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { CreateOrderDialog } from "@/features/orders/components/create-order-dialog"
+import { OrderStatusStats } from "@/features/orders/components/order-status-stats"
 import { orderColumns } from "@/features/orders/components/order-columns"
 import { useOrders } from "@/features/orders/hooks/use-orders"
 import type { OrderStatusGroup } from "@/features/orders/types"
@@ -44,6 +45,13 @@ export function OrdersTable({ statusGroup }: OrdersTableProps) {
   const statusOptions = data?.filters?.statuses ?? []
 
   return (
+    <div className="flex flex-col gap-5">
+    <OrderStatusStats
+      stats={data?.stats ?? []}
+      selected={status}
+      onSelect={setStatus}
+      isLoading={isPending}
+    />
     <DataTable
       columns={orderColumns}
       data={data?.data ?? []}
@@ -59,7 +67,7 @@ export function OrdersTable({ statusGroup }: OrdersTableProps) {
         <>
           {statusOptions.length > 0 && (
             <Select value={status} onValueChange={(next) => setStatus(next ?? ALL_STATUSES)}>
-              <SelectTrigger className="w-50">
+              <SelectTrigger className="w-48">
                 <SelectValue>
                   {(selected: string | null) =>
                     statusOptions.find((option) => option.value === selected)?.label ?? "Tous les statuts"
@@ -89,5 +97,6 @@ export function OrdersTable({ statusGroup }: OrdersTableProps) {
       }}
       className={isFetching ? "opacity-70 transition-opacity" : undefined}
     />
+    </div>
   )
 }
