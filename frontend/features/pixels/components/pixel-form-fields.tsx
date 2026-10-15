@@ -4,9 +4,7 @@ import { Controller, type UseFormReturn } from "react-hook-form"
 
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
-import { PIXEL_PROVIDERS } from "@/features/pixels/constants/pixel-providers"
 import type { PixelSchema } from "@/features/pixels/schemas/pixel-schema"
 
 type PixelFormFieldsProps = {
@@ -32,29 +30,6 @@ export function PixelFormFields({ form, idPrefix }: PixelFormFieldsProps) {
           {...register("name")}
         />
         <FieldError errors={errors.name ? [errors.name] : undefined} />
-      </Field>
-
-      <Field data-invalid={!!errors.provider}>
-        <FieldLabel>Fournisseur</FieldLabel>
-        <Controller
-          control={control}
-          name="provider"
-          render={({ field }) => (
-            <Select value={field.value} onValueChange={field.onChange}>
-              <SelectTrigger className="w-full" aria-invalid={!!errors.provider}>
-                <SelectValue placeholder="Sélectionnez un fournisseur" />
-              </SelectTrigger>
-              <SelectContent>
-                {PIXEL_PROVIDERS.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-        />
-        <FieldError errors={errors.provider ? [errors.provider] : undefined} />
       </Field>
 
       <Field data-invalid={!!errors.pixel_id}>

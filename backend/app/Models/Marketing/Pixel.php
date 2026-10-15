@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Pixel extends Model
 {
-    public const PROVIDERS = ['facebook', 'tiktok', 'snapchat', 'google'];
+    public const PROVIDERS = ['facebook'];
 
     protected $fillable = [
         'name',

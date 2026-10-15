@@ -1,4 +1,4 @@
-export type PixelProvider = "facebook" | "tiktok" | "snapchat" | "google"
+export type PixelProvider = "facebook"
 
 export type Pixel = {
   id: number

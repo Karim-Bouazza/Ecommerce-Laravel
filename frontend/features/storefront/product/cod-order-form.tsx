@@ -220,15 +220,12 @@ function CodOrderFormContent({
     deliveryType === "home" ? homeDeliveryPrice : stopDeskPrice;
   const total = subtotal + (deliveryPrice ?? 0);
 
-  const lastTrackedCommuneId = useRef<number | null>(null);
+  const hasTrackedCheckout = useRef(false);
   useEffect(() => {
-    if (
-      providerCommuneId === null ||
-      providerCommuneId === lastTrackedCommuneId.current
-    ) {
+    if (providerCommuneId === null || hasTrackedCheckout.current) {
       return;
     }
-    lastTrackedCommuneId.current = providerCommuneId;
+    hasTrackedCheckout.current = true;
     trackInitiateCheckout({
       id: product.id,
       name: product.name,
@@ -274,6 +271,11 @@ function CodOrderFormContent({
           productName: product.name,
           value: total,
           quantity: values.quantity,
+          customer: {
+            phone: values.phone_number,
+            firstName: values.first_name,
+            lastName: values.last_name,
+          },
         });
       }
 

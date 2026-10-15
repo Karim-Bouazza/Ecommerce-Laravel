@@ -1,8 +1,15 @@
-// Pixel base scripts load only after the active-pixels request resolves, so events fired earlier
-// (e.g. ViewContent on the landing page) would hit an undefined window.fbq and be lost.
-// They are buffered here until TrackingPixels has initialized the pixels and sent the first PageView.
 let pixelsReady = false
 const pendingEvents: Array<() => void> = []
+let facebookPixelIds: string[] = []
+
+export function setFacebookPixelIds(ids: string[]) {
+  facebookPixelIds = ids
+}
+
+function normalizePhone(phone: string) {
+  const digits = phone.replace(/\D/g, "")
+  return digits.startsWith("0") ? `213${digits.slice(1)}` : digits
+}
 
 function dispatch(fire: () => void) {
   if (pixelsReady) fire()
@@ -40,22 +47,6 @@ function fireInitiateCheckout({
     currency,
   })
 
-  window.ttq?.track("InitiateCheckout", {
-    content_id: contentId,
-    content_name: name,
-    content_type: "product",
-    quantity,
-    value,
-    currency,
-  })
-
-  window.snaptr?.("track", "START_CHECKOUT", {
-    item_ids: [contentId],
-    number_items: quantity,
-    price: value,
-    currency,
-  })
-
   window.gtag?.("event", "begin_checkout", {
     currency,
     value,
@@ -76,6 +67,11 @@ export type TrackPurchaseParams = {
   value: number
   quantity: number
   currency?: string
+  customer?: {
+    phone: string
+    firstName: string
+    lastName: string
+  }
 }
 
 function firePurchase({
@@ -85,35 +81,33 @@ function firePurchase({
   value,
   quantity,
   currency = "DZD",
+  customer,
 }: TrackPurchaseParams) {
   const contentId = String(productId)
   const transactionId = String(orderId)
 
-  window.fbq?.("track", "Purchase", {
-    content_ids: [contentId],
-    content_name: productName,
-    content_type: "product",
-    num_items: quantity,
-    value,
-    currency,
-  })
+  if (customer) {
+    const userData = {
+      ph: normalizePhone(customer.phone),
+      fn: customer.firstName.trim().toLowerCase(),
+      ln: customer.lastName.trim().toLowerCase(),
+    }
+    facebookPixelIds.forEach((id) => window.fbq?.("init", id, userData))
+  }
 
-  window.ttq?.track("CompletePayment", {
-    content_id: contentId,
-    content_name: productName,
-    content_type: "product",
-    quantity,
-    value,
-    currency,
-  })
-
-  window.snaptr?.("track", "PURCHASE", {
-    item_ids: [contentId],
-    number_items: quantity,
-    price: value,
-    currency,
-    transaction_id: transactionId,
-  })
+  window.fbq?.(
+    "track",
+    "Purchase",
+    {
+      content_ids: [contentId],
+      content_name: productName,
+      content_type: "product",
+      num_items: quantity,
+      value,
+      currency,
+    },
+    { eventID: `order-${transactionId}` }
+  )
 
   window.gtag?.("event", "purchase", {
     transaction_id: transactionId,
@@ -146,21 +140,6 @@ function fireViewContent({ id, name, price, category, currency = "DZD" }: TrackV
     content_type: "product",
     content_category: category ?? undefined,
     value: price,
-    currency,
-  })
-
-  window.ttq?.track("ViewContent", {
-    content_id: contentId,
-    content_name: name,
-    content_type: "product",
-    value: price,
-    currency,
-  })
-
-  window.snaptr?.("track", "VIEW_CONTENT", {
-    item_ids: [contentId],
-    item_category: category ?? undefined,
-    price,
     currency,
   })
 

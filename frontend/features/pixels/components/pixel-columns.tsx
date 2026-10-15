@@ -6,18 +6,12 @@ import { cn } from "cn"
 import { DeletePixelDialog } from "@/features/pixels/components/delete-pixel-dialog"
 import { EditPixelDialog } from "@/features/pixels/components/edit-pixel-dialog"
 import { TogglePixelActiveDialog } from "@/features/pixels/components/toggle-pixel-active-dialog"
-import { pixelProviderLabel } from "@/features/pixels/constants/pixel-providers"
 import type { Pixel } from "@/features/pixels/types"
 
 export const pixelColumns: ColumnDef<Pixel>[] = [
   {
     accessorKey: "name",
     header: "Nom",
-  },
-  {
-    accessorKey: "provider",
-    header: "Fournisseur",
-    cell: ({ row }) => pixelProviderLabel(row.original.provider),
   },
   {
     accessorKey: "pixel_id",

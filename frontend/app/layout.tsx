@@ -5,7 +5,7 @@ import { QueryProvider } from "@/components/query-provider";
 import { Toaster } from "@/components/ui/sonner";
 import ClarityProvider from "@/components/Clarity";
 import GoogleAnalytics from "@/components/google-analytics";
-import { TrackingPixels } from "@/features/pixels/components/tracking-pixels";
+import { FacebookPixel } from "@/features/pixels/components/facebook-pixel";
 import "./globals.css";
 
 const inter = Inter({
@@ -37,7 +37,7 @@ export default function RootLayout({
           <QueryProvider>
             <ClarityProvider />
             <GoogleAnalytics />
-            <TrackingPixels />
+            <FacebookPixel />
             {children}
             <Toaster />
           </QueryProvider>

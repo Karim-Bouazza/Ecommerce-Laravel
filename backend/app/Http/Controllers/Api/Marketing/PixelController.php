@@ -17,6 +17,7 @@ class PixelController extends Controller
     {
         $pixels = Pixel::query()
             ->where('is_active', true)
+            ->where('provider', 'facebook')
             ->get(['provider', 'pixel_id'])
             ->map(fn (Pixel $pixel) => [
                 'provider' => $pixel->provider,
