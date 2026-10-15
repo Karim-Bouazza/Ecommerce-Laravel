@@ -46,6 +46,7 @@ export type Order = {
   status_label: string;
   status_color: BadgeColor;
   status_transitions: OrderStatusTransition[];
+  can_delete: boolean;
   is_editable: boolean;
   payment_status: string;
   payment_status_label: string;
@@ -105,5 +106,8 @@ export type PaginatedResponse<T> = {
     last_page: number;
     per_page: number;
     total: number;
+  };
+  filters?: {
+    statuses: { value: string; label: string }[];
   };
 };

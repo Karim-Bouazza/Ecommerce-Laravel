@@ -11,6 +11,7 @@ export type GetOrdersParams = {
   per_page?: number
   search?: string
   status_group?: OrderStatusGroup
+  status?: string
 }
 
 export async function getOrders(params: GetOrdersParams): Promise<PaginatedResponse<Order>> {

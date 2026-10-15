@@ -98,7 +98,7 @@ export const orderColumns: ColumnDef<Order>[] = [
       <div className="flex items-center justify-center gap-1">
         {row.original.is_editable && <EditOrderDialog order={row.original} />}
         {row.original.status === "assigned" && <ShipOrderDialog order={row.original} />}
-        {(row.original.status === "pending" || row.original.status === "cancelled") && <DeleteOrderDialog order={row.original} />}
+        {row.original.can_delete &&<DeleteOrderDialog order={row.original} />}
         <OrderStatusHistoryDialog order={row.original} />
         <ViewOrderDialog order={row.original} />
       </div>

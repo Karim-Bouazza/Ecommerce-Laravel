@@ -22,6 +22,7 @@ class OrderResource extends JsonResource
             'status_label' => $this->status->label(),
             'status_color' => $this->status->color(),
             'is_editable' => $this->status->isEditable(),
+            'can_delete' => $this->status->canBeDeleted(),
             'status_transitions' => collect($this->status->allowedTransitions())
                 ->reject(fn(OrderStatus $status) => $status === OrderStatus::Scheduled)
                 ->map(fn(OrderStatus $status) => ['value' => $status->value, 'label' => $status->label()])

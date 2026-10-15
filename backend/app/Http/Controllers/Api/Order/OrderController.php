@@ -83,10 +83,17 @@ class OrderController extends Controller
         $perPage = (int) $request->input('per_page', 15);
         $search = trim((string) $request->input('search', ''));
 
+        $groupStatuses = $statusGroup !== '' ? OrderStatus::forGroup($statusGroup) : [];
+
+        $status = OrderStatus::tryFrom(trim((string) $request->input('status', '')));
+        $filteredStatuses = $status !== null && in_array($status, $groupStatuses, true)
+            ? [$status]
+            : $groupStatuses;
+
         $orders = Order::query()
             ->with(self::WITH)
-            ->when($statusGroup !== '', function ($query) use ($statusGroup) {
-                $query->whereIn('status', array_column(OrderStatus::forGroup($statusGroup), 'value'));
+            ->when($statusGroup !== '', function ($query) use ($filteredStatuses) {
+                $query->whereIn('status', array_column($filteredStatuses, 'value'));
             })
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($query) use ($search) {
@@ -107,7 +114,11 @@ class OrderController extends Controller
             ->paginate($perPage)
             ->withQueryString();
 
-        return OrderResource::collection($orders);
+        return OrderResource::collection($orders)->additional([
+            'filters' => [
+                'statuses' => count($groupStatuses) > 1 ? OrderStatus::groupOptions($statusGroup) : [],
+            ],
+        ]);
     }
 
     public function generateName(Request $request): \Illuminate\Http\JsonResponse
@@ -184,7 +195,7 @@ class OrderController extends Controller
     {
         abort_unless(auth()->user()->hasPermission('orders.delete'), 403);
         abort_unless(
-            in_array($order->status, [OrderStatus::New, OrderStatus::Cancelled], true),
+            $order->status->canBeDeleted(),
             409,
             "Seules les commandes au statut « Nouvelle » ou « Annulée » peuvent être supprimées."
         );

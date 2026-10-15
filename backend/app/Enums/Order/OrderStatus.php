@@ -145,6 +145,22 @@ enum OrderStatus: string
         };
     }
 
+    public function canBeDeleted(): bool
+    {
+        return in_array($this, [self::New, self::Cancelled], true);
+    }
+
+    /**
+     * @return array<int, array{value: string, label: string}>
+     */
+    public static function groupOptions(string $group): array
+    {
+        return collect(self::forGroup($group))
+            ->map(fn(self $status) => ['value' => $status->value, 'label' => $status->label()])
+            ->values()
+            ->all();
+    }
+
     /**
      * @return array<string, string>
      */
