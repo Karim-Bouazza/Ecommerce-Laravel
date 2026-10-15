@@ -88,15 +88,29 @@ enum OrderStatus: string
         return match ($this) {
             self::New => [
                 self::Reported,
-                self::Call1, self::Call2, self::Call3,
-                self::Unreachable, self::ToCheck, self::Duplicated, self::FakeOrder,
-                self::Confirmed, self::ConfirmedBot, self::ConfirmedNoStock,
+                self::Call1,
+                self::Call2,
+                self::Call3,
+                self::Unreachable,
+                self::ToCheck,
+                self::Duplicated,
+                self::FakeOrder,
+                self::Confirmed,
+                self::ConfirmedBot,
+                self::ConfirmedNoStock,
                 self::Cancelled,
             ],
             self::Reported => [
-                self::Call1, self::Call2, self::Call3,
-                self::Unreachable, self::ToCheck, self::Duplicated, self::FakeOrder,
-                self::Confirmed, self::ConfirmedBot, self::ConfirmedNoStock,
+                self::Call1,
+                self::Call2,
+                self::Call3,
+                self::Unreachable,
+                self::ToCheck,
+                self::Duplicated,
+                self::FakeOrder,
+                self::Confirmed,
+                self::ConfirmedBot,
+                self::ConfirmedNoStock,
                 self::Cancelled,
             ],
             self::Call1 => [self::Call2, self::Call3, self::Unreachable, self::ToCheck, self::Duplicated, self::FakeOrder, ...$confirmationOutcomes],
@@ -137,7 +151,7 @@ enum OrderStatus: string
     public static function options(): array
     {
         return collect(self::cases())
-            ->mapWithKeys(fn (self $status) => [$status->value => $status->label()])
+            ->mapWithKeys(fn(self $status) => [$status->value => $status->label()])
             ->all();
     }
 
@@ -152,14 +166,20 @@ enum OrderStatus: string
             'nouvelles' => [self::New],
             'en_cours' => [
                 self::Reported,
-                self::Call1, self::Call2, self::Call3,
-                self::Unreachable, self::ToCheck, self::Duplicated, self::FakeOrder, self::Scheduled,
-                self::ConfirmedBot, self::ConfirmedNoStock,
+                self::Call1,
+                self::Call2,
+                self::Call3,
+                self::Unreachable,
+                self::ToCheck,
+                self::Duplicated,
+                self::Scheduled,
+                self::ConfirmedBot,
+                self::ConfirmedNoStock,
             ],
             'confirmees' => [self::Confirmed, self::Assigned],
             'suivi' => [self::Shipped],
             'terminees' => [self::Delivered],
-            'annulees' => [self::Cancelled, self::Returned, self::ReturnInProgress],
+            'annulees' => [self::Cancelled, self::Returned, self::ReturnInProgress, self::FakeOrder],
             default => [],
         };
     }

@@ -183,7 +183,11 @@ class OrderController extends Controller
     public function destroy(Order $order): Response
     {
         abort_unless(auth()->user()->hasPermission('orders.delete'), 403);
-        abort_unless($order->status === OrderStatus::New, 409, "Seules les commandes au statut « Nouvelle » peuvent être supprimées.");
+        abort_unless(
+            in_array($order->status, [OrderStatus::New, OrderStatus::Cancelled], true),
+            409,
+            "Seules les commandes au statut « Nouvelle » ou « Annulée » peuvent être supprimées."
+        );
 
         $order->delete();
 
