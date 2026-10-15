@@ -10,6 +10,11 @@ const nextConfig: NextConfig = {
   output: "standalone",
 
   images: {
+    formats: ["image/avif", "image/webp"],
+    minimumCacheTTL: 60 * 60 * 24 * 30,
+    deviceSizes: [384, 640, 828, 1080, 1200, 1920],
+    imageSizes: [64, 96, 128, 256],
+    dangerouslyAllowLocalIP: process.env.NODE_ENV !== "production",
     remotePatterns: [
       {
         protocol: apiUrl.protocol.replace(":", "") as "http" | "https",

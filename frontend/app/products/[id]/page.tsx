@@ -1,3 +1,4 @@
+import { cache } from "react"
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { StorefrontTheme } from "@/features/storefront/components/storefront-theme"
@@ -10,8 +11,10 @@ type Props = { params: Promise<{ id: string }> }
 
 export const dynamic = "force-dynamic"
 
+const getProduct = cache((id: string) => getStorefrontProduct(id).catch(() => null))
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const product = await getStorefrontProduct((await params).id).catch(() => null)
+  const product = await getProduct((await params).id)
   if (!product) return {}
 
   return {
@@ -21,7 +24,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function ProductDetailPage({ params }: Props) {
-  const product = await getStorefrontProduct((await params).id).catch(() => null)
+  const product = await getProduct((await params).id)
 
   if (!product) {
     notFound()

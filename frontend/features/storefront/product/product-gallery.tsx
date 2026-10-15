@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import Image from "next/image";
 import { cn } from "cn";
 
 export function ProductGallery({
@@ -62,12 +63,14 @@ export function ProductGallery({
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerCancel}
       >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <Image
           src={images[active]}
           alt={`${name} – image ${active + 1} sur ${count}`}
+          fill
+          sizes="(min-width: 1024px) 50vw, 100vw"
+          preload={active === 0}
           draggable={false}
-          className="absolute inset-0 h-full w-full object-contain"
+          className="object-contain"
         />
 
         {count > 1 && (
@@ -90,18 +93,18 @@ export function ProductGallery({
             aria-label={`Afficher l'image ${index + 1}`}
             aria-current={index === active}
             className={cn(
-              "overflow-hidden rounded-2xl border-2 bg-muted/60 transition-colors",
+              "relative aspect-square overflow-hidden rounded-2xl border-2 bg-muted/60 transition-colors",
               index === active
                 ? "border-primary"
                 : "border-transparent hover:border-border",
             )}
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <Image
               src={src}
               alt=""
-              loading="lazy"
-              className="aspect-square w-full object-contain"
+              fill
+              sizes="(min-width: 1024px) 12vw, 25vw"
+              className="object-contain"
             />
           </button>
         ))}

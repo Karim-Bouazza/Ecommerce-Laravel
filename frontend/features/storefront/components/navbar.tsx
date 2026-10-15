@@ -49,8 +49,14 @@ export function Navbar() {
       <div className="mx-auto flex h-18 max-w-7xl items-center gap-4 px-4 sm:gap-8 sm:px-6 lg:px-8">
         <Link href="/" className="flex shrink-0 items-center" aria-label="CodAvenir">
           {logoUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={logoUrl} alt="" className="h-12 w-auto object-contain" />
+            <Image
+              src={logoUrl}
+              alt=""
+              width={288}
+              height={96}
+              preload
+              className="h-12 w-auto object-contain"
+            />
           ) : (
             <>
               <Image

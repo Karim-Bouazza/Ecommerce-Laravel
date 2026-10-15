@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import Link from "next/link"
 import { cn } from "cn"
 import { formatPrice } from "@/shared/lib/format-price"
@@ -8,17 +9,19 @@ import type { StorefrontProduct } from "./api/products-api"
 export function ProductCard({ product }: { product: StorefrontProduct }) {
   return (
     <article className="group relative flex flex-col overflow-hidden rounded-2xl border bg-card shadow-sm transition-shadow hover:shadow-md">
-      <div className="relative overflow-hidden bg-white">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={product.image ?? undefined}
-          alt={product.name}
-          loading="lazy"
-          className={cn(
-            "aspect-square w-full object-cover transition-transform duration-500 group-hover:scale-105",
-            !product.in_stock && "opacity-50 grayscale"
-          )}
-        />
+      <div className="relative aspect-square overflow-hidden bg-white">
+        {product.image && (
+          <Image
+            src={product.image}
+            alt={product.name}
+            fill
+            sizes="(min-width: 1024px) 25vw, 50vw"
+            className={cn(
+              "object-cover transition-transform duration-500 group-hover:scale-105",
+              !product.in_stock && "opacity-50 grayscale"
+            )}
+          />
+        )}
 
         <div className="absolute top-2 left-2 flex flex-col items-start gap-1.5">
           {product.discount_percentage !== null && (
