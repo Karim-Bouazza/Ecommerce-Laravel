@@ -70,6 +70,16 @@ test('an order from an excluded wildcard is created but purchase is not tracked'
     expect(Order::count())->toBe(2);
 });
 
+test('only the first order per IP in 24h is tracked as a purchase', function () {
+    pixelIpOrderFrom($this, '123.13.53.183')->assertJsonPath('track_purchase', true);
+    pixelIpOrderFrom($this, '123.13.53.183')->assertJsonPath('track_purchase', false);
+    pixelIpOrderFrom($this, '123.13.53.184')->assertJsonPath('track_purchase', true);
+
+    $this->travel(25)->hours();
+
+    pixelIpOrderFrom($this, '123.13.53.183')->assertJsonPath('track_purchase', true);
+});
+
 test('the default range is seeded and removing an entry takes effect immediately', function () {
     pixelIpOrderFrom($this, '105.235.133.9')->assertJsonPath('track_purchase', false);
 

@@ -42,7 +42,13 @@ class OrderController extends Controller
         $data = $request->validated();
         unset($data['fingerprint']);
 
-        $order = $this->createOrderService->execute(
+        $ip = $request->ip();
+        $alreadyTracked = $ip !== null && Order::query()
+            ->where('ip_address', $ip)
+            ->where('created_at', '>=', now()->subDay())
+            ->exists();
+
+        $order =$this->createOrderService->execute(
             [
                 ...$data,
                 'ip_address' => $request->ip(),
@@ -57,7 +63,7 @@ class OrderController extends Controller
         return response()->json([
             'id' => $order->id,
             'reference' => $order->reference,
-            'track_purchase' => ! $this->excludedIps->matches($request->ip()),
+            'track_purchase' => ! $alreadyTracked && ! $this->excludedIps->matches($ip),
         ], 201);
     }
 
