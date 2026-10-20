@@ -45,6 +45,7 @@ export function useUpdateProduct(product: Product, onSuccess?: () => void) {
       image_2: null,
       image_3: null,
       image_4: null,
+      remove_images: [],
     },
   });
 

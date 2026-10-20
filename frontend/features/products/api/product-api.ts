@@ -41,6 +41,7 @@ type BaseProductPayload = {
   tags: number[];
   specs: ProductSpecPayload[];
   variants: string[];
+  remove_images?: number[];
 };
 
 type ProductImagesPayload = {
@@ -84,6 +85,9 @@ function toProductFormData(
   ([1, 2, 3, 4] as const).forEach((index) => {
     const image = payload[`image_${index}`];
     if (image) formData.append(`image_${index}`, image);
+  });
+  payload.remove_images?.forEach((imageNumber) => {
+    formData.append("remove_images[]", String(imageNumber));
   });
   payload.tags.forEach((tagId) => {
     formData.append("tags[]", String(tagId));

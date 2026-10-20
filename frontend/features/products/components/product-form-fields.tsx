@@ -7,9 +7,9 @@ import {
   useWatch,
   type UseFormReturn,
 } from "react-hook-form";
-import { Plus, Trash2 } from "lucide-react";
+import { ImageIcon, Plus, Trash2, Upload } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Field,
   FieldError,
@@ -24,6 +24,7 @@ import { BrandSelect } from "@/features/brands/components/brand-select";
 import { MultiSelectCombobox } from "@/components/multi-select/multi-select-combobox";
 import { TagsInput } from "@/components/tags-input/tags-input";
 import { useTags } from "@/features/tags/hooks/use-tags";
+import { cn } from "@/lib/utils";
 import type { ProductFormInput } from "@/features/products/schemas/product-schema";
 import { ProductImageCropperDialog } from "@/features/products/components/product-image-cropper-dialog";
 
@@ -54,6 +55,15 @@ export function ProductFormFields<TOutput>({
     src: string;
     fileName: string;
   } | null>(null);
+  const [newImagePreviews, setNewImagePreviews] = useState<
+    Partial<Record<ProductImageFieldName, string>>
+  >({});
+
+  const imageValues = useWatch({
+    control,
+    name: ["image_1", "image_2", "image_3", "image_4"],
+  });
+  const removedImages = useWatch({ control, name: "remove_images" }) ?? [];
 
   const priceValue = useWatch({ control, name: "price" });
   const comparePriceValue = useWatch({ control, name: "compare_price" });
@@ -90,6 +100,26 @@ export function ProductFormFields<TOutput>({
       }
     });
     reader.readAsDataURL(file);
+  }
+
+  function setRemovedImages(next: number[]) {
+    setValue("remove_images", next, { shouldDirty: true });
+  }
+
+  function handleImageRemove(imageNumber: number) {
+    const fieldName = `image_${imageNumber}` as ProductImageFieldName;
+    if (imageValues[imageNumber - 1]) {
+      // Discard the newly picked file first; the existing image stays.
+      setValue(fieldName, null, { shouldDirty: true, shouldValidate: true });
+      return;
+    }
+    if (!removedImages.includes(imageNumber)) {
+      setRemovedImages([...removedImages, imageNumber]);
+    }
+  }
+
+  function handleImageRestore(imageNumber: number) {
+    setRemovedImages(removedImages.filter((n) => n !== imageNumber));
   }
 
   return (
@@ -187,39 +217,103 @@ export function ProductFormFields<TOutput>({
           />
         </Field>
 
-        {[1, 2, 3, 4].map((imageNumber) => {
+        {[1, 2, 3, 4].map((imageNumber, index) => {
           const fieldName = `image_${imageNumber}` as ProductImageFieldName;
           const error = errors[fieldName];
+          const newPreview = imageValues[index]
+            ? newImagePreviews[fieldName]
+            : undefined;
+          const currentUrl = currentImageUrls[index] ?? null;
+          const isRemoved = removedImages.includes(imageNumber);
+          const previewUrl =
+            newPreview ?? (isRemoved ? null : currentUrl);
+          const canRemove =
+            !!newPreview || (imageNumber !== 1 && !!currentUrl && !isRemoved);
+
           return (
             <Field key={fieldName} data-invalid={!!error}>
               <FieldLabel htmlFor={`${idPrefix}-${fieldName}`}>
                 Image {imageNumber}
                 {imageNumber === 1 ? " (requise)" : " (optionnelle)"}
               </FieldLabel>
-              {currentImageUrls[imageNumber - 1] && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={currentImageUrls[imageNumber - 1] ?? undefined}
-                  alt=""
-                  className="size-16 rounded-md border object-cover"
-                />
-              )}
-              <Controller
-                control={control}
-                name={fieldName}
-                render={({ field: { onBlur, name, ref } }) => (
-                  <Input
-                    id={`${idPrefix}-${fieldName}`}
-                    type="file"
-                    accept="image/*"
-                    name={name}
-                    ref={ref}
-                    onBlur={onBlur}
-                    aria-invalid={!!error}
-                    onChange={(event) => handleImageChange(fieldName, event)}
-                  />
-                )}
-              />
+              <div className="flex items-center gap-3">
+                <div className="flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-md border bg-muted/40">
+                  {previewUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={previewUrl}
+                      alt={`Aperçu de l'image ${imageNumber}`}
+                      className="size-full object-cover"
+                    />
+                  ) : (
+                    <ImageIcon
+                      className="size-6 text-muted-foreground"
+                      aria-hidden="true"
+                    />
+                  )}
+                </div>
+                <div className="flex min-w-0 flex-col gap-1.5">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <label
+                      className={cn(
+                        buttonVariants({ variant: "outline", size: "sm" }),
+                        "cursor-pointer focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50",
+                      )}
+                    >
+                      <Upload className="size-4" aria-hidden="true" />
+                      {previewUrl ? "Remplacer" : "Ajouter"}
+                      <Controller
+                        control={control}
+                        name={fieldName}
+                        render={({ field: { onBlur, name, ref } }) => (
+                          <input
+                            id={`${idPrefix}-${fieldName}`}
+                            type="file"
+                            accept="image/*"
+                            className="sr-only"
+                            name={name}
+                            ref={ref}
+                            onBlur={onBlur}
+                            aria-invalid={!!error}
+                            onChange={(event) =>
+                              handleImageChange(fieldName, event)
+                            }
+                          />
+                        )}
+                      />
+                    </label>
+                    {canRemove && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="text-destructive hover:text-destructive"
+                        aria-label={`Supprimer l'image ${imageNumber}`}
+                        onClick={() => handleImageRemove(imageNumber)}
+                      >
+                        <Trash2 className="size-4" aria-hidden="true" />
+                        Supprimer
+                      </Button>
+                    )}
+                  </div>
+                  {isRemoved && !newPreview ? (
+                    <p className="text-xs text-muted-foreground">
+                      Sera supprimée à l&rsquo;enregistrement.{" "}
+                      <button
+                        type="button"
+                        className="cursor-pointer font-medium text-foreground underline underline-offset-2"
+                        onClick={() => handleImageRestore(imageNumber)}
+                      >
+                        Annuler
+                      </button>
+                    </p>
+                  ) : newPreview ? (
+                    <p className="text-xs text-muted-foreground">
+                      Nouvelle image, enregistrée à la validation.
+                    </p>
+                  ) : null}
+                </div>
+              </div>
               <FieldError errors={error ? [error] : undefined} />
             </Field>
           );
@@ -231,9 +325,14 @@ export function ProductFormFields<TOutput>({
           onOpenChange={(open) => !open && setPendingImage(null)}
           onConfirm={(file) => {
             if (!pendingImage) return;
-            setValue(pendingImage.fieldName, file, {
+            const { fieldName } = pendingImage;
+            setValue(fieldName, file, {
               shouldDirty: true,
               shouldValidate: true,
+            });
+            setNewImagePreviews((previews) => {
+              if (previews[fieldName]) URL.revokeObjectURL(previews[fieldName]);
+              return { ...previews, [fieldName]: URL.createObjectURL(file) };
             });
             setPendingImage(null);
           }}

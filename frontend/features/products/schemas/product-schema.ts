@@ -20,6 +20,7 @@ const baseProductFields = {
   tags: z.array(z.number()),
   specs: z.array(specSchema),
   variants: z.array(z.string()),
+  remove_images: z.array(z.number()).optional(),
 };
 
 function checkComparePrice(

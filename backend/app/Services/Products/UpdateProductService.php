@@ -33,6 +33,10 @@ class UpdateProductService
                 if ($previousImage) {
                     Storage::disk('public')->delete($previousImage);
                 }
+            } elseif (in_array($imageNumber, $data['remove_images'] ?? []) && $product->{$field}) {
+                $previousImage = $product->{$field};
+                $product->update([$field => null]);
+                Storage::disk('public')->delete($previousImage);
             }
         }
 

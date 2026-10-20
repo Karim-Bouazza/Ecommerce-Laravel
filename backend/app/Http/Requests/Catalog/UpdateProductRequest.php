@@ -34,6 +34,8 @@ class UpdateProductRequest extends FormRequest
             'image_2' => ['nullable', 'image', 'max:4096'],
             'image_3' => ['nullable', 'image', 'max:4096'],
             'image_4' => ['nullable', 'image', 'max:4096'],
+            'remove_images' => ['array'],
+            'remove_images.*' => ['integer', 'in:2,3,4'],
             'tags' => ['array'],
             'tags.*' => ['integer', 'exists:tags,id'],
             'specs' => ['array'],

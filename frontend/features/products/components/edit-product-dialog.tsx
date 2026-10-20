@@ -55,6 +55,7 @@ export function EditProductDialog({ product }: EditProductDialogProps) {
             image_2: null,
             image_3: null,
             image_4: null,
+            remove_images: [],
           });
         }
       }}
