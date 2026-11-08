@@ -43,8 +43,7 @@ RUN install-php-extensions \
     zip \
     exif \
     pcntl \
-    redis \
-    opcache \
+    redis-6.2.0 \
     && apk add --no-cache su-exec
 
 COPY docker/php.ini /usr/local/etc/php/conf.d/99-app.ini
