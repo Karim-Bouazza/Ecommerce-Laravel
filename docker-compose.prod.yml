@@ -38,8 +38,6 @@ services:
   certbot:
     image: certbot/certbot:v5.7.0
     restart: unless-stopped
-    ports:
-      - "80:80"
     volumes:
       - certbot_conf:/etc/letsencrypt
       - certbot_www:/var/www/certbot
