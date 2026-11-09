@@ -61,7 +61,7 @@ RUN chmod +x docker/entrypoint.sh \
     && php artisan storage:link \
     && addgroup -g 1000 octane \
     && adduser -D -u 1000 -G octane octane \
-    && chown -R octane:octane /app
+    && chown -R octane:octane /app /data/caddy /config/caddy
 
 # ${DOMAIN} substitution happens at the edge nginx; Octane just binds this port.
 ENV OCTANE_SERVER=frankenphp

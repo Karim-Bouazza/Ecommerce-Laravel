@@ -16,6 +16,12 @@ services:
   nginx:
     image: nginx:1.27-alpine
     restart: unless-stopped
+    # Reload every 6h so certificates renewed by the certbot service are picked
+    # up; nginx otherwise keeps serving the old cert until it is restarted.
+    # /docker-entrypoint.sh still runs, so the ${DOMAIN} templating still works.
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - "(while :; do sleep 6h; nginx -s reload; done) & exec /docker-entrypoint.sh nginx -g 'daemon off;'"
     ports:
       - "80:80"
       - "443:443"
