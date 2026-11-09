@@ -6,6 +6,19 @@
 # Only nginx publishes ports. mysql has no `ports:` mapping, so it is reachable
 # from the backend container and from nowhere else.
 
+# The VPS's default upstream DNS intermittently drops lookups from inside
+# containers: resolving an external host (e.g. zimou.express) then hangs for the
+# full 5s resolver timeout. Docker's embedded DNS (127.0.0.11) still resolves
+# service names (backend, mysql, ...) and only forwards external names to these
+# servers. timeout:1 / attempts:2 caps a bad lookup at ~1-2s instead of 5s.
+x-dns: &default-dns
+  dns:
+    - 1.1.1.1
+    - 8.8.8.8
+  dns_opt:
+    - timeout:1
+    - attempts:2
+
 x-logging: &default-logging
   driver: json-file
   options:
@@ -55,6 +68,7 @@ services:
     logging: *default-logging
 
   frontend:
+    <<: *default-dns
     build:
       context: ./frontend
       target: production
@@ -68,6 +82,8 @@ services:
     init: true
     environment:
       NODE_ENV: production
+      # Server-side API calls go straight to the backend container.
+      INTERNAL_API_URL: http://backend:8000
       SANCTUM_SESSION_COOKIE: ${SANCTUM_SESSION_COOKIE:-ecommerce-session}
     expose:
       - "3000"
@@ -76,6 +92,7 @@ services:
     logging: *default-logging
 
   backend:
+    <<: *default-dns
     build:
       context: ./backend
       target: production

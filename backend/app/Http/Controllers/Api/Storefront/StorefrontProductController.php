@@ -60,25 +60,31 @@ class StorefrontProductController extends Controller
         return StorefrontProductResource::collection($products);
     }
 
-    public function show(Product $product)
+    public function show(string $product)
     {
-        if (!$product->is_active) {
-            abort(404);
-        }
-
-        $product = $this->baseQuery()
-            ->where('products.id', $product->id)
+        // One query instead of route-model-binding + reload. baseQuery()
+        // already filters is_active, so an inactive/missing product is a 404.
+        $product = $this->baseQuery((int) $product)
+            ->where('products.id', (int) $product)
             ->firstOrFail();
 
         return new StorefrontProductDetailResource($product);
     }
 
-    protected function baseQuery()
+    /**
+     * @param  int|null  $productId  Restricts the stock aggregation to a single
+     *                               product, so a detail page doesn't sum the
+     *                               stock movements of the whole catalogue.
+     */
+    protected function baseQuery(?int $productId = null)
     {
+        $stockTotals = Stock::totalSubquery()
+            ->when($productId !== null, fn ($query) => $query->where('product_id', $productId));
+
         return Product::query()
             ->where('is_active', true)
             ->with(['category', 'brand', 'tags', 'specs', 'variants'])
-            ->leftJoinSub(Stock::totalSubquery(), 'stock_totals', 'stock_totals.product_id', '=', 'products.id')
+            ->leftJoinSub($stockTotals, 'stock_totals', 'stock_totals.product_id', '=', 'products.id')
             ->select('products.*')
             ->selectRaw('COALESCE(stock_totals.total_quantity, 0) as total_stock')
             ->withCount('approvedReviews as reviews_count')

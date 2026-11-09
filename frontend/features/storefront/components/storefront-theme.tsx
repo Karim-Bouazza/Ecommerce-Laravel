@@ -6,6 +6,15 @@ import { getSiteLanguage } from "@/features/site-settings/api/language-api"
 import type { SiteColorsTheme, SiteLanguage } from "@/features/site-settings/types"
 import { StorefrontLogoProvider } from "@/features/storefront/lib/logo-context"
 import { StorefrontLanguageProvider } from "@/features/storefront/components/storefront-locale"
+import { ttlCache } from "@/lib/server-ttl-cache"
+
+// These settings change rarely (only from the admin panel), but are needed on
+// every storefront render. Caching them in the Node process for a minute saves
+// three backend calls per page view; an admin change shows up within 60s.
+const SETTINGS_TTL_MS = 60_000
+const getCachedColorsTheme = ttlCache(getColorsTheme, SETTINGS_TTL_MS)
+const getCachedLogo = ttlCache(getLogo, SETTINGS_TTL_MS)
+const getCachedSiteLanguage = ttlCache(getSiteLanguage, SETTINGS_TTL_MS)
 
 const DEFAULT_COLORS_THEME: SiteColorsTheme = {
   primary_color: "#007fff",
@@ -25,9 +34,9 @@ function safeColor(theme: SiteColorsTheme, key: keyof SiteColorsTheme): string {
 
 export async function StorefrontTheme({ children }: { children: ReactNode }) {
   const [theme, logo, languageSetting] = await Promise.all([
-    getColorsTheme().catch(() => DEFAULT_COLORS_THEME),
-    getLogo().catch(() => null),
-    getSiteLanguage().catch(() => ({ language: "fr" as SiteLanguage })),
+    getCachedColorsTheme().catch(() => DEFAULT_COLORS_THEME),
+    getCachedLogo().catch(() => null),
+    getCachedSiteLanguage().catch(() => ({ language: "fr" as SiteLanguage })),
   ])
 
   const css = `:root {
