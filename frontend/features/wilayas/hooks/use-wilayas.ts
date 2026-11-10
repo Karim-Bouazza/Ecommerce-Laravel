@@ -4,9 +4,10 @@ import { useQuery } from "@tanstack/react-query"
 
 import { getWilayas } from "@/features/wilayas/api/wilaya-api"
 
-export function useWilayas() {
+export function useWilayas(enabled = true) {
   return useQuery({
     queryKey: ["wilayas"],
     queryFn: getWilayas,
+    enabled,
   })
 }

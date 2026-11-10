@@ -26,36 +26,6 @@ const FOOTER_COLUMNS: FooterGroup[][] = [
       ],
     },
   ],
-  [
-    {
-      title: "Catégories",
-      links: [
-        { label: "Caméras CCTV", href: "/categories/cctv-cameras" },
-        { label: "Systèmes d'alarme", href: "/categories/alarm-systems" },
-        { label: "Contrôle d'accès", href: "/categories/access-control" },
-        { label: "Interphones vidéo", href: "/categories/video-intercoms" },
-        { label: "Capteurs & détecteurs", href: "/categories/sensors-detectors" },
-        { label: "Toutes les catégories", href: "/categories" },
-      ],
-    },
-  ],
-  [
-    {
-      title: "Légal",
-      links: [
-        { label: "Politique de confidentialité", href: "/privacy" },
-        { label: "Conditions générales", href: "/terms" },
-      ],
-    },
-    {
-      title: "Support",
-      links: [
-        { label: "Contactez-nous", href: "/contact" },
-        { label: "Donner votre avis", href: "/feedback" },
-        { label: "Centre d'aide", href: "/help" },
-      ],
-    },
-  ],
 ]
 
 function NewsletterCard() {
@@ -114,15 +84,17 @@ export function Footer() {
             <Image
               src="/logo.png"
               alt=""
-              width={2172}
-              height={724}
+              width={168}
+              height={56}
+              sizes="168px"
               className="h-14 w-auto dark:hidden"
             />
             <Image
               src="/logo-dark.png"
               alt=""
-              width={2172}
-              height={724}
+              width={168}
+              height={56}
+              sizes="168px"
               className="hidden h-14 w-auto dark:block"
             />
           </Link>
@@ -133,7 +105,7 @@ export function Footer() {
           <NewsletterCard />
         </div>
 
-        <div className="grid grid-cols-2 gap-10 sm:grid-cols-3 lg:col-span-7 lg:pl-12">
+        <div className="grid grid-cols-2 gap-10 lg:col-span-7 lg:pl-12">
           {FOOTER_COLUMNS.map((groups, index) => (
             <div key={index} className="flex flex-col gap-10">
               {groups.map((group) => (

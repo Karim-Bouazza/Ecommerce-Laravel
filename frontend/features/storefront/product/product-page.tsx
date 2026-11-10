@@ -1,11 +1,6 @@
-"use client";
-
-import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { toast } from "sonner";
 import {
   ChevronRight,
-  Link2,
   PackageOpen,
   ShieldCheck,
   Star,
@@ -14,10 +9,10 @@ import {
 import { cn } from "cn";
 
 import { formatPrice } from "@/shared/lib/format-price";
-import { trackViewContent } from "@/features/pixels/lib/track-events";
 import type { StorefrontProductDetail } from "@/features/storefront/catalog/api/products-api";
-import { CodOrderForm } from "./cod-order-form";
+import { CopyLinkButton } from "./copy-link-button";
 import { ProductGallery } from "./product-gallery";
+import { ProductOrderSection } from "./product-order-section";
 import { MOCK_RATING } from "./product-data";
 
 const GUARANTEES = [
@@ -51,44 +46,9 @@ function Rating({ value, reviews }: { value: number; reviews: number }) {
   );
 }
 
-function copyLink() {
-  navigator.clipboard
-    .writeText(window.location.href)
-    .then(() => toast.success("Lien copié"))
-    .catch(() => toast.error("Impossible de copier le lien"));
-}
-
 export function ProductPage({ product }: { product: StorefrontProductDetail }) {
   const inStock = product.in_stock;
-  const orderFormRef = useRef<HTMLDivElement>(null);
-  const [showFloatingOrderButton, setShowFloatingOrderButton] = useState(true);
   const subtitle = product.category ?? "";
-
-  useEffect(() => {
-    const orderForm = orderFormRef.current;
-
-    if (!inStock || !orderForm || !("IntersectionObserver" in window)) {
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      ([entry]) => setShowFloatingOrderButton(!entry.isIntersecting),
-      { rootMargin: "-72px 0px 0px 0px" },
-    );
-
-    observer.observe(orderForm);
-
-    return () => observer.disconnect();
-  }, [inStock]);
-
-  useEffect(() => {
-    trackViewContent({
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      category: product.category,
-    });
-  }, [product.id, product.name, product.price, product.category]);
 
   return (
     <main className="mx-auto max-w-7xl px-4 pt-8 pb-16 sm:px-6 lg:px-8">
@@ -163,15 +123,7 @@ export function ProductPage({ product }: { product: StorefrontProductDetail }) {
             </p>
           )}
 
-          {inStock ? (
-            <div ref={orderFormRef} className="scroll-mt-24">
-              <CodOrderForm product={product} />
-            </div>
-          ) : (
-            <div className="rounded-3xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-              Ce produit est momentanément indisponible.
-            </div>
-          )}
+          <ProductOrderSection product={product} />
 
           <ul className="grid grid-cols-3 gap-2">
             {GUARANTEES.map(({ icon: Icon, label }) => (
@@ -195,34 +147,12 @@ export function ProductPage({ product }: { product: StorefrontProductDetail }) {
             <div className="flex items-center gap-2">
               <dt className="font-medium">Partager :</dt>
               <dd>
-                <button
-                  type="button"
-                  onClick={copyLink}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1 text-xs font-medium transition-colors hover:bg-muted"
-                >
-                  <Link2 className="size-3.5" />
-                  Copier le lien
-                </button>
+                <CopyLinkButton />
               </dd>
             </div>
           </dl>
         </div>
       </div>
-
-      {inStock && showFloatingOrderButton && (
-        <button
-          type="button"
-          onClick={() =>
-            orderFormRef.current?.scrollIntoView({
-              behavior: "smooth",
-              block: "start",
-            })
-          }
-          className="fixed inset-x-4 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-40 h-12 rounded-full bg-primary px-6 text-lg font-semibold text-primary-foreground shadow-lg transition-opacity hover:opacity-90 md:hidden"
-        >
-          أطلب الآن
-        </button>
-      )}
 
       <section
         aria-labelledby="product-details"

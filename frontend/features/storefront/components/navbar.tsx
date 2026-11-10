@@ -48,17 +48,18 @@ export function Navbar() {
           <Image
             src="/logo.png"
             alt=""
-            width={2172}
-            height={724}
+            width={144}
+            height={48}
+            sizes="144px"
             priority
             className="h-12 w-auto dark:hidden"
           />
           <Image
             src="/logo-dark.png"
             alt=""
-            width={2172}
-            height={724}
-            priority
+            width={144}
+            height={48}
+            sizes="144px"
             className="hidden h-12 w-auto dark:block"
           />
         </Link>

@@ -205,7 +205,7 @@ function CodOrderFormContent({
   });
   const maxQuantity = Math.min(MAX_ORDER_QUANTITY, product.stock);
 
-  const { data: wilayas = [] } = useWilayas();
+  const { data: wilayas = [] } = useWilayas(wilayaId !== null);
   const selectedWilaya = useMemo(
     () => wilayas.find((w) => w.id === wilayaId),
     [wilayas, wilayaId],

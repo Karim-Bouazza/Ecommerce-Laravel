@@ -10,7 +10,7 @@ import { ApiError } from "@/lib/api"
 
 type Props = { params: Promise<{ id: string }> }
 
-export const dynamic = "force-dynamic"
+export const revalidate = 60
 
 // Only a real 404 means "product not found". Any other failure (429, 5xx,
 // network) is rethrown so it renders the error page instead of a misleading 404.
