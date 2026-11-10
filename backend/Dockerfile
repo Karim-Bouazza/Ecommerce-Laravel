@@ -15,10 +15,7 @@ RUN composer install \
     --prefer-dist \
     --ignore-platform-reqs
 
-# --- production: FrankenPHP + Laravel Octane, single process, no separate nginx/php-fpm ---
-# If this exact tag 404s on Docker Hub by the time you build, swap it for
-# whatever the current "php8.3-alpine" tag is at https://hub.docker.com/r/dunglas/frankenphp/tags
-FROM dunglas/frankenphp:1-php8.3-alpine AS production
+    FROM dunglas/frankenphp:1-php8.4-alpine AS production
 WORKDIR /app
 
 # install-php-extensions is baked into the frankenphp image (docker-php-extension-installer).
