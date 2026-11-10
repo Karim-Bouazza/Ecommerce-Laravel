@@ -63,13 +63,21 @@ class ChargeController extends Controller
 
         // The amount owed by per-order and recurring charges is computed, so the
         // payment status cannot be filtered in SQL.
-        $charges = $paymentStatus
-            ? $this->paginateCollection(
-                $charges->get()->filter(fn (Charge $charge) => $charge->paymentStatus()->value === $paymentStatus),
+        $calculator = app(CalculateChargeAmountService::class);
+
+        if ($paymentStatus) {
+            $all = $charges->get();
+            $calculator->warm($all);
+
+            $charges = $this->paginateCollection(
+                $all->filter(fn (Charge $charge) => $charge->paymentStatus()->value === $paymentStatus),
                 $perPage,
                 $request,
-            )
-            : $charges->paginate($perPage)->withQueryString();
+            );
+        } else {
+            $charges = $charges->paginate($perPage)->withQueryString();
+            $calculator->warm($charges->getCollection());
+        }
 
         return ChargeResource::collection($charges);
     }
@@ -86,6 +94,8 @@ class ChargeController extends Controller
         Charge::query()
             ->with(['products:id', 'pauses'])
             ->chunk(100, function ($charges) use ($calculator, &$byCategory, &$total) {
+                $calculator->warm($charges);
+
                 foreach ($charges as $charge) {
                     $amount = $calculator->execute($charge);
                     $category = $charge->category->value;

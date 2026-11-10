@@ -27,10 +27,10 @@ class GetPerformanceRevenueService
 
         $revenus = $ventes - $capital;
 
-        $charges = Charge::query()
-            ->with(['products:id', 'pauses'])
-            ->get()
-            ->sum(fn (Charge $charge) => $this->chargeCalculator->execute($charge, $filters->from, $filters->to));
+        $charges = Charge::query()->with(['products:id', 'pauses'])->get();
+        $this->chargeCalculator->warm($charges);
+
+        $charges = $charges->sum(fn (Charge $charge) => $this->chargeCalculator->execute($charge, $filters->from, $filters->to));
 
         $benefices = $revenus - $charges;
 

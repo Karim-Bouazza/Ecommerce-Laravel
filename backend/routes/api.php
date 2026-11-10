@@ -63,9 +63,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/sales-channel-analysis/chart', [SalesChannelAnalysisController::class, 'chart']);
     });
 
-    Route::get('/products/{product}', [ProductController::class, 'show']);
     Route::get('/wilayas', [WilayaController::class, 'index']);
-    Route::get('/wilayas/{wilaya}', [WilayaController::class, 'show']);
     Route::get('/provider-wilayas', [ProviderWilayaController::class, 'index']);
     Route::get('/provider-communes', [ProviderCommuneController::class, 'index']);
     Route::get('/provider-delivery-price/home', [ProviderDeliveryPriceController::class, 'home']);

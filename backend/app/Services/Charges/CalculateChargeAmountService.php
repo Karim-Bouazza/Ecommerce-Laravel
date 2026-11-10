@@ -31,13 +31,43 @@ use Illuminate\Support\Facades\DB;
 class CalculateChargeAmountService
 {
     /**
+     * Order events per trigger, loaded once by warm() instead of once per charge.
+     *
+     * @var array<string, Collection<int, object>>
+     */
+    private array $events = [];
+
+    /**
+     * Order items grouped by order, loaded once and only when a charge needs them.
+     *
+     * @var Collection<int, Collection<int, object>>|null
+     */
+    private ?Collection $itemsByOrder = null;
+
+    /**
+     * Preloads the order events the per-order charges depend on, so listing many
+     * charges costs one query per trigger instead of several queries per charge.
+     *
+     * @param  iterable<int, Charge>  $charges
+     */
+    public function warm(iterable $charges): void
+    {
+        foreach ($charges as $charge) {
+            if ($charge->type === ChargeType::PerOrder) {
+                $this->events[$this->triggerKey($charge)] ??= $this->eventsQuery($charge->order_trigger)->get();
+            }
+        }
+    }
+
+    /**
      * Amount of the charge counted as an expense in the [$from, $to] period (all time when null).
      */
     public function execute(Charge $charge, ?CarbonInterface $from = null, ?CarbonInterface $to = null): int
     {
         return match ($charge->type) {
             ChargeType::Normal => $this->normalAmount($charge, $from, $to),
-            ChargeType::PerOrder => $charge->amount * $this->perOrderEvents($charge, $from, $to)->count(),
+            ChargeType::PerOrder => $charge->amount * ($this->cachedOrderIds($charge, $from, $to)?->count()
+                ?? $this->perOrderEvents($charge, $from, $to)->count()),
             ChargeType::Recurring => $charge->amount * $this->recurringOccurrences($charge, $from, $to),
         };
     }
@@ -70,10 +100,16 @@ class CalculateChargeAmountService
             return [];
         }
 
-        $items = OrderItem::query()
-            ->joinSub($this->perOrderEvents($charge, $from, $to), 'events', 'events.order_id', '=', 'order_items.order_id')
-            ->when($productIds !== null, fn ($query) => $query->whereIn('order_items.product_id', $productIds))
-            ->get(['order_items.order_id', 'order_items.product_id', 'order_items.quantity']);
+        $orderIds = $this->cachedOrderIds($charge, $from, $to);
+
+        $items = $orderIds !== null
+            ? $orderIds
+                ->flatMap(fn ($orderId) => $this->itemsByOrder()->get($orderId, collect()))
+                ->when($productIds !== null, fn ($items) => $items->whereIn('product_id', $productIds))
+            : OrderItem::query()
+                ->joinSub($this->perOrderEvents($charge, $from, $to), 'events', 'events.order_id', '=', 'order_items.order_id')
+                ->when($productIds !== null, fn ($query) => $query->whereIn('order_items.product_id', $productIds))
+                ->get(['order_items.order_id', 'order_items.product_id', 'order_items.quantity']);
 
         $allocations = [];
 
@@ -110,14 +146,7 @@ class CalculateChargeAmountService
     {
         [$start, $end] = $this->window($charge, $from, $to);
 
-        $events = match ($charge->order_trigger) {
-            ChargeOrderTrigger::NewOrder => Order::query()->select('id as order_id', 'created_at as event_at')->toBase(),
-            ChargeOrderTrigger::ConfirmedOrder => $this->firstReached(OrderStatusGroups::confirmedOrLater()),
-            ChargeOrderTrigger::DeliveredOrder => $this->firstReached([OrderStatus::Delivered]),
-            default => $this->firstReached([]),
-        };
-
-        $query = DB::query()->fromSub($events, 'events')
+        $query = DB::query()->fromSub($this->eventsQuery($charge->order_trigger), 'events')
             ->select('events.order_id')
             ->whereBetween('events.event_at', [$start, $end]);
 
@@ -137,6 +166,81 @@ class CalculateChargeAmountService
         }
 
         return $query;
+    }
+
+    /**
+     * Every order that reached the trigger, as (order_id, event_at) rows.
+     */
+    private function eventsQuery(?ChargeOrderTrigger $trigger): Builder
+    {
+        return match ($trigger) {
+            ChargeOrderTrigger::NewOrder => Order::query()->select('id as order_id', 'created_at as event_at')->toBase(),
+            ChargeOrderTrigger::ConfirmedOrder => $this->firstReached(OrderStatusGroups::confirmedOrLater()),
+            ChargeOrderTrigger::DeliveredOrder => $this->firstReached([OrderStatus::Delivered]),
+            default => $this->firstReached([]),
+        };
+    }
+
+    private function triggerKey(Charge $charge): string
+    {
+        return $charge->order_trigger?->value ?? 'none';
+    }
+
+    /**
+     * Same result as perOrderEvents(), computed in memory from the warmed events.
+     * Null when warm() was not called for this charge's trigger.
+     *
+     * @return Collection<int, int>|null
+     */
+    private function cachedOrderIds(Charge $charge, ?CarbonInterface $from, ?CarbonInterface $to): ?Collection
+    {
+        $events = $this->events[$this->triggerKey($charge)] ?? null;
+
+        if ($events === null) {
+            return null;
+        }
+
+        [$start, $end] = $this->window($charge, $from, $to);
+        $start = $start->toDateTimeString();
+        $end = $end->toDateTimeString();
+
+        $pauses = $this->pauses($charge)->map(fn (ChargePause $pause) => [
+            $pause->paused_at->toDateTimeString(),
+            ($pause->resumed_at ?? now())->toDateTimeString(),
+        ]);
+
+        $productIds = $this->concernedProductIds($charge)?->flip();
+
+        return $events
+            ->filter(function (object $event) use ($start, $end, $pauses, $productIds) {
+                $at = (string) $event->event_at;
+
+                if ($at < $start || $at > $end) {
+                    return false;
+                }
+
+                foreach ($pauses as [$pausedAt, $resumedAt]) {
+                    if ($at >= $pausedAt && $at < $resumedAt) {
+                        return false;
+                    }
+                }
+
+                return $productIds === null
+                    || $this->itemsByOrder()->get($event->order_id, collect())->contains(
+                        fn (object $item) => $productIds->has($item->product_id)
+                    );
+            })
+            ->pluck('order_id');
+    }
+
+    /**
+     * @return Collection<int, Collection<int, object>>
+     */
+    private function itemsByOrder(): Collection
+    {
+        return $this->itemsByOrder ??= DB::table('order_items')
+            ->get(['order_id', 'product_id', 'quantity'])
+            ->groupBy('order_id');
     }
 
     /**

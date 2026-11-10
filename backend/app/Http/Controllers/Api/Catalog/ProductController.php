@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api\Catalog;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Catalog\StoreProductRequest;
 use App\Http\Requests\Catalog\UpdateProductRequest;
-use App\Http\Resources\Catalog\ProductDetailResource;
 use App\Http\Resources\Catalog\ProductResource;
 use App\Models\Catalog\Product;
 use App\Services\Products\CreateProductService;
@@ -27,11 +26,6 @@ class ProductController extends Controller
             ->paginate($perPage);
 
         return ProductResource::collection($products);
-    }
-
-    public function show(Product $product)
-    {
-        return new ProductDetailResource($product);
     }
 
     public function store(StoreProductRequest $request): ProductResource

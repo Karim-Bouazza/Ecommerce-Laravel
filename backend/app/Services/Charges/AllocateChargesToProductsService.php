@@ -27,6 +27,8 @@ class AllocateChargesToProductsService
         Charge::query()
             ->with(['products:id', 'pauses'])
             ->chunk(100, function ($charges) use (&$allocations, $deliveredQuantityByProduct, $totalDeliveredQuantity, $from, $to) {
+                $this->calculator->warm($charges);
+
                 foreach ($charges as $charge) {
                     $chargeAllocations = $charge->type === ChargeType::PerOrder
                         ? $this->calculator->perOrderAllocation($charge, $from, $to)
