@@ -27,7 +27,7 @@ export function LoginForm({
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card className="rounded-2xl border border-brand-500/15 shadow-sm [--card-spacing:1.75rem]">
+      <Card className="rounded-2xl border border-primary/20 shadow-sm [--card-spacing:1.75rem]">
         <CardHeader className="items-center justify-center pb-2">
           <Image
             src="/logo.png"
@@ -71,7 +71,7 @@ export function LoginForm({
                   </FieldLabel>
                   <a
                     href="#"
-                    className="text-sm font-medium text-brand-500 hover:text-brand-700"
+                    className="text-sm font-medium text-primary hover:text-primary/80"
                   >
                     Mot de passe oublié?
                   </a>
@@ -125,7 +125,7 @@ export function LoginForm({
                 <Button
                   type="submit"
                   disabled={isSubmitting}
-                  className="h-9 rounded-md bg-brand-700  text-white hover:bg-brand-950 disabled:opacity-70"
+                  className="h-9 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-70"
                 >
                   {isSubmitting ? "Connexion..." : "Se connecter"}
                 </Button>
