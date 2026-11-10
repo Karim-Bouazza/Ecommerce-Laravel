@@ -3,11 +3,7 @@
 import { Wallet } from "lucide-react"
 import { cn } from "cn"
 
-import {
-  ComingSoonRow,
-  MetricRow,
-  PerformanceCard,
-} from "@/features/performance/components/performance-card"
+import { MetricRow, PerformanceCard } from "@/features/performance/components/performance-card"
 import type { PerformanceRevenueStats } from "@/features/performance/types"
 import { formatPrice } from "@/shared/lib/format-price"
 
@@ -63,7 +59,6 @@ export function RevenueProfitCard({
         loading={loading}
         negative={(data?.roi ?? 0) < 0}
       />
-      <ComingSoonRow label="Upsell" />
       <MetricRow label="Capital" value={money(data?.capital)} loading={loading} />
     </PerformanceCard>
   )

@@ -9,8 +9,10 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { ThemeSwitch } from "@/components/theme-switch"
 import { useMe } from "@/features/auth/hooks/use-me"
 import { getInitials } from "@/features/auth/lib/get-initials"
 
@@ -47,6 +49,8 @@ export function UserBadge({ className }: { className?: string }) {
           <User />
           Profil
         </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <ThemeSwitch />
       </DropdownMenuContent>
     </DropdownMenu>
   )

@@ -57,32 +57,6 @@ export function StockAlertFiltersSheet({ value, onApply }: StockAlertFiltersShee
 
         <FieldGroup className="px-4">
           <Field>
-            <FieldLabel className="flex items-center gap-2">
-              Fournisseur
-              <span className="text-xs text-muted-foreground">(bientôt)</span>
-            </FieldLabel>
-            <Select disabled>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Tous les fournisseurs" />
-              </SelectTrigger>
-              <SelectContent />
-            </Select>
-          </Field>
-
-          <Field>
-            <FieldLabel className="flex items-center gap-2">
-              Marque (catégorie)
-              <span className="text-xs text-muted-foreground">(bientôt)</span>
-            </FieldLabel>
-            <Select disabled>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Toutes les marques" />
-              </SelectTrigger>
-              <SelectContent />
-            </Select>
-          </Field>
-
-          <Field>
             <FieldLabel htmlFor="filter-purchase-price-min">Prix MIN</FieldLabel>
             <Input
               id="filter-purchase-price-min"

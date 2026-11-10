@@ -3,12 +3,10 @@ import {
   ChevronRight,
   GalleryHorizontal,
   Globe,
-  Image as ImageIcon,
   Languages,
   LayoutGrid,
   Megaphone,
   PackagePlus,
-  Palette,
   Sparkles,
   Tag,
 } from "lucide-react"
@@ -16,18 +14,6 @@ import {
 import { SettingsPageShell } from "@/features/site-settings/components/settings-page-shell"
 
 const SECTIONS = [
-  {
-    href: "/admin/website/colors",
-    icon: Palette,
-    title: "Couleurs",
-    description: "Thème de la boutique : boutons, liens, dégradés et badges.",
-  },
-  {
-    href: "/admin/website/logo",
-    icon: ImageIcon,
-    title: "Logo",
-    description: "Logo affiché dans l'en-tête de la boutique.",
-  },
   {
     href: "/admin/website/language",
     icon: Languages,

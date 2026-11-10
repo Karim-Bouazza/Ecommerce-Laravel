@@ -39,13 +39,11 @@ export function EditProductDialog({ product }: EditProductDialogProps) {
             description: product.description,
             short_description: product.short_description,
             category_id: product.category_id,
-            brand_id: product.brand_id,
             purchase_price: product.purchase_price,
             price: product.price,
             compare_price: product.compare_price,
             is_active: product.is_active,
             is_new: product.is_new,
-            tags: product.tags.map((tag) => tag.id),
             specs: product.specs.map((spec) => ({
               label: spec.label,
               value: spec.value,

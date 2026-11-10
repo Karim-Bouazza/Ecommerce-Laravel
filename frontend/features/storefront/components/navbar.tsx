@@ -5,7 +5,6 @@ import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Search } from "lucide-react"
-import { useStorefrontLogo } from "@/features/storefront/lib/logo-context"
 
 function SearchBar() {
   const router = useRouter()
@@ -42,41 +41,26 @@ function SearchBar() {
 }
 
 export function Navbar() {
-  const logoUrl = useStorefrontLogo()
-
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background">
       <div className="mx-auto flex h-18 max-w-7xl items-center gap-4 px-4 sm:gap-8 sm:px-6 lg:px-8">
         <Link href="/" className="flex shrink-0 items-center" aria-label="CodAvenir">
-          {logoUrl ? (
-            <Image
-              src={logoUrl}
-              alt=""
-              width={288}
-              height={96}
-              preload
-              className="h-12 w-auto object-contain"
-            />
-          ) : (
-            <>
-              <Image
-                src="/logo.png"
-                alt=""
-                width={2172}
-                height={724}
-                priority
-                className="h-12 w-auto dark:hidden"
-              />
-              <Image
-                src="/logo-dark.png"
-                alt=""
-                width={2172}
-                height={724}
-                priority
-                className="hidden h-12 w-auto dark:block"
-              />
-            </>
-          )}
+          <Image
+            src="/logo.png"
+            alt=""
+            width={2172}
+            height={724}
+            priority
+            className="h-12 w-auto dark:hidden"
+          />
+          <Image
+            src="/logo-dark.png"
+            alt=""
+            width={2172}
+            height={724}
+            priority
+            className="hidden h-12 w-auto dark:block"
+          />
         </Link>
 
         <div className="min-w-0 flex-1">

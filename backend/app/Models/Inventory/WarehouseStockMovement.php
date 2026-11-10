@@ -29,8 +29,7 @@ class WarehouseStockMovement extends Model
     {
         static::creating(function (WarehouseStockMovement $movement) {
             $movement->created_by ??= auth()->id();
-        });
-    }
+        });    }
 
     public function warehouse(): BelongsTo
     {

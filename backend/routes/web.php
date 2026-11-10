@@ -3,8 +3,5 @@
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
+    return response()->json(['status' => 'ok']);
 })->name('home');
-
-Route::livewire('/products', 'pages::products')->name('products.index');
-Route::livewire('/products/{product}', 'pages::products.show')->name('products.show');

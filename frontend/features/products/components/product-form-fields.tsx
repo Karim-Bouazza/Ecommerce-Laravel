@@ -20,10 +20,7 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { CategorySelect } from "@/features/categories/components/category-select";
-import { BrandSelect } from "@/features/brands/components/brand-select";
-import { MultiSelectCombobox } from "@/components/multi-select/multi-select-combobox";
 import { TagsInput } from "@/components/tags-input/tags-input";
-import { useTags } from "@/features/tags/hooks/use-tags";
 import { cn } from "@/lib/utils";
 import type { ProductFormInput } from "@/features/products/schemas/product-schema";
 import { ProductImageCropperDialog } from "@/features/products/components/product-image-cropper-dialog";
@@ -49,7 +46,6 @@ export function ProductFormFields<TOutput>({
   } = form;
 
   const { fields, append, remove } = useFieldArray({ control, name: "specs" });
-  const { data: tagOptions = [] } = useTags();
   const [pendingImage, setPendingImage] = useState<{
     fieldName: ProductImageFieldName;
     src: string;
@@ -196,24 +192,6 @@ export function ProductFormFields<TOutput>({
           />
           <FieldError
             errors={errors.category_id ? [errors.category_id] : undefined}
-          />
-        </Field>
-
-        <Field data-invalid={!!errors.brand_id}>
-          <FieldLabel htmlFor={`${idPrefix}-brand`}>Marque</FieldLabel>
-          <Controller
-            control={control}
-            name="brand_id"
-            render={({ field }) => (
-              <BrandSelect
-                value={field.value}
-                onChange={field.onChange}
-                invalid={!!errors.brand_id}
-              />
-            )}
-          />
-          <FieldError
-            errors={errors.brand_id ? [errors.brand_id] : undefined}
           />
         </Field>
 
@@ -429,22 +407,6 @@ export function ProductFormFields<TOutput>({
                   onCheckedChange={field.onChange}
                 />
               </div>
-            )}
-          />
-        </Field>
-
-        <Field>
-          <FieldLabel htmlFor={`${idPrefix}-tags`}>Étiquettes</FieldLabel>
-          <Controller
-            control={control}
-            name="tags"
-            render={({ field }) => (
-              <MultiSelectCombobox
-                value={field.value}
-                onChange={field.onChange}
-                options={tagOptions}
-                placeholder="Sélectionner des étiquettes"
-              />
             )}
           />
         </Field>

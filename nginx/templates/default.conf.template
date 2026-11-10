@@ -4,8 +4,8 @@
 # substituted.
 #
 #   ${DOMAIN}      ->  frontend  (Next.js standalone server)
-#   api.${DOMAIN}  ->  backend   (Laravel Octane/FrankenPHP, incl. Filament
-#                       admin at /admin and product images at /storage)
+#   api.${DOMAIN}  ->  backend   (Laravel Octane/FrankenPHP, incl. product
+#                       images at /storage)
 #
 # The API deliberately lives on its own subdomain rather than a /api path so
 # Sanctum's SPA cookie auth has a stable, single-level parent domain to scope

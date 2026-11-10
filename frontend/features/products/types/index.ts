@@ -1,8 +1,3 @@
-export type ProductTag = {
-  id: number;
-  name: string;
-};
-
 export type ProductSpec = {
   id: number;
   label: string;
@@ -22,9 +17,6 @@ export type Product = {
   short_description: string | null;
   category_id: number | null;
   category: string | null;
-  brand_id: number | null;
-  brand: string | null;
-  tags: ProductTag[];
   specs: ProductSpec[];
   variants: ProductVariant[];
   purchase_price: number | null;

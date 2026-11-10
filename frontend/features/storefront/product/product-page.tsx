@@ -62,9 +62,7 @@ export function ProductPage({ product }: { product: StorefrontProductDetail }) {
   const inStock = product.in_stock;
   const orderFormRef = useRef<HTMLDivElement>(null);
   const [showFloatingOrderButton, setShowFloatingOrderButton] = useState(true);
-  const subtitle = [product.category, product.brand]
-    .filter(Boolean)
-    .join(" · ");
+  const subtitle = product.category ?? "";
 
   useEffect(() => {
     const orderForm = orderFormRef.current;
@@ -192,14 +190,6 @@ export function ProductPage({ product }: { product: StorefrontProductDetail }) {
               <div className="flex gap-2">
                 <dt className="font-medium">Référence :</dt>
                 <dd className="text-muted-foreground">{product.sku}</dd>
-              </div>
-            )}
-            {product.tags.length > 0 && (
-              <div className="flex gap-2">
-                <dt className="font-medium">Tags :</dt>
-                <dd className="text-muted-foreground">
-                  {product.tags.join(", ")}
-                </dd>
               </div>
             )}
             <div className="flex items-center gap-2">

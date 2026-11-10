@@ -32,13 +32,11 @@ type BaseProductPayload = {
   description: string;
   short_description: string | null;
   category_id: number | null;
-  brand_id: number | null;
   purchase_price: number | null;
   price: number;
   compare_price: number | null;
   is_active: boolean;
   is_new: boolean;
-  tags: number[];
   specs: ProductSpecPayload[];
   variants: string[];
   remove_images?: number[];
@@ -70,9 +68,6 @@ function toProductFormData(
   if (payload.category_id != null) {
     formData.append("category_id", String(payload.category_id));
   }
-  if (payload.brand_id != null) {
-    formData.append("brand_id", String(payload.brand_id));
-  }
   if (payload.purchase_price != null) {
     formData.append("purchase_price", String(payload.purchase_price));
   }
@@ -88,9 +83,6 @@ function toProductFormData(
   });
   payload.remove_images?.forEach((imageNumber) => {
     formData.append("remove_images[]", String(imageNumber));
-  });
-  payload.tags.forEach((tagId) => {
-    formData.append("tags[]", String(tagId));
   });
   payload.specs
     .filter((spec) => spec.label.trim() !== "" && spec.value.trim() !== "")

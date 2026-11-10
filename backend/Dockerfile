@@ -15,19 +15,6 @@ RUN composer install \
     --prefer-dist \
     --ignore-platform-reqs
 
-# --- assets: Vite build for resources/{css,js}/app.* consumed by Blade/Filament ---
-FROM node:22-alpine AS assets
-WORKDIR /app
-COPY package.json package-lock.json ./
-RUN npm ci
-COPY vite.config.js ./
-COPY resources ./resources
-COPY public ./public
-# app.css imports vendor/livewire/flux's own CSS directly, so Vite needs
-# composer's output present at build time too, not just npm's.
-COPY --from=vendor /app/vendor ./vendor
-RUN npm run build
-
 # --- production: FrankenPHP + Laravel Octane, single process, no separate nginx/php-fpm ---
 # If this exact tag 404s on Docker Hub by the time you build, swap it for
 # whatever the current "php8.3-alpine" tag is at https://hub.docker.com/r/dunglas/frankenphp/tags
@@ -54,7 +41,6 @@ COPY --from=vendor /usr/bin/composer /usr/bin/composer
 
 COPY --from=vendor /app/vendor ./vendor
 COPY . .
-COPY --from=assets /app/public/build ./public/build
 
 RUN chmod +x docker/entrypoint.sh \
     && composer dump-autoload --optimize --classmap-authoritative --no-dev \

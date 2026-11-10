@@ -2,7 +2,6 @@
 
 namespace App\Enums\Stock;
 
-use Filament\Support\Icons\Heroicon;
 
 enum StockMovementType: string
 {
@@ -22,14 +21,6 @@ enum StockMovementType: string
         return match ($this) {
             self::In => 'success',
             self::Out => 'danger',
-        };
-    }
-
-    public function icon(): Heroicon
-    {
-        return match ($this) {
-            self::In => Heroicon::OutlinedArrowDownOnSquare,
-            self::Out => Heroicon::OutlinedArrowUpOnSquare,
         };
     }
 

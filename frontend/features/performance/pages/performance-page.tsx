@@ -3,7 +3,6 @@
 import * as React from "react"
 
 import { CustomerMetricsCard } from "@/features/performance/components/customer-metrics-card"
-import { DeliveryImpactCard } from "@/features/performance/components/delivery-impact-card"
 import { ExpensesCard } from "@/features/performance/components/expenses-card"
 import { PerformanceFiltersSheet } from "@/features/performance/components/performance-filters-sheet"
 import { PerformanceToolbar } from "@/features/performance/components/performance-toolbar"
@@ -39,7 +38,6 @@ export function PerformancePage() {
         <RevenueProfitCard data={data} isPending={isPending} />
         <ExpensesCard data={data} isPending={isPending} />
         <CustomerMetricsCard data={data} isPending={isPending} />
-        <DeliveryImpactCard />
         <div className="sm:col-span-2 lg:col-span-1 lg:col-start-3 lg:row-span-2 lg:row-start-1">
           <RatesCard data={data} isPending={isPending} />
         </div>

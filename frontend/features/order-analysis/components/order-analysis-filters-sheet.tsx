@@ -31,20 +31,9 @@ const dateBasisLabels: Record<OrderAnalysisDateBasis, string> = {
   status_changed_at: "Par date de changement de statut",
 }
 
-export type ComingSoonFilter = { label: string; placeholder: string }
-
-const DEFAULT_COMING_SOON_FILTERS: ComingSoonFilter[] = [
-  { label: "Canaux de vente", placeholder: "Tous les canaux" },
-  { label: "Agent", placeholder: "Tous les agents" },
-  { label: "Agent de suivi", placeholder: "Tous les agents de suivi" },
-  { label: "Marketer", placeholder: "Tous les marketers" },
-]
-
 type OrderAnalysisFiltersSheetProps<T extends OrderAnalysisFilters> = {
   value: T
   onApply: (value: T) => void
-  /** Filters not computable yet, shown disabled. */
-  comingSoon?: ComingSoonFilter[]
   /** Page-specific fields rendered after the shared ones. */
   extraFields?: (draft: T, update: (patch: Partial<T>) => void) => React.ReactNode
 }
@@ -52,7 +41,6 @@ type OrderAnalysisFiltersSheetProps<T extends OrderAnalysisFilters> = {
 export function OrderAnalysisFiltersSheet<T extends OrderAnalysisFilters = OrderAnalysisFilters>({
   value,
   onApply,
-  comingSoon = DEFAULT_COMING_SOON_FILTERS,
   extraFields,
 }: OrderAnalysisFiltersSheetProps<T>) {
   const emptyFilters = {} as T
@@ -172,21 +160,6 @@ export function OrderAnalysisFiltersSheet<T extends OrderAnalysisFilters = Order
               </SelectContent>
             </Select>
           </Field>
-
-          {comingSoon.map((filter) => (
-            <Field key={filter.label}>
-              <FieldLabel className="flex items-center gap-2">
-                {filter.label}
-                <span className="text-xs text-muted-foreground">(bientôt)</span>
-              </FieldLabel>
-              <Select disabled>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder={filter.placeholder} />
-                </SelectTrigger>
-                <SelectContent />
-              </Select>
-            </Field>
-          ))}
 
           {extraFields?.(draft, update)}
         </FieldGroup>

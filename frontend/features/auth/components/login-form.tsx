@@ -35,7 +35,15 @@ export function LoginForm({
             width={2172}
             height={724}
             priority
-            className="h-25 w-auto"
+            className="h-25 w-auto dark:hidden"
+          />
+          <Image
+            src="/logo-dark.png"
+            alt="CodAvenir"
+            width={2172}
+            height={724}
+            priority
+            className="hidden h-25 w-auto dark:block"
           />
         </CardHeader>
         <CardContent>

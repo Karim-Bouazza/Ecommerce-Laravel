@@ -34,23 +34,6 @@ export type DashboardFiltersValue = {
 
 const emptyFilters: DashboardFiltersValue = {}
 
-function ComingSoonSelect({ label, placeholder }: { label: string; placeholder: string }) {
-  return (
-    <Field>
-      <FieldLabel className="flex items-center gap-2">
-        {label}
-        <span className="text-xs text-muted-foreground">(bientôt)</span>
-      </FieldLabel>
-      <Select disabled>
-        <SelectTrigger className="w-full">
-          <SelectValue placeholder={placeholder} />
-        </SelectTrigger>
-        <SelectContent />
-      </Select>
-    </Field>
-  )
-}
-
 type DashboardFiltersSheetProps = {
   value: DashboardFiltersValue
   onApply: (value: DashboardFiltersValue) => void
@@ -87,11 +70,6 @@ export function DashboardFiltersSheet({ value, onApply }: DashboardFiltersSheetP
         </SheetHeader>
 
         <FieldGroup className="min-h-0 flex-1 overflow-y-auto px-4">
-          <ComingSoonSelect
-            label="Par date de changement de statut"
-            placeholder="Date de création"
-          />
-
           <Field>
             <FieldLabel>Date début</FieldLabel>
             <DatePicker
@@ -139,10 +117,6 @@ export function DashboardFiltersSheet({ value, onApply }: DashboardFiltersSheetP
             </Select>
           </Field>
 
-          <ComingSoonSelect label="Canaux de vente" placeholder="Tous les canaux" />
-          <ComingSoonSelect label="Agent" placeholder="Tous les agents" />
-          <ComingSoonSelect label="Agent de suivi" placeholder="Tous les agents de suivi" />
-
           <Field>
             <FieldLabel>Wilaya</FieldLabel>
             <Select
@@ -163,8 +137,6 @@ export function DashboardFiltersSheet({ value, onApply }: DashboardFiltersSheetP
               </SelectContent>
             </Select>
           </Field>
-
-          <ComingSoonSelect label="Marketer" placeholder="Tous les marketers" />
         </FieldGroup>
 
         <SheetFooter className="flex-row justify-end">

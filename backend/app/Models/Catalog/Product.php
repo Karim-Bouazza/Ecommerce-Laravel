@@ -2,16 +2,14 @@
 
 namespace App\Models\Catalog;
 
-use App\Enums\Stock\StockMovementType;
 use App\Models\Inventory\Stock;
 use App\Models\Inventory\WarehouseStockMovement;
 use App\Models\Order\OrderItem;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\DB;
 
 /**
  * @property int|float|null $stock_in
@@ -37,7 +35,6 @@ class Product extends Model
 {
     protected $fillable = [
         'category_id',
-        'brand_id',
         'sku',
         'name',
         'description',
@@ -65,16 +62,6 @@ class Product extends Model
         return $this->belongsTo(Category::class);
     }
 
-    public function brand(): BelongsTo
-    {
-        return $this->belongsTo(Brand::class);
-    }
-
-    public function tags(): BelongsToMany
-    {
-        return $this->belongsToMany(Tag::class);
-    }
-
     public function specs(): HasMany
     {
         return $this->hasMany(ProductSpec::class)->orderBy('sort_order');
@@ -83,16 +70,6 @@ class Product extends Model
     public function variants(): HasMany
     {
         return $this->hasMany(ProductVariant::class)->orderBy('sort_order');
-    }
-
-    public function reviews(): HasMany
-    {
-        return $this->hasMany(ProductReview::class);
-    }
-
-    public function approvedReviews(): HasMany
-    {
-        return $this->reviews()->where('is_approved', true);
     }
 
     public function orderItems(): HasMany
@@ -117,16 +94,20 @@ class Product extends Model
 
     public function scopeWithStockSums(Builder $query, ?int $warehouseId = null): Builder
     {
+        $internal = DB::table('warehouse_product')
+            ->when($warehouseId, fn ($query) => $query->where('warehouse_id', $warehouseId))
+            ->groupBy('product_id')
+            ->selectRaw('product_id, SUM(quantite_interne) AS quantite_interne');
+
         return $query
-            ->select(['id', 'name', 'image_1', 'purchase_price'])
-            ->withSum(['stockMovements as stock_in' => function (Builder $query) use ($warehouseId) {
-                $query->where('type', StockMovementType::In)
-                    ->when($warehouseId, fn(Builder $query) => $query->where('warehouse_id', $warehouseId));
-            }], 'quantity')
-            ->withSum(['stockMovements as stock_out' => function (Builder $query) use ($warehouseId) {
-                $query->where('type', StockMovementType::Out)
-                    ->when($warehouseId, fn(Builder $query) => $query->where('warehouse_id', $warehouseId));
-            }], 'quantity')
+            ->leftJoinSub($internal, 'stock_internal', 'stock_internal.product_id', '=', 'products.id')
+            ->select([
+                'products.id',
+                'products.name',
+                'products.image_1',
+                'products.purchase_price',
+                'stock_internal.quantite_interne',
+            ])
             ->withSum(['orderItems as reserved_quantity' => Stock::reservedItemsQuery($warehouseId)], 'quantity')
             ->withSum(['orderItems as in_delivery_quantity' => Stock::inDeliveryItemsQuery($warehouseId)], 'quantity')
             ->withSum(['orderItems as in_delivery_value' => Stock::inDeliveryItemsQuery($warehouseId)], 'total_price')
@@ -137,13 +118,13 @@ class Product extends Model
 
     public static function stockInterneSql(): string
     {
-        return 'COALESCE(stock_in,0) - COALESCE(stock_out,0) - COALESCE(reserved_quantity,0) - COALESCE(in_delivery_quantity,0) - COALESCE(in_return_quantity,0) - COALESCE(sold_quantity,0)';
+        return 'COALESCE(stock_internal.quantite_interne, 0)';
     }
 
     protected function stockInterne(): Attribute
     {
         return Attribute::make(
-            get: fn() => (int) $this->stock_in - (int) $this->stock_out - (int) $this->reserved_quantity - (int) $this->in_delivery_quantity - (int) $this->in_return_quantity - (int) $this->sold_quantity,
+            get: fn() => (int) $this->quantite_interne,
         );
     }
 

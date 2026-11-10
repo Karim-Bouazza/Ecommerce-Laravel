@@ -23,7 +23,7 @@ function FacebookPixelInner() {
 
   const isStorefront = !EXCLUDED_PREFIXES.some((prefix) => pathname?.startsWith(prefix))
   const facebookIds = React.useMemo(
-    () => (pixels ?? []).filter((pixel) => pixel.provider === "facebook").map((pixel) => pixel.pixel_id),
+    () => (Array.isArray(pixels) ? pixels : []).filter((pixel) => pixel.provider === "facebook").map((pixel) => pixel.pixel_id),
     [pixels]
   )
   const hasFacebook = facebookIds.length > 0

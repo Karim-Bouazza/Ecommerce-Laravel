@@ -52,8 +52,8 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon" className="h-svh border-r border-sidebar-border">
       <SidebarHeader className="gap-0 p-0">
-        <div className="flex h-16 items-center gap-2.5 pr-3 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
-          <Link href="/admin" className="flex min-w-0 items-center gap-2.5" aria-label="CodAvenir">
+        <div className="relative flex h-16 items-center justify-center pr-8 group-data-[collapsible=icon]:px-0">
+          <Link href="/admin" className="flex min-w-0 items-center justify-center" aria-label="CodAvenir">
             <span className="hidden group-data-[collapsible=icon]:block">
               <BrandMark />
             </span>
@@ -65,7 +65,7 @@ export function AppSidebar() {
                 width={2172}
                 height={724}
                 priority
-                className="h-14 w-auto dark:hidden"
+                className="h-12 w-auto dark:hidden"
               />
               <Image
                 src="/logo-dark.png"
@@ -73,7 +73,7 @@ export function AppSidebar() {
                 width={2172}
                 height={724}
                 priority
-                className="hidden h-14 w-auto dark:block"
+                className="hidden h-12 w-auto dark:block"
               />
             </span>
           </Link>
@@ -82,7 +82,7 @@ export function AppSidebar() {
             type="button"
             onClick={toggleSidebar}
             aria-label="Réduire le menu"
-            className="ml-auto flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-md text-sidebar-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:hidden"
+            className="absolute right-3 flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-md text-sidebar-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:hidden"
           >
             <ChevronsLeft className="size-4" />
           </button>
@@ -131,7 +131,20 @@ function BrandMark() {
         width={2172}
         height={724}
         priority
-        className="absolute h-auto max-w-none"
+        className="absolute h-auto max-w-none dark:hidden"
+        style={{
+          width: "calc(var(--mark) * 2172 / 413)",
+          left: "calc(var(--mark) * -174 / 413)",
+          top: "calc(var(--mark) * -168 / 413)",
+        }}
+      />
+      <Image
+        src="/logo-dark.png"
+        alt=""
+        width={2172}
+        height={724}
+        priority
+        className="absolute hidden h-auto max-w-none dark:block"
         style={{
           width: "calc(var(--mark) * 2172 / 413)",
           left: "calc(var(--mark) * -174 / 413)",

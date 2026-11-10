@@ -24,6 +24,7 @@ export async function logout(): Promise<void> {
 export async function getCurrentUser(): Promise<User | null> {
   try {
     const { data } = await api.get<User>("/api/v1/me")
+    if (!data || typeof data !== "object" || typeof data.name !== "string") return null
     return data
   } catch {
     return null

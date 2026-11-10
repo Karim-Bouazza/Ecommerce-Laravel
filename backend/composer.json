@@ -7,12 +7,10 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
-        "filament/filament": "^5.7",
         "laravel/framework": "^12.0",
         "laravel/octane": "^2.19",
         "laravel/sanctum": "^4.3",
         "laravel/tinker": "^2.10.1",
-        "livewire/flux": "^2.17",
         "matomo/device-detector": "^6.5",
         "mlocati/ip-lib": "^1.22",
         "spatie/laravel-data": "^4.23"
@@ -42,8 +40,7 @@
     "scripts": {
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
-            "@php artisan package:discover --ansi",
-            "@php artisan filament:upgrade"
+            "@php artisan package:discover --ansi"
         ],
         "post-update-cmd": [
             "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
@@ -58,7 +55,7 @@
         ],
         "dev": [
             "Composer\\Config::disableProcessTimeout",
-            "npx concurrently -c \"#93c5fd,#c4b5fd,#fdba74\" \"php artisan serve\" \"php artisan queue:listen --tries=1\" \"npm run dev\" --names='server,queue,vite'"
+            "npx concurrently -c \"#93c5fd,#c4b5fd,#fdba74\" \"php artisan serve\" \"php artisan queue:listen --tries=1\" --names='server,queue'"
         ],
         "test": [
             "@php artisan config:clear --ansi",

@@ -10,7 +10,6 @@ class CreateProductService
     {
         $product = Product::create([
             'category_id' => $data['category_id'] ?? null,
-            'brand_id' => $data['brand_id'] ?? null,
             'sku' => $data['sku'] ?? null,
             'name' => $data['name'],
             'description' => $data['description'],
@@ -25,8 +24,6 @@ class CreateProductService
             'image_3' => ($images['image_3'] ?? null)?->store('products', 'public'),
             'image_4' => ($images['image_4'] ?? null)?->store('products', 'public'),
         ]);
-
-        $product->tags()->sync($data['tags'] ?? []);
 
         foreach ($data['specs'] ?? [] as $index => $spec) {
             $product->specs()->create([

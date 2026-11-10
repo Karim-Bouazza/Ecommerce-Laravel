@@ -52,36 +52,6 @@ export const stockMovementColumns: ColumnDef<StockMovement>[] = [
     ),
   },
   {
-    id: "stock_interne",
-    header: "Stock interne",
-    cell: () => (
-      <div className="flex flex-col items-center">
-        <span>0</span>
-        <span className="text-xs text-muted-foreground">(bientôt)</span>
-      </div>
-    ),
-  },
-  {
-    id: "stock_en_livraison",
-    header: "Stock en livraison",
-    cell: () => (
-      <div className="flex flex-col items-center">
-        <span>0</span>
-        <span className="text-xs text-muted-foreground">(bientôt)</span>
-      </div>
-    ),
-  },
-  {
-    id: "vendu",
-    header: "Vendu",
-    cell: () => (
-      <div className="flex flex-col items-center">
-        <span>0</span>
-        <span className="text-xs text-muted-foreground">(bientôt)</span>
-      </div>
-    ),
-  },
-  {
     id: "creator_name",
     header: "Éditeur",
     cell: ({ row }) => row.original.creator_name ?? "—",

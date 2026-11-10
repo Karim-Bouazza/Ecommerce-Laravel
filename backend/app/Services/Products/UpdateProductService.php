@@ -12,7 +12,6 @@ class UpdateProductService
     {
         $product->update(Arr::only($data, [
             'category_id',
-            'brand_id',
             'sku',
             'name',
             'description',
@@ -38,10 +37,6 @@ class UpdateProductService
                 $product->update([$field => null]);
                 Storage::disk('public')->delete($previousImage);
             }
-        }
-
-        if (array_key_exists('tags', $data)) {
-            $product->tags()->sync($data['tags'] ?? []);
         }
 
         if (array_key_exists('specs', $data)) {

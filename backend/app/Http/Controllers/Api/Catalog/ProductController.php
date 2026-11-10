@@ -22,7 +22,7 @@ class ProductController extends Controller
         $search = trim((string) $request->input('search', ''));
 
         $products = Product::query()
-            ->with(['category', 'brand', 'tags', 'specs', 'variants'])
+            ->with(['category', 'specs', 'variants'])
             ->when($search !== '', fn($query) => $query->where('name', 'like', "%{$search}%"))
             ->paginate($perPage);
 
@@ -38,14 +38,14 @@ class ProductController extends Controller
     {
         $product = app(CreateProductService::class)->execute($request->validated(), $request->allFiles());
 
-        return new ProductResource($product->load(['category', 'brand', 'tags', 'specs', 'variants']));
+        return new ProductResource($product->load(['category', 'specs', 'variants']));
     }
 
     public function update(UpdateProductRequest $request, Product $product): ProductResource
     {
         $product = app(UpdateProductService::class)->execute($product, $request->validated(), $request->allFiles());
 
-        return new ProductResource($product->load(['category', 'brand', 'tags', 'specs', 'variants']));
+        return new ProductResource($product->load(['category', 'specs', 'variants']));
     }
 
     public function destroy(Product $product): JsonResponse

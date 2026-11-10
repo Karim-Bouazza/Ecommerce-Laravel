@@ -92,14 +92,3 @@ export function MetricRow({ label, value, loading, negative, badge }: MetricRowP
     </div>
   )
 }
-
-export function ComingSoonRow({ label }: { label: string }) {
-  return (
-    <div className="flex items-center justify-between gap-4 rounded-lg bg-muted/40 px-4 py-3">
-      <span className="text-sm text-muted-foreground">{label}</span>
-      <span className="inline-flex shrink-0 items-center rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
-        Bientôt
-      </span>
-    </div>
-  )
-}

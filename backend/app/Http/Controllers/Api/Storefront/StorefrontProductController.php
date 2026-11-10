@@ -83,11 +83,9 @@ class StorefrontProductController extends Controller
 
         return Product::query()
             ->where('is_active', true)
-            ->with(['category', 'brand', 'tags', 'specs', 'variants'])
+            ->with(['category', 'specs', 'variants'])
             ->leftJoinSub($stockTotals, 'stock_totals', 'stock_totals.product_id', '=', 'products.id')
             ->select('products.*')
-            ->selectRaw('COALESCE(stock_totals.total_quantity, 0) as total_stock')
-            ->withCount('approvedReviews as reviews_count')
-            ->withAvg('approvedReviews as rating_avg', 'rating');
+            ->selectRaw('COALESCE(stock_totals.total_quantity, 0) as total_stock');
     }
 }

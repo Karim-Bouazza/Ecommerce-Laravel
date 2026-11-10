@@ -31,11 +31,6 @@ export const productColumns: ColumnDef<Product>[] = [
     cell: ({ row }) => row.original.category ?? <span className="text-muted-foreground">—</span>,
   },
   {
-    accessorKey: "brand",
-    header: "Marque",
-    cell: ({ row }) => row.original.brand ?? <span className="text-muted-foreground">—</span>,
-  },
-  {
     accessorKey: "name",
     header: "Nom",
   },

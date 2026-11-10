@@ -23,6 +23,11 @@ class UpdateWarehouseStockService
 
             $delta = $newQuantity - $current;
 
+            DB::table('warehouse_product')
+                ->where('warehouse_id', $warehouse->id)
+                ->where('product_id', $product->id)
+                ->update(['quantite_interne' => $newQuantity]);
+
             if ($delta !== 0) {
                 $warehouse->stockMovements()->create([
                     'product_id' => $product->id,

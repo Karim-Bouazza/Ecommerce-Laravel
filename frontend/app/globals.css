@@ -62,20 +62,13 @@
 }
 
 :root {
-  /*
-   * Brand palette — fixed hex source of truth for logo identity.
-   * Theme-independent: values never change between light/dark.
-   * Prefer the semantic tokens below in components; reach for
-   * brand-* utilities only for the logo, gradients, or marketing UI.
-   */
-  --brand-950: #0018b8; /* Deep Blue — dark part of the icon */
-  --brand-700: #0055ff; /* Royal Blue — main blue */
-  --brand-500: #007fff; /* Bright Blue — primary highlight */
-  --brand-300: #00cff0; /* Cyan Blue — swoosh / bright gradient */
-  --brand-200: #7defff; /* Light Cyan — swoosh highlight */
-  --brand-white: #ffffff; /* White — letter A */
+  --brand-950: #7a5c00;
+  --brand-700: #c99a0a;
+  --brand-500: #f6c530;
+  --brand-300: #f9d86b;
+  --brand-200: #fcebb0;
+  --brand-white: #ffffff;
 
-  /* Brand gradients, for the logo mark and swoosh accents */
   --gradient-brand-logo: linear-gradient(135deg, var(--brand-950), var(--brand-500));
   --gradient-brand-swoosh: linear-gradient(135deg, var(--brand-300), var(--brand-200));
 
@@ -86,7 +79,7 @@
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
   --primary: var(--brand-500);
-  --primary-foreground: var(--brand-white);
+  --primary-foreground: oklch(0.16 0 0);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
@@ -97,6 +90,7 @@
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   --ring: var(--brand-500);
+  color-scheme: light;
   --chart-1: var(--brand-950);
   --chart-2: var(--brand-700);
   --chart-3: var(--brand-500);
@@ -104,26 +98,14 @@
   --chart-5: var(--brand-200);
   --radius: 0.625rem;
 
-  /*
-   * Sidebar shell — light theme: a plain white/near-black surface (not brand
-   * blue), with the brand blue itself reserved for the selected row and the
-   * notification chip — color-mix against --brand-500/700 so it stays in sync
-   * with the brand palette above. `.dark` below overrides every one of these.
-   */
   --sidebar: oklch(1 0 0);
   --sidebar-foreground: oklch(0.16 0 0);
   --sidebar-muted-foreground: oklch(0.5 0 0);
-  /* Dimmer than muted-foreground on purpose: uppercase section headings (VENTES, STOCK…)
-     read as loud at full muted contrast, so they get their own quieter tone. */
   --sidebar-label-foreground: oklch(0.64 0 0);
-  /* Selected row: pale brand-blue wash, Royal Blue text/icon. */
   --sidebar-primary: color-mix(in oklch, var(--brand-500) 12%, white 88%);
-  --sidebar-primary-foreground: var(--brand-700);
-  /* Notification counter: a more saturated wash of the same blue than the
-     selected-row fill, so a badge sitting on top of an active row never
-     blends into it. */
-  --sidebar-chip: color-mix(in oklch, var(--brand-500) 22%, white 78%);
-  --sidebar-chip-foreground: var(--brand-700);
+  --sidebar-primary-foreground: var(--brand-950);
+  --sidebar-chip: color-mix(in oklch, var(--brand-500) 40%, white 60%);
+  --sidebar-chip-foreground: var(--brand-950);
   --sidebar-accent: oklch(0.96 0 0);
   --sidebar-accent-foreground: oklch(0.16 0 0);
   --sidebar-border: oklch(0.92 0 0);
@@ -131,14 +113,15 @@
 }
 
 .dark {
+  color-scheme: dark;
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: var(--brand-300);
-  --primary-foreground: var(--brand-950);
+  --primary: var(--brand-500);
+  --primary-foreground: oklch(0.16 0 0);
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.269 0 0);
@@ -148,33 +131,19 @@
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
-  --ring: var(--brand-300);
-  --chart-1: var(--brand-200);
-  --chart-2: var(--brand-300);
-  --chart-3: var(--brand-500);
-  --chart-4: var(--brand-700);
-  --chart-5: var(--brand-950);
-
-  /*
-   * Sidebar shell — dark theme: near-black surface, brand-blue text/icon on the
-   * selected row (its fill stays a touch lighter than the shell, tinted with the
-   * same blue, so the row still reads as a distinct surface, not just colored
-   * text on the same bg). Mirrors the light theme's brand-blue treatment.
-   */
+  --ring: var(--brand-500);
   --sidebar: oklch(0.09 0 0);
   --sidebar-foreground: oklch(0.96 0 0);
   --sidebar-muted-foreground: oklch(0.8 0 0);
   --sidebar-label-foreground: oklch(0.56 0 0);
-  --sidebar-primary: color-mix(in oklch, var(--brand-700) 35%, black 65%);
+  --sidebar-primary: color-mix(in oklch, var(--brand-500) 25%, black 75%);
   --sidebar-primary-foreground: var(--brand-300);
-  /* Notification counter: solid brand-blue fill, white text — the inverse of
-     the selected row, so a badge on top of an active row stays legible. */
   --sidebar-chip: var(--brand-500);
-  --sidebar-chip-foreground: var(--brand-white);
+  --sidebar-chip-foreground: oklch(0.16 0 0);
   --sidebar-accent: oklch(0.16 0 0);
   --sidebar-accent-foreground: oklch(0.97 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: var(--brand-300);
+  --sidebar-ring: var(--brand-500);
 }
 
 @layer components {

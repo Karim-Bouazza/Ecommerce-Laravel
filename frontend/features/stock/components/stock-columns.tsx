@@ -52,16 +52,6 @@ export function getStockColumns(warehouseId: number): ColumnDef<StockItem>[] {
       ),
     },
     {
-      id: "stock_manquant",
-      header: "Stock manquant",
-      cell: () => (
-        <div className="flex flex-col items-center">
-          <span>0</span>
-          <span className="text-xs text-muted-foreground">(bientôt)</span>
-        </div>
-      ),
-    },
-    {
       accessorKey: "confirme_sans_stock",
       header: "Confirmé sans stock",
     },

@@ -25,8 +25,6 @@ class StorefrontProductDetailResource extends JsonResource
             'short_description' => $this->short_description,
             'category_id' => $this->category_id,
             'category' => $this->whenLoaded('category', fn () => $this->category?->name),
-            'brand' => $this->whenLoaded('brand', fn () => $this->brand?->name),
-            'tags' => $this->whenLoaded('tags', fn () => $this->tags->pluck('name')->values()),
             'specs' => $this->whenLoaded('specs', fn () => $this->specs->map(fn ($spec) => [
                 'label' => $spec->label,
                 'value' => $spec->value,
@@ -43,8 +41,6 @@ class StorefrontProductDetailResource extends JsonResource
             'is_new' => $this->is_new,
             'in_stock' => (int) $this->total_stock > 0,
             'stock' => (int) $this->total_stock,
-            'rating_avg' => $this->rating_avg !== null ? round((float) $this->rating_avg, 1) : null,
-            'reviews_count' => (int) ($this->reviews_count ?? 0),
             'images' => collect([$this->image_1, $this->image_2, $this->image_3, $this->image_4])
                 ->filter()
                 ->values()

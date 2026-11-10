@@ -37,8 +37,6 @@ export type StorefrontProductDetail = {
   short_description: string | null;
   category_id: number | null;
   category: string | null;
-  brand: string | null;
-  tags: string[];
   specs: StorefrontProductSpec[];
   variants: StorefrontProductVariant[];
   price: number;
@@ -47,8 +45,6 @@ export type StorefrontProductDetail = {
   is_new: boolean;
   in_stock: boolean;
   stock: number;
-  rating_avg: number | null;
-  reviews_count: number;
   images: string[];
 };
 

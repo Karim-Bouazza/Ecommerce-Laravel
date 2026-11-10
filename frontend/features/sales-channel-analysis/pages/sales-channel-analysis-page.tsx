@@ -15,11 +15,6 @@ import type { SalesChannelFilters } from "@/features/sales-channel-analysis/type
 
 const QUERY_KEY = ["sales-channel-analysis"] as const
 
-const COMING_SOON_FILTERS = [
-  { label: "Agent", placeholder: "Tous les agents" },
-  { label: "Marketer", placeholder: "Tous les marketers" },
-]
-
 function toCount(value: string): number | undefined {
   return value === "" ? undefined : Math.max(0, Math.trunc(Number(value)))
 }
@@ -48,7 +43,6 @@ export function SalesChannelAnalysisPage() {
           <OrderAnalysisFiltersSheet<SalesChannelFilters>
             value={filters}
             onApply={setFilters}
-            comingSoon={COMING_SOON_FILTERS}
             extraFields={(draft, update) => (
               <>
                 <Field>

@@ -33,23 +33,6 @@ const dateBasisLabels: Record<PerformanceDateBasis, string> = {
 
 const emptyFilters: PerformanceFilters = {}
 
-function ComingSoonSelect({ label, placeholder }: { label: string; placeholder: string }) {
-  return (
-    <Field>
-      <FieldLabel className="flex items-center gap-2">
-        {label}
-        <span className="text-xs text-muted-foreground">(bientôt)</span>
-      </FieldLabel>
-      <Select disabled>
-        <SelectTrigger className="w-full">
-          <SelectValue placeholder={placeholder} />
-        </SelectTrigger>
-        <SelectContent />
-      </Select>
-    </Field>
-  )
-}
-
 type PerformanceFiltersSheetProps = {
   value: PerformanceFilters
   onApply: (value: PerformanceFilters) => void
@@ -153,8 +136,6 @@ export function PerformanceFiltersSheet({ value, onApply }: PerformanceFiltersSh
             </Select>
           </Field>
 
-          <ComingSoonSelect label="Marketer" placeholder="Tous les marketers" />
-
           <div className="flex items-start gap-2 rounded-lg border-l-4 border-amber-400 bg-amber-500/10 px-3 py-2 text-xs text-muted-foreground">
             <Info className="mt-0.5 size-4 shrink-0 text-amber-500" />
             Les filtres ci-dessous ne s&apos;appliquent pas aux charges, bénéfices et ROI.
@@ -178,9 +159,6 @@ export function PerformanceFiltersSheet({ value, onApply }: PerformanceFiltersSh
               </SelectContent>
             </Select>
           </Field>
-
-          <ComingSoonSelect label="Canaux de vente" placeholder="Tous les canaux" />
-          <ComingSoonSelect label="Source UTM" placeholder="Toutes les sources" />
         </FieldGroup>
 
         <SheetFooter className="flex-row justify-end">

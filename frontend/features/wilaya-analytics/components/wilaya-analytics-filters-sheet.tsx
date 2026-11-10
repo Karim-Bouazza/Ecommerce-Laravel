@@ -68,19 +68,6 @@ export function WilayaAnalyticsFiltersSheet({ value, onApply }: WilayaAnalyticsF
 
         <FieldGroup className="min-h-0 flex-1 overflow-y-auto px-4">
           <Field>
-            <FieldLabel className="flex items-center gap-2">
-              Par date de changement de statut
-              <span className="text-xs text-muted-foreground">(bientôt)</span>
-            </FieldLabel>
-            <Select disabled>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Date de création" />
-              </SelectTrigger>
-              <SelectContent />
-            </Select>
-          </Field>
-
-          <Field>
             <FieldLabel htmlFor="filter-date-from">Date début</FieldLabel>
             <DatePicker
               value={draft.date_from ? new Date(draft.date_from) : undefined}
@@ -107,19 +94,6 @@ export function WilayaAnalyticsFiltersSheet({ value, onApply }: WilayaAnalyticsF
           </Field>
 
           <Field>
-            <FieldLabel className="flex items-center gap-2">
-              Canaux de vente
-              <span className="text-xs text-muted-foreground">(bientôt)</span>
-            </FieldLabel>
-            <Select disabled>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Tous les canaux" />
-              </SelectTrigger>
-              <SelectContent />
-            </Select>
-          </Field>
-
-          <Field>
             <FieldLabel>Produits</FieldLabel>
             <Select
               value={draft.product_id ? String(draft.product_id) : undefined}
@@ -137,32 +111,6 @@ export function WilayaAnalyticsFiltersSheet({ value, onApply }: WilayaAnalyticsF
                   </SelectItem>
                 ))}
               </SelectContent>
-            </Select>
-          </Field>
-
-          <Field>
-            <FieldLabel className="flex items-center gap-2">
-              Agent
-              <span className="text-xs text-muted-foreground">(bientôt)</span>
-            </FieldLabel>
-            <Select disabled>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Tous les agents" />
-              </SelectTrigger>
-              <SelectContent />
-            </Select>
-          </Field>
-
-          <Field>
-            <FieldLabel className="flex items-center gap-2">
-              Marketer
-              <span className="text-xs text-muted-foreground">(bientôt)</span>
-            </FieldLabel>
-            <Select disabled>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Tous les marketers" />
-              </SelectTrigger>
-              <SelectContent />
             </Select>
           </Field>
 

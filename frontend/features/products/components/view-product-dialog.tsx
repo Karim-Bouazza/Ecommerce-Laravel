@@ -91,10 +91,6 @@ export function ViewProductDialog({ product }: ViewProductDialogProps) {
               value={product.category ?? <span className="text-muted-foreground">—</span>}
             />
             <DetailField
-              label="Marque"
-              value={product.brand ?? <span className="text-muted-foreground">—</span>}
-            />
-            <DetailField
               label="SKU"
               value={product.sku ?? <span className="text-muted-foreground">—</span>}
             />
@@ -108,24 +104,6 @@ export function ViewProductDialog({ product }: ViewProductDialogProps) {
               value={formatPrice(product.price) ?? <span className="text-muted-foreground">—</span>}
             />
           </div>
-
-          {product.tags.length > 0 && (
-            <DetailField
-              label="Étiquettes"
-              value={
-                <div className="flex flex-wrap gap-1.5">
-                  {product.tags.map((tag) => (
-                    <span
-                      key={tag.id}
-                      className="inline-flex items-center rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium"
-                    >
-                      {tag.name}
-                    </span>
-                  ))}
-                </div>
-              }
-            />
-          )}
 
           {product.specs.length > 0 && (
             <DetailField

@@ -10,8 +10,8 @@ class AdminUserSeeder extends Seeder
 {
     /**
      * Creates (or updates) the bootstrap administrator from ADMIN_* env vars,
-     * so a fresh deploy always has a way into the Filament panel without an
-     * interactive `make:filament-user` step. Safe to run on every deploy:
+     * so a fresh deploy always has a way into the admin without an
+     * interactive step. Safe to run on every deploy:
      * updateOrCreate keys on email, so it never duplicates the account.
      */
     public function run(): void

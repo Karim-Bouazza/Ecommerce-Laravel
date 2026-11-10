@@ -3,8 +3,10 @@ import type { ActivePixel, PaginatedResponse, Pixel, PixelProvider } from "@/fea
 
 export async function getActivePixels(): Promise<ActivePixel[]> {
   try {
-    const { data } = await api.get<ActivePixel[]>("/api/v1/pixels/active")
-    return data
+    const { data } = await api.get<ActivePixel[] | { data?: ActivePixel[] }>("/api/v1/pixels/active")
+    if (Array.isArray(data)) return data
+    if (data && Array.isArray(data.data)) return data.data
+    return []
   } catch (error) {
     throw toApiError(error)
   }

@@ -15,7 +15,7 @@ su-exec octane php artisan view:cache
 su-exec octane php artisan migrate --force
 
 # Idempotent (keyed on ADMIN_EMAIL): guarantees a way into /admin after every
-# deploy without an interactive `make:filament-user` step.
+# deploy without an interactive step.
 su-exec octane php artisan db:seed --class="Database\\Seeders\\AdminUserSeeder" --force
 
 exec su-exec octane "$@"
