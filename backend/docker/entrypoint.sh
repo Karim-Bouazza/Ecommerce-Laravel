@@ -8,7 +8,6 @@ chown -R octane:octane storage bootstrap/cache
 su-exec octane php artisan config:cache
 su-exec octane php artisan event:cache
 su-exec octane php artisan route:cache
-su-exec octane php artisan view:cache
 
 # --isolated skips the run if a migration is already in progress on another
 # instance/container, so scaling backend replicas doesn't race the schema.
