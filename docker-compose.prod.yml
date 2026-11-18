@@ -1,16 +1,3 @@
-# Production stack — single VPS.
-#
-# Always pass the env file explicitly, it is what fills ${DOMAIN} and friends:
-#   docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --build
-#
-# Only nginx publishes ports. mysql has no `ports:` mapping, so it is reachable
-# from the backend container and from nowhere else.
-
-# The VPS's default upstream DNS intermittently drops lookups from inside
-# containers: resolving an external host (e.g. zimou.express) then hangs for the
-# full 5s resolver timeout. Docker's embedded DNS (127.0.0.11) still resolves
-# service names (backend, mysql, ...) and only forwards external names to these
-# servers. timeout:1 / attempts:2 caps a bad lookup at ~1-2s instead of 5s.
 x-dns: &default-dns
   dns:
     - 1.1.1.1
@@ -29,9 +16,6 @@ services:
   nginx:
     image: nginx:1.27-alpine
     restart: unless-stopped
-    # Reload every 6h so certificates renewed by the certbot service are picked
-    # up; nginx otherwise keeps serving the old cert until it is restarted.
-    # /docker-entrypoint.sh still runs, so the ${DOMAIN} templating still works.
     entrypoint: ["/bin/sh", "-c"]
     command:
       - "(while :; do sleep 6h; nginx -s reload; done) & exec /docker-entrypoint.sh nginx -g 'daemon off;'"
@@ -41,8 +25,6 @@ services:
     environment:
       DOMAIN: ${DOMAIN:?DOMAIN is required}
     volumes:
-      # The official image runs envsubst over /etc/nginx/templates/*.template
-      # into /etc/nginx/conf.d/ at startup, which is how ${DOMAIN} gets filled.
       - ./nginx/templates:/etc/nginx/templates:ro
       - certbot_conf:/etc/letsencrypt:ro
       - certbot_www:/var/www/certbot:ro
@@ -60,7 +42,6 @@ services:
     volumes:
       - certbot_conf:/etc/letsencrypt
       - certbot_www:/var/www/certbot
-    # Renewal attempt twice a day; certbot only acts within 30 days of expiry.
     entrypoint: >
       /bin/sh -c "trap exit TERM;
       while :; do certbot renew --webroot -w /var/www/certbot --quiet;
@@ -73,8 +54,6 @@ services:
       context: ./frontend
       target: production
       args:
-        # Baked into the client bundle at build time — changing it requires a
-        # rebuild, not just a restart.
         NEXT_PUBLIC_API_URL: https://api.${DOMAIN}
         NEXT_PUBLIC_CLARITY_PROJECT_ID: ${NEXT_PUBLIC_CLARITY_PROJECT_ID}
         NEXT_PUBLIC_GA_ID: ${NEXT_PUBLIC_GA_ID:?NEXT_PUBLIC_GA_ID is required}
@@ -82,13 +61,15 @@ services:
     init: true
     environment:
       NODE_ENV: production
-      # Server-side API calls go straight to the backend container.
       INTERNAL_API_URL: http://backend:8000
       SANCTUM_SESSION_COOKIE: ${SANCTUM_SESSION_COOKIE:-ecommerce-session}
     expose:
       - "3000"
     networks:
-      - frontend
+      frontend: {}
+      proxy_codavenir:
+        aliases:
+          - codavenir-frontend
     logging: *default-logging
 
   backend:
@@ -100,7 +81,6 @@ services:
     env_file:
       - .env.prod
     environment:
-      # Derived from DOMAIN so it can't drift from the nginx server_names below.
       APP_URL: https://api.${DOMAIN}
       FRONTEND_URLS: https://${DOMAIN}
       SANCTUM_STATEFUL_DOMAINS: ${DOMAIN}
@@ -114,15 +94,16 @@ services:
     expose:
       - "8000"
     volumes:
-      # Product images land under storage/app/public via the `public` disk.
-      # Without this volume every rebuild would destroy them.
       - backend_storage:/app/storage/app/public
     depends_on:
       mysql:
         condition: service_healthy
     networks:
-      - frontend
-      - backend
+      frontend: {}
+      backend: {}
+      proxy_codavenir:
+        aliases:
+          - codavenir-backend
     logging: *default-logging
 
   mysql:
@@ -158,3 +139,6 @@ volumes:
 networks:
   frontend:
   backend:
+  proxy_codavenir:
+    external: true
+    name: proxy_codavenir
