@@ -5,6 +5,7 @@ namespace App\Services\Performance;
 use App\Models\Finance\Charge;
 use App\Queries\Performance\PerformanceRevenueQuery;
 use App\Services\Charges\CalculateChargeAmountService;
+use App\Services\Meta\GetTotalAdSpendService;
 use App\Support\Analytics\OrderRateCalculator;
 use App\Support\Performance\PerformanceFilters;
 
@@ -13,6 +14,7 @@ class GetPerformanceRevenueService
     public function __construct(
         private readonly PerformanceRevenueQuery $query,
         private readonly CalculateChargeAmountService $chargeCalculator,
+        private readonly GetTotalAdSpendService $adSpend,
     ) {}
 
     /**
@@ -32,7 +34,9 @@ class GetPerformanceRevenueService
 
         $charges = $charges->sum(fn (Charge $charge) => $this->chargeCalculator->execute($charge, $filters->from, $filters->to));
 
-        $benefices = $revenus - $charges;
+        $publicite = $this->adSpend->execute($filters->from, $filters->to);
+
+        $benefices = $revenus - $charges - $publicite;
 
         $customers = $this->query->customerStats($filters);
         $buyers = $customers['buyers'];
@@ -59,6 +63,7 @@ class GetPerformanceRevenueService
             'roi' => $capital > 0 ? round($benefices / $capital * 100, 2) : 0.0,
             'capital' => $capital,
             'charges' => (float) $charges,
+            'publicite' => $publicite,
             'cout_produits' => $capital,
         ];
     }

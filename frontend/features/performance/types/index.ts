@@ -17,6 +17,7 @@ export type PerformanceRevenueStats = {
   roi: number
   capital: number
   charges: number
+  publicite: number
   cout_produits: number
 }
 
