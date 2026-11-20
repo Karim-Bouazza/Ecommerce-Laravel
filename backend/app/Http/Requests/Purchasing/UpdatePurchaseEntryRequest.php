@@ -6,11 +6,6 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class UpdatePurchaseEntryRequest extends FormRequest
 {
-    public function authorize(): bool
-    {
-        return $this->user()->hasPermission('entrees_achat.edit');
-    }
-
     /**
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */

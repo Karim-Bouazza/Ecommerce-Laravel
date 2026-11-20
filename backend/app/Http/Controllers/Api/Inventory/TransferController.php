@@ -20,8 +20,6 @@ class TransferController extends Controller
 
     public function index(Request $request): AnonymousResourceCollection
     {
-        abort_unless(auth()->user()->hasPermission('transferts.view'), 403);
-
         $perPage = (int) $request->input('per_page', 15);
         $search = trim((string) $request->input('search', ''));
         $warehouseId = $request->input('warehouse_id');
@@ -56,8 +54,6 @@ class TransferController extends Controller
 
     public function confirm(WarehouseTransfer $transfer): TransferResource|JsonResponse
     {
-        abort_unless(auth()->user()->hasPermission('transferts.edit'), 403);
-
         try {
             app(ConfirmTransferService::class)->execute($transfer);
         } catch (RuntimeException $exception) {
@@ -69,8 +65,6 @@ class TransferController extends Controller
 
     public function destroy(WarehouseTransfer $transfer): JsonResponse
     {
-        abort_unless(auth()->user()->hasPermission('transferts.delete'), 403);
-
         try {
             app(DeleteTransferService::class)->execute($transfer);
         } catch (RuntimeException $exception) {

@@ -6,11 +6,6 @@ use App\Support\SalesChannelAnalysis\SalesChannelFilters;
 
 class SalesChannelAnalysisRequest extends OrderAnalysisRequest
 {
-    public function authorize(): bool
-    {
-        return $this->user()->hasPermission('analytics_sales_channels.view');
-    }
-
     /**
      * @return array<string, array<mixed>>
      */

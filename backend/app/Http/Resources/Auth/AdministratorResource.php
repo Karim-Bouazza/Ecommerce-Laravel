@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Auth;
 
+use App\Support\PermissionRegistry;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Storage;
@@ -21,10 +22,10 @@ class AdministratorResource extends JsonResource
             'avatar' => $this->avatar ? Storage::url($this->avatar) : null,
             'is_active' => $this->is_active,
             'is_current' => $request->user()?->is($this->resource) ?? false,
-            'role' => $this->whenLoaded('role', fn () => $this->role ? [
+            'role' => $this->whenLoaded('roles', fn () => $this->role ? [
                 'id' => $this->role->id,
                 'name' => $this->role->name,
-                'is_system' => $this->role->is_system,
+                'is_system' => PermissionRegistry::isSystemRole($this->role->name),
             ] : null),
             'created_at' => $this->created_at?->toIso8601String(),
         ];

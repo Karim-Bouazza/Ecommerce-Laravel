@@ -7,7 +7,6 @@ use App\Http\Requests\Auth\StoreRoleRequest;
 use App\Http\Requests\Auth\UpdateRoleRequest;
 use App\Http\Resources\Auth\RoleDetailResource;
 use App\Http\Resources\Auth\RoleResource;
-use App\Models\Auth\Role;
 use App\Services\Roles\CreateRoleService;
 use App\Services\Roles\DeleteRoleService;
 use App\Services\Roles\UpdateRoleService;
@@ -16,17 +15,17 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use RuntimeException;
+use Spatie\Permission\Models\Role;
 
 class RoleController extends Controller
 {
     public function index(Request $request): AnonymousResourceCollection
     {
-        abort_unless(auth()->user()->hasPermission('roles.view'), 403);
-
         $perPage = (int) $request->input('per_page', 15);
         $search = trim((string) $request->input('search', ''));
 
         $roles = Role::query()
+            ->with('permissions:id,name')
             ->when($search !== '', function ($query) use ($search) {
                 $query->where('name', 'like', "%{$search}%");
             })
@@ -39,11 +38,6 @@ class RoleController extends Controller
 
     public function permissions(): JsonResponse
     {
-        abort_unless(
-            auth()->user()->hasPermission('roles.create') || auth()->user()->hasPermission('roles.edit'),
-            403
-        );
-
         $groups = collect(PermissionRegistry::grouped())
             ->map(fn (array $permissions, string $group) => [
                 'group' => $group,
@@ -67,8 +61,6 @@ class RoleController extends Controller
 
     public function show(Role $role): RoleDetailResource
     {
-        abort_unless(auth()->user()->hasPermission('roles.view'), 403);
-
         return new RoleDetailResource($role);
     }
 
@@ -85,8 +77,6 @@ class RoleController extends Controller
 
     public function destroy(Role $role): JsonResponse
     {
-        abort_unless(auth()->user()->hasPermission('roles.delete'), 403);
-
         try {
             app(DeleteRoleService::class)->execute($role);
         } catch (RuntimeException $exception) {

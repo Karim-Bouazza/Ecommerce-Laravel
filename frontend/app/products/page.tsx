@@ -6,7 +6,7 @@ import { Footer } from "@/features/storefront/components/footer"
 import { CatalogPage } from "@/features/storefront/catalog/catalog-page"
 
 export const metadata: Metadata = {
-  title: "Produits | CodAvenir",
+  title: "Produits | ProSecurity DZ",
   description: "Caméras, alarmes, contrôle d'accès et solutions de sécurité connectées.",
 }
 

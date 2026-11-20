@@ -6,11 +6,6 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class IndexAdministratorRequest extends FormRequest
 {
-    public function authorize(): bool
-    {
-        return $this->user()->hasPermission('administrateurs.view');
-    }
-
     /**
      * @return array<string, array<mixed>>
      */

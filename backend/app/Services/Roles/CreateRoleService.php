@@ -2,8 +2,8 @@
 
 namespace App\Services\Roles;
 
-use App\Models\Auth\Role;
 use App\Support\PermissionRegistry;
+use Spatie\Permission\Models\Role;
 
 class CreateRoleService
 {
@@ -11,10 +11,9 @@ class CreateRoleService
     {
         $permissions = array_values(array_intersect($data['permissions'] ?? [], PermissionRegistry::all()));
 
-        return Role::create([
-            'name' => $data['name'],
-            'slug' => Role::generateUniqueSlug($data['name']),
-            'permissions' => $permissions,
-        ]);
+        $role = Role::create(['name' => $data['name'], 'guard_name' => 'web']);
+        $role->syncPermissions($permissions);
+
+        return $role;
     }
 }

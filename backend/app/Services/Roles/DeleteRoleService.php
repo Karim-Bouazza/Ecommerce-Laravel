@@ -2,14 +2,15 @@
 
 namespace App\Services\Roles;
 
-use App\Models\Auth\Role;
+use App\Support\PermissionRegistry;
 use RuntimeException;
+use Spatie\Permission\Models\Role;
 
 class DeleteRoleService
 {
     public function execute(Role $role): void
     {
-        if ($role->is_system) {
+        if (PermissionRegistry::isSystemRole($role->name)) {
             throw new RuntimeException('Le rôle système ne peut pas être supprimé.');
         }
 

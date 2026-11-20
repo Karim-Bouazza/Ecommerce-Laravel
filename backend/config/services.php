@@ -44,6 +44,10 @@ return [
         'chat_id' => env('TELEGRAM_CHAT_ID'),
     ],
 
+    'meta' => [
+        'graph_version' => env('META_GRAPH_VERSION', 'v21.0'),
+    ],
+
     'zimou' => [
         'base_url' => env('ZIMOU_API_BASE_URL', 'https://zimou.express/api/v3'),
     ],

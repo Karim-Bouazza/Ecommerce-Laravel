@@ -10,11 +10,6 @@ use Illuminate\Validation\Rule;
 
 class StoreManualOrderRequest extends FormRequest
 {
-    public function authorize(): bool
-    {
-        return $this->user()->hasPermission('orders.create');
-    }
-
     /**
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */

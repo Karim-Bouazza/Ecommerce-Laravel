@@ -20,8 +20,6 @@ class PaiementController extends Controller
 {
     public function index(Request $request): AnonymousResourceCollection
     {
-        abort_unless(auth()->user()->hasPermission('paiements.view'), 403);
-
         $perPage = (int) $request->input('per_page', 15);
         $search = trim((string) $request->input('search', ''));
 
@@ -73,8 +71,6 @@ class PaiementController extends Controller
 
     public function destroy(WalletTransaction $paiement): JsonResponse
     {
-        abort_unless(auth()->user()->hasPermission('paiements.delete'), 403);
-
         $this->authorizePaiement($paiement);
 
         app(DeleteDeliveryPaymentService::class)->execute($paiement);

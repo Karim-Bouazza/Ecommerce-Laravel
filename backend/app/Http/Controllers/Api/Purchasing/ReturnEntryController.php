@@ -28,8 +28,6 @@ class ReturnEntryController extends Controller
 
     public function index(Request $request): AnonymousResourceCollection
     {
-        abort_unless(auth()->user()->hasPermission('entrees_retour.view'), 403);
-
         $perPage = (int) $request->input('per_page', 15);
         $search = trim((string) $request->input('search', ''));
 
@@ -74,8 +72,6 @@ class ReturnEntryController extends Controller
 
     public function confirm(ReturnEntry $returnEntry): ReturnEntryResource|JsonResponse
     {
-        abort_unless(auth()->user()->hasPermission('entrees_retour.edit'), 403);
-
         try {
             app(ConfirmReturnEntryService::class)->execute($returnEntry);
         } catch (RuntimeException $exception) {
@@ -87,8 +83,6 @@ class ReturnEntryController extends Controller
 
     public function destroy(ReturnEntry $returnEntry): JsonResponse
     {
-        abort_unless(auth()->user()->hasPermission('entrees_retour.delete'), 403);
-
         try {
             app(DeleteReturnEntryService::class)->execute($returnEntry);
         } catch (RuntimeException $exception) {
@@ -113,8 +107,6 @@ class ReturnEntryController extends Controller
 
     public function versements(ReturnEntry $returnEntry): AnonymousResourceCollection
     {
-        abort_unless(auth()->user()->hasPermission('versements.view'), 403);
-
         $versements = $returnEntry->versements()
             ->with('wallet')
             ->orderByDesc('date')
@@ -126,8 +118,6 @@ class ReturnEntryController extends Controller
 
     public function purchaseEntryOptions(): JsonResponse
     {
-        abort_unless(auth()->user()->hasPermission('entrees_retour.view'), 403);
-
         $options = PurchaseEntry::query()
             ->where('status', PurchaseEntryStatus::Completed)
             ->with(['warehouse', 'fournisseur'])
@@ -146,8 +136,6 @@ class ReturnEntryController extends Controller
 
     public function purchaseEntryItems(Request $request, PurchaseEntry $purchaseEntry): JsonResponse
     {
-        abort_unless(auth()->user()->hasPermission('entrees_retour.view'), 403);
-
         $excludeReturnEntryId = $request->integer('exclude_return_entry_id') ?: null;
 
         $items = $purchaseEntry->items()

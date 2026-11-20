@@ -8,11 +8,6 @@ use Illuminate\Validation\Rule;
 
 class CalculatePackagePriceRequest extends FormRequest
 {
-    public function authorize(): bool
-    {
-        return $this->user()->hasPermission('orders.create') || $this->user()->hasPermission('orders.edit');
-    }
-
     /**
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */

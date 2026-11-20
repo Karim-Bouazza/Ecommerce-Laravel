@@ -1,6 +1,5 @@
 "use client"
 
-import type * as React from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -53,7 +52,7 @@ export function AppSidebar() {
     <Sidebar collapsible="icon" className="h-svh border-r border-sidebar-border">
       <SidebarHeader className="gap-0 p-0">
         <div className="relative flex h-16 items-center justify-center pr-8 group-data-[collapsible=icon]:px-0">
-          <Link href="/admin" className="flex min-w-0 items-center justify-center" aria-label="CodAvenir">
+          <Link href="/admin" className="flex min-w-0 items-center justify-center" aria-label="ProSecurity DZ">
             <span className="hidden group-data-[collapsible=icon]:block">
               <BrandMark />
             </span>
@@ -121,36 +120,13 @@ export function AppSidebar() {
 
 function BrandMark() {
   return (
-    <span
-      className="relative block size-8 shrink-0 overflow-hidden"
-      style={{ "--mark": "2rem" } as React.CSSProperties}
-    >
-      <Image
-        src="/logo.png"
-        alt=""
-        width={2172}
-        height={724}
-        priority
-        className="absolute h-auto max-w-none dark:hidden"
-        style={{
-          width: "calc(var(--mark) * 2172 / 413)",
-          left: "calc(var(--mark) * -174 / 413)",
-          top: "calc(var(--mark) * -168 / 413)",
-        }}
-      />
-      <Image
-        src="/logo-dark.png"
-        alt=""
-        width={2172}
-        height={724}
-        priority
-        className="absolute hidden h-auto max-w-none dark:block"
-        style={{
-          width: "calc(var(--mark) * 2172 / 413)",
-          left: "calc(var(--mark) * -174 / 413)",
-          top: "calc(var(--mark) * -168 / 413)",
-        }}
-      />
-    </span>
+    <Image
+      src="/mini-logo.png"
+      alt=""
+      width={512}
+      height={512}
+      priority
+      className="size-11 shrink-0 object-contain"
+    />
   )
 }

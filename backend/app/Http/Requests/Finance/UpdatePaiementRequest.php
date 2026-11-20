@@ -6,11 +6,6 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class UpdatePaiementRequest extends FormRequest
 {
-    public function authorize(): bool
-    {
-        return $this->user()->hasPermission('paiements.edit');
-    }
-
     /**
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */

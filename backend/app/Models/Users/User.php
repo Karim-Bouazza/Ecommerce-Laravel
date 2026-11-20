@@ -3,16 +3,16 @@
 namespace App\Models\Users;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
-use App\Models\Auth\Role;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, HasRoles, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -26,7 +26,6 @@ class User extends Authenticatable
         'avatar',
         'password',
         'is_active',
-        'role_id',
     ];
 
     /**
@@ -53,13 +52,18 @@ class User extends Authenticatable
         ];
     }
 
-    public function role(): BelongsTo
+    protected function role(): Attribute
     {
-        return $this->belongsTo(Role::class);
+        return Attribute::get(fn () => $this->roles->first());
+    }
+
+    public function isSystemAdmin(): bool
+    {
+        return $this->hasAnyRole(config('permissions.system_roles'));
     }
 
     public function hasPermission(string $key): bool
     {
-        return $this->role?->hasPermission($key) ?? false;
+        return $this->isSystemAdmin() || $this->checkPermissionTo($key);
     }
 }

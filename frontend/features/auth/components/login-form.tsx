@@ -31,7 +31,7 @@ export function LoginForm({
         <CardHeader className="items-center justify-center pb-2">
           <Image
             src="/logo.png"
-            alt="CodAvenir"
+            alt="ProSecurity DZ"
             width={2172}
             height={724}
             priority
@@ -39,7 +39,7 @@ export function LoginForm({
           />
           <Image
             src="/logo-dark.png"
-            alt="CodAvenir"
+            alt="ProSecurity DZ"
             width={2172}
             height={724}
             priority

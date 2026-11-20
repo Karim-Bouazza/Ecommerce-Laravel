@@ -15,7 +15,7 @@ class AdministratorIndexQuery
         $search = trim((string) ($filters['search'] ?? ''));
 
         return User::query()
-            ->with('role:id,name,is_system')
+            ->with('roles:id,name')
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($query) use ($search) {
                     $query->where('name', 'like', "%{$search}%")
@@ -23,7 +23,7 @@ class AdministratorIndexQuery
                         ->orWhere('phone', 'like', "%{$search}%");
                 });
             })
-            ->when($filters['role_id'] ?? null, fn ($query, $roleId) => $query->where('role_id', $roleId))
+            ->when($filters['role_id'] ?? null, fn ($query, $roleId) => $query->whereHas('roles', fn ($roles) => $roles->whereKey($roleId)))
             ->when(($filters['status'] ?? null) === 'active', fn ($query) => $query->where('is_active', true))
             ->when(($filters['status'] ?? null) === 'inactive', fn ($query) => $query->where('is_active', false))
             ->orderByDesc('created_at')

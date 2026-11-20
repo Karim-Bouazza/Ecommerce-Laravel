@@ -26,8 +26,6 @@ class ChargeController extends Controller
 {
     public function index(Request $request): AnonymousResourceCollection
     {
-        abort_unless(auth()->user()->hasPermission('charges.view'), 403);
-
         $perPage = (int) $request->input('per_page', 15);
         $search = trim((string) $request->input('search', ''));
         $tab = $request->input('tab', 'charges');
@@ -84,8 +82,6 @@ class ChargeController extends Controller
 
     public function stats(): JsonResponse
     {
-        abort_unless(auth()->user()->hasPermission('charges.view'), 403);
-
         $calculator = app(CalculateChargeAmountService::class);
 
         $byCategory = [];
@@ -131,8 +127,6 @@ class ChargeController extends Controller
 
     public function toggleActive(Charge $charge): ChargeResource
     {
-        abort_unless(auth()->user()->hasPermission('charges.edit'), 403);
-
         $charge = app(ToggleChargeActiveService::class)->execute($charge);
 
         return new ChargeResource($charge->load('products:id,name'));
@@ -140,8 +134,6 @@ class ChargeController extends Controller
 
     public function destroy(Charge $charge): JsonResponse
     {
-        abort_unless(auth()->user()->hasPermission('charges.delete'), 403);
-
         try {
             app(DeleteChargeService::class)->execute($charge);
         } catch (RuntimeException $exception) {
@@ -164,8 +156,6 @@ class ChargeController extends Controller
 
     public function versements(Charge $charge): AnonymousResourceCollection
     {
-        abort_unless(auth()->user()->hasPermission('versements.view'), 403);
-
         $versements = $charge->versements()
             ->with('wallet')
             ->orderByDesc('date')

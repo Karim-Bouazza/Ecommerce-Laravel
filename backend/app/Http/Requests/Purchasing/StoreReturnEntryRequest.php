@@ -9,11 +9,6 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class StoreReturnEntryRequest extends FormRequest
 {
-    public function authorize(): bool
-    {
-        return $this->user()->hasPermission('entrees_retour.create');
-    }
-
     /**
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */

@@ -18,8 +18,6 @@ class FournisseurController extends Controller
 {
     public function index(Request $request): AnonymousResourceCollection
     {
-        abort_unless(auth()->user()->hasPermission('fournisseurs.view'), 403);
-
         $perPage = (int) $request->input('per_page', 15);
         $search = trim((string) $request->input('search', ''));
 
@@ -58,8 +56,6 @@ class FournisseurController extends Controller
 
     public function destroy(Fournisseur $fournisseur): JsonResponse
     {
-        abort_unless(auth()->user()->hasPermission('fournisseurs.delete'), 403);
-
         app(DeleteFournisseurService::class)->execute($fournisseur);
 
         return response()->json(['message' => 'Fournisseur supprimé.']);

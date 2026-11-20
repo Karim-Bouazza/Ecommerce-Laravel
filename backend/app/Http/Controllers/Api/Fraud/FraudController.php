@@ -22,8 +22,6 @@ class FraudController extends Controller
 
     public function index(Request $request): AnonymousResourceCollection
     {
-        abort_unless($request->user()->hasPermission('fraud.view'), 403);
-
         $search = trim((string) $request->input('search', ''));
         $level = $request->input('risk_level');
         $label = $request->input('review_label');
@@ -50,8 +48,6 @@ class FraudController extends Controller
 
     public function show(Request $request, Order $order): JsonResponse
     {
-        abort_unless($request->user()->hasPermission('fraud.view'), 403);
-
         $assessment = FraudAssessment::query()
             ->with([...self::WITH, 'histories'])
             ->where('order_id', $order->id)

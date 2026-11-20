@@ -15,8 +15,6 @@ class StockAlertController extends Controller
 {
     public function index(Request $request): AnonymousResourceCollection
     {
-        abort_unless(auth()->user()->hasPermission('alerte_stock.view'), 403);
-
         $warehouse = Warehouse::findOrFail($request->input('warehouse_id'));
 
         $perPage = (int) $request->input('per_page', 15);

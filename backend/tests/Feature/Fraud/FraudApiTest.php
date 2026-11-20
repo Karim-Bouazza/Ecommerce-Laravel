@@ -2,7 +2,8 @@
 
 use App\Models\Order\Order;
 use App\Models\Catalog\Product;
-use App\Models\Auth\Role;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 use App\Models\Users\User;
 use App\Models\Delivery\Wilaya;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -12,11 +13,10 @@ uses(RefreshDatabase::class);
 
 function fraudApiUser(array $permissions): User
 {
-    $role = Role::forceCreate([
-        'name' => 'R'.uniqid(), 'slug' => 'r'.uniqid(), 'permissions' => $permissions, 'is_system' => false,
-    ]);
+    $role = Role::create(['name' => 'R'.uniqid(), 'guard_name' => 'web']);
+    $role->syncPermissions(array_map(fn (string $key) => Permission::findOrCreate($key, 'web'), $permissions));
 
-    return User::factory()->create(['role_id' => $role->id]);
+    return User::factory()->create()->assignRole($role);
 }
 
 function fraudApiOrder($test): Order

@@ -8,11 +8,6 @@ use Illuminate\Validation\Rule;
 
 class FraudReviewRequest extends FormRequest
 {
-    public function authorize(): bool
-    {
-        return (bool) $this->user()?->hasPermission('fraud.review');
-    }
-
     /** @return array<string, mixed> */
     public function rules(): array
     {

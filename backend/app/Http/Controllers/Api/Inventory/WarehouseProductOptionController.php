@@ -14,13 +14,6 @@ class WarehouseProductOptionController extends Controller
 {
     public function index(Request $request, Warehouse $warehouse): JsonResponse
     {
-        abort_unless(
-            auth()->user()->hasPermission('transferts.create')
-                || auth()->user()->hasPermission('orders.create')
-                || auth()->user()->hasPermission('orders.edit'),
-            403
-        );
-
         $search = trim((string) $request->input('search', ''));
 
         $products = DB::table('products')

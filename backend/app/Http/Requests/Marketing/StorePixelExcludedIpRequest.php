@@ -8,11 +8,6 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class StorePixelExcludedIpRequest extends FormRequest
 {
-    public function authorize(): bool
-    {
-        return $this->user()->hasPermission('pixels.create');
-    }
-
     /**
      * @return array<string, array<mixed>>
      */

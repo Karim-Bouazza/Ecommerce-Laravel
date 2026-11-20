@@ -7,7 +7,7 @@ use App\Models\Fraud\FraudAssessmentHistory;
 use App\Models\Order\Order;
 use App\Models\Order\OrderAttempt;
 use App\Models\Catalog\Product;
-use App\Models\Auth\Role;
+use Spatie\Permission\Models\Role;
 use App\Models\Users\User;
 use App\Models\Delivery\Wilaya;
 use App\Services\Fraud\FraudAssessmentService;
@@ -74,9 +74,9 @@ function fraudAssessment(Order $order): FraudAssessment
 
 function fraudReviewer(): User
 {
-    $role = Role::forceCreate(['name' => 'Admin', 'slug' => 'admin', 'permissions' => [], 'is_system' => true]);
+    $role = Role::findOrCreate('admin', 'web');
 
-    return User::factory()->create(['role_id' => $role->id]);
+    return User::factory()->create()->assignRole($role);
 }
 
 function fraudHasRule(FraudAssessment $a, string $rule): bool

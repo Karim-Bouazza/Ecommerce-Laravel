@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Auth;
 
+use App\Support\PermissionRegistry;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Storage;
@@ -19,12 +20,12 @@ class UserResource extends JsonResource
             'email' => $this->email,
             'phone' => $this->phone,
             'avatar' => $this->avatar ? Storage::url($this->avatar) : null,
-            'role' => $this->whenLoaded('role', fn () => [
+            'role' => $this->whenLoaded('roles', fn () => $this->role ? [
                 'id' => $this->role->id,
                 'name' => $this->role->name,
-                'is_system' => $this->role->is_system,
-                'permissions' => $this->role->permissions ?? [],
-            ]),
+                'is_system' => PermissionRegistry::isSystemRole($this->role->name),
+                'permissions' => $this->role->permissions->pluck('name')->values()->all(),
+            ] : null),
         ];
     }
 }

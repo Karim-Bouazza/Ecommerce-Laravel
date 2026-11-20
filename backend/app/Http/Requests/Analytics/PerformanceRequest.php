@@ -10,11 +10,6 @@ use Illuminate\Validation\Rule;
 
 class PerformanceRequest extends FormRequest
 {
-    public function authorize(): bool
-    {
-        return $this->user()->hasPermission('performance_kpi.view');
-    }
-
     /**
      * @return array<string, array<mixed>>
      */

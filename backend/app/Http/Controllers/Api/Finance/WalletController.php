@@ -29,8 +29,6 @@ class WalletController extends Controller
 {
     public function index(Request $request): AnonymousResourceCollection
     {
-        abort_unless(auth()->user()->hasPermission('portefeuilles.view'), 403);
-
         $perPage = (int) $request->input('per_page', 15);
         $search = trim((string) $request->input('search', ''));
 
@@ -83,8 +81,6 @@ class WalletController extends Controller
 
     public function destroy(Wallet $wallet): JsonResponse
     {
-        abort_unless(auth()->user()->hasPermission('portefeuilles.delete'), 403);
-
         app(DeleteWalletService::class)->execute($wallet);
 
         return response()->json(['message' => 'Portefeuille supprimé.']);
@@ -92,8 +88,6 @@ class WalletController extends Controller
 
     public function transactions(Request $request, Wallet $wallet): AnonymousResourceCollection
     {
-        abort_unless(auth()->user()->hasPermission('portefeuilles.view'), 403);
-
         $perPage = (int) $request->input('per_page', 15);
         $category = $request->input('category');
         $search = trim((string) $request->input('search', ''));
@@ -125,8 +119,6 @@ class WalletController extends Controller
 
     public function stats(): JsonResponse
     {
-        abort_unless(auth()->user()->hasPermission('portefeuilles.view'), 403);
-
         return response()->json([
             'balance' => (int) Wallet::query()->sum('balance'),
             'entries' => (int) WalletTransaction::query()->where('type', WalletTransactionType::In)->sum('amount'),

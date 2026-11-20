@@ -10,11 +10,6 @@ use Illuminate\Validation\Rule;
 
 class UpdateManualOrderRequest extends FormRequest
 {
-    public function authorize(): bool
-    {
-        return $this->user()->hasPermission('orders.edit');
-    }
-
     /**
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */

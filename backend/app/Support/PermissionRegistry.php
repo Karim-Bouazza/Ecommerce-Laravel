@@ -32,6 +32,11 @@ class PermissionRegistry
             ->all();
     }
 
+    public static function isSystemRole(string $name): bool
+    {
+        return in_array($name, config('permissions.system_roles'), true);
+    }
+
     public static function label(string $key): string
     {
         return static::labels()[$key] ?? $key;

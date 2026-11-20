@@ -6,11 +6,6 @@ use Carbon\CarbonImmutable;
 
 class ProductAnalyticsRequest extends OrderAnalysisRequest
 {
-    public function authorize(): bool
-    {
-        return $this->user()->hasPermission('products.view');
-    }
-
     /**
      * @return array<string, array<mixed>>
      */

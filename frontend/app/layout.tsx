@@ -15,9 +15,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "CodAvenir - E-ecommerece management",
+  title: "ProSecurity DZ - E-ecommerece management",
   description:
-    "CodAvenir is a management platform for cash-on-delivery e-commerce operations.",
+    "ProSecurity DZ is a management platform for cash-on-delivery e-commerce operations.",
 };
 
 export default function RootLayout({

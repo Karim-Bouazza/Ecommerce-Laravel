@@ -3,7 +3,8 @@
 use App\Models\Order\Order;
 use App\Models\Marketing\PixelExcludedIp;
 use App\Models\Catalog\Product;
-use App\Models\Auth\Role;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 use App\Models\Users\User;
 use App\Models\Delivery\Wilaya;
 use App\Services\PixelTracking\ExcludedIpMatcher;
@@ -14,11 +15,10 @@ uses(RefreshDatabase::class);
 
 function pixelIpUser(array $permissions): User
 {
-    $role = Role::forceCreate([
-        'name' => 'R'.uniqid(), 'slug' => 'r'.uniqid(), 'permissions' => $permissions, 'is_system' => false,
-    ]);
+    $role = Role::create(['name' => 'R'.uniqid(), 'guard_name' => 'web']);
+    $role->syncPermissions(array_map(fn (string $key) => Permission::findOrCreate($key, 'web'), $permissions));
 
-    return User::factory()->create(['role_id' => $role->id]);
+    return User::factory()->create()->assignRole($role);
 }
 
 function pixelIpOrderFrom($test, string $ip)

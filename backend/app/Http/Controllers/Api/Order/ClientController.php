@@ -18,8 +18,6 @@ class ClientController extends Controller
 {
     public function index(Request $request): AnonymousResourceCollection
     {
-        abort_unless(auth()->user()->hasPermission('clients.view'), 403);
-
         $perPage = (int) $request->input('per_page', 15);
         $search = trim((string) $request->input('search', ''));
 
@@ -34,8 +32,6 @@ class ClientController extends Controller
 
     public function blacklisted(Request $request): AnonymousResourceCollection
     {
-        abort_unless(auth()->user()->hasPermission('clients_blacklist.view'), 403);
-
         $perPage = (int) $request->input('per_page', 15);
         $search = trim((string) $request->input('search', ''));
 
@@ -72,8 +68,6 @@ class ClientController extends Controller
 
     public function toggleBlacklist(Client $client): ClientResource
     {
-        abort_unless(auth()->user()->hasPermission('clients.edit'), 403);
-
         $client = app(ToggleClientBlacklistService::class)->execute($client);
 
         return new ClientResource($client->load(['wilaya', 'commune']));
@@ -81,8 +75,6 @@ class ClientController extends Controller
 
     public function destroy(Client $client): JsonResponse
     {
-        abort_unless(auth()->user()->hasPermission('clients.delete'), 403);
-
         try {
             app(DeleteClientService::class)->execute($client);
         } catch (RuntimeException $exception) {

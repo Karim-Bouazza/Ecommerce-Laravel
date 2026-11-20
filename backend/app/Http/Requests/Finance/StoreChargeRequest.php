@@ -11,11 +11,6 @@ use Illuminate\Validation\Rule;
 
 class StoreChargeRequest extends FormRequest
 {
-    public function authorize(): bool
-    {
-        return $this->user()->hasPermission('charges.create');
-    }
-
     /**
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */

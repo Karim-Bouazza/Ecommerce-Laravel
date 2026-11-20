@@ -15,8 +15,6 @@ class CategoryController extends Controller
 {
     public function index(Request $request): AnonymousResourceCollection
     {
-        abort_unless(auth()->user()->hasPermission('categories.view'), 403);
-
         $perPage = (int) $request->input('per_page', 15);
         $search = trim((string) $request->input('search', ''));
 
@@ -56,8 +54,6 @@ class CategoryController extends Controller
 
     public function toggleActive(Category $category): CategoryResource
     {
-        abort_unless(auth()->user()->hasPermission('categories.edit'), 403);
-
         $category->update(['is_active' => ! $category->is_active]);
 
         return new CategoryResource($category->fresh()->loadCount('products'));
@@ -65,8 +61,6 @@ class CategoryController extends Controller
 
     public function destroy(Category $category): JsonResponse
     {
-        abort_unless(auth()->user()->hasPermission('categories.delete'), 403);
-
         $category->delete();
 
         return response()->json(['message' => 'Catégorie supprimée.']);

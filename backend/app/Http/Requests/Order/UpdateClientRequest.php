@@ -7,11 +7,6 @@ use Illuminate\Validation\Rule;
 
 class UpdateClientRequest extends FormRequest
 {
-    public function authorize(): bool
-    {
-        return $this->user()->hasPermission('clients.edit');
-    }
-
     /**
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */

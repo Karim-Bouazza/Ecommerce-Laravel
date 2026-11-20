@@ -21,8 +21,6 @@ class VersementController extends Controller
 {
     public function index(Request $request): AnonymousResourceCollection
     {
-        abort_unless(auth()->user()->hasPermission('versements.view'), 403);
-
         $perPage = (int) $request->input('per_page', 15);
         $search = trim((string) $request->input('search', ''));
 
@@ -47,8 +45,6 @@ class VersementController extends Controller
 
     public function stats(): JsonResponse
     {
-        abort_unless(auth()->user()->hasPermission('versements.view'), 403);
-
         $sums = Fournisseur::query()
             ->withSum('completedPurchaseEntries as total_dues_sum', 'total')
             ->withSum('completedPurchaseEntryVersements as entries_paid_amount', 'amount')
@@ -94,8 +90,6 @@ class VersementController extends Controller
 
     public function destroy(WalletTransaction $versement): JsonResponse
     {
-        abort_unless(auth()->user()->hasPermission('versements.delete'), 403);
-
         $this->authorizeVersement($versement);
 
         app(DeleteFournisseurVersementService::class)->execute($versement);

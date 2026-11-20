@@ -44,7 +44,7 @@ export function UserBadge({ className }: { className?: string }) {
           )}
         </div>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent align="end" className="w-56 min-w-56">
         <DropdownMenuItem render={<Link href="/admin/profile" />}>
           <User />
           Profil

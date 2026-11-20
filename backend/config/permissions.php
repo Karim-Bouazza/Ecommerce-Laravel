@@ -58,6 +58,8 @@ return [
                 'pixels.create' => 'Créer des pixels',
                 'pixels.edit' => 'Modifier les pixels',
                 'pixels.delete' => 'Supprimer les pixels',
+                'meta_ads.view' => 'Voir la publicité Meta',
+                'meta_ads.edit' => 'Gérer la publicité Meta',
             ],
         ],
         'inventaire' => [

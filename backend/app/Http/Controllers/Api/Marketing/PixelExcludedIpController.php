@@ -14,8 +14,6 @@ class PixelExcludedIpController extends Controller
 {
     public function index(): AnonymousResourceCollection
     {
-        abort_unless(auth()->user()->hasPermission('pixels.view'), 403);
-
         return PixelExcludedIpResource::collection(
             PixelExcludedIp::query()->orderByDesc('id')->get()
         );
@@ -35,8 +33,6 @@ class PixelExcludedIpController extends Controller
 
     public function destroy(PixelExcludedIp $pixelExcludedIp): JsonResponse
     {
-        abort_unless(auth()->user()->hasPermission('pixels.delete'), 403);
-
         $pixelExcludedIp->delete();
 
         return response()->json(['message' => 'Adresse retirée de la liste.']);

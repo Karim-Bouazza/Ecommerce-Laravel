@@ -22,7 +22,7 @@ class AuthController extends Controller
 
         $request->session()->regenerate();
 
-        return new UserResource($request->user()->load('role'));
+        return new UserResource($request->user()->load('roles.permissions'));
     }
 
     public function logout(Request $request)
@@ -37,7 +37,7 @@ class AuthController extends Controller
 
     public function me(Request $request)
     {
-        return new UserResource($request->user()->load('role'));
+        return new UserResource($request->user()->load('roles.permissions'));
     }
 
     public function updateProfile(UpdateProfileRequest $request): UserResource
@@ -60,6 +60,6 @@ class AuthController extends Controller
 
         $user->update($data);
 
-        return new UserResource($user->fresh()->load('role'));
+        return new UserResource($user->fresh()->load('roles.permissions'));
     }
 }

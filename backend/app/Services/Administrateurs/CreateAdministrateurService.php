@@ -3,18 +3,22 @@
 namespace App\Services\Administrateurs;
 
 use App\Models\Users\User;
+use Spatie\Permission\Models\Role;
 
 class CreateAdministrateurService
 {
     public function execute(array $data): User
     {
-        return User::create([
+        $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
             'phone' => $data['phone'] ?? null,
-            'role_id' => $data['role_id'],
             'password' => $data['password'],
             'is_active' => $data['is_active'] ?? true,
-        ])->load('role');
+        ]);
+
+        $user->syncRoles(Role::findById($data['role_id'], 'web'));
+
+        return $user->load('roles.permissions');
     }
 }

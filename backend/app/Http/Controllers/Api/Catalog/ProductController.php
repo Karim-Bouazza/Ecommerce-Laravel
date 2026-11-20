@@ -44,8 +44,6 @@ class ProductController extends Controller
 
     public function destroy(Product $product): JsonResponse
     {
-        abort_unless(auth()->user()->hasPermission('products.delete'), 403);
-
         app(DeleteProductService::class)->execute($product);
 
         return response()->json(['message' => 'Produit supprimé.']);

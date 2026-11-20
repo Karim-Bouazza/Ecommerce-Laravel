@@ -17,8 +17,6 @@ class WilayaAnalyticsController extends Controller
 
     public function index(Request $request): AnonymousResourceCollection
     {
-        abort_unless(auth()->user()->hasPermission('wilayas.view'), 403);
-
         $perPage = (int) $request->input('per_page', 15);
         $search = trim((string) $request->input('search', ''));
         $dateFrom = $request->input('date_from');

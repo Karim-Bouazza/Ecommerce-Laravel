@@ -9,6 +9,7 @@ use App\Http\Resources\Analytics\ProductAnalyticsResource;
 use App\Models\Catalog\Product;
 use App\Queries\Products\ProductAnalyticsQuery;
 use App\Services\Charges\AllocateChargesToProductsService;
+use App\Services\Meta\GetProductAdSpendService;
 use App\Support\Analytics\OrderRateCalculator;
 use App\Support\Analytics\ProductAnalyticsCalculator;
 use Illuminate\Database\Eloquent\Builder;
@@ -20,6 +21,7 @@ class ProductAnalyticsController extends Controller
     public function __construct(
         private readonly ProductAnalyticsQuery $query,
         private readonly AllocateChargesToProductsService $chargeAllocator,
+        private readonly GetProductAdSpendService $adSpend,
     ) {}
 
     public function index(ProductAnalyticsRequest $request): AnonymousResourceCollection
@@ -32,9 +34,11 @@ class ProductAnalyticsController extends Controller
             ->withQueryString();
 
         $allocations = $this->chargeAllocator->execute($request->periodStart(), $request->periodEnd());
-        $products->getCollection()->each(
-            fn (Product $product) => $product->setAttribute('charge_totale', $allocations[$product->id] ?? 0.0)
-        );
+        $adSpends = $this->adSpend->execute($request->periodStart(), $request->periodEnd());
+        $products->getCollection()->each(function (Product $product) use ($allocations, $adSpends) {
+            $product->setAttribute('charge_totale', $allocations[$product->id] ?? 0.0);
+            $product->setAttribute('ad_spend', $adSpends[$product->id] ?? 0.0);
+        });
 
         return ProductAnalyticsResource::collection($products);
     }
@@ -48,10 +52,11 @@ class ProductAnalyticsController extends Controller
             'delivered_count', 'delivered_quantity', 'delivered_sales_value',
             'returned_count', 'returned_quantity',
             'pending_count', 'delivery_resolved_count',
-            'cost', 'charge',
+            'cost', 'charge', 'ad_spend',
         ];
 
         $allocations = $this->chargeAllocator->execute($request->periodStart(), $request->periodEnd());
+        $adSpends = $this->adSpend->execute($request->periodStart(), $request->periodEnd());
 
         $totals = $this->filteredQuery($request)->get()->reduce(
             fn (array $totals, Product $product) => [
@@ -70,6 +75,7 @@ class ProductAnalyticsController extends Controller
                 'delivery_resolved_count' => $totals['delivery_resolved_count'] + $product->delivery_resolved_count,
                 'cost' => $totals['cost'] + (ProductAnalyticsCalculator::cost((int) $product->delivered_quantity, $product->purchase_price) ?? 0),
                 'charge' => $totals['charge'] + ($allocations[$product->id] ?? 0.0),
+                'ad_spend' => $totals['ad_spend'] + ($adSpends[$product->id] ?? 0.0),
             ],
             array_fill_keys($keys, 0),
         );
@@ -78,7 +84,8 @@ class ProductAnalyticsController extends Controller
         $cost = (float) $totals['cost'];
         $margin = $sales - $cost;
         $charge = (float) $totals['charge'];
-        $beneficeNet = $margin - $charge;
+        $adSpend = (float) $totals['ad_spend'];
+        $beneficeNet = $margin - $charge - $adSpend;
 
         return response()->json([
             'nombre_commandes' => ['count' => $totals['total_orders_count'], 'quantity' => $totals['total_quantity']],
@@ -96,6 +103,7 @@ class ProductAnalyticsController extends Controller
             'marge_brute' => $margin,
             'profit_pourcentage' => ProductAnalyticsCalculator::profitPercentage($margin, $sales),
             'charge_totale' => $charge,
+            'ad_spend' => $adSpend,
             'benefice_net' => $beneficeNet,
             'profit_net_pourcentage' => ProductAnalyticsCalculator::profitPercentage($beneficeNet, $sales),
         ]);

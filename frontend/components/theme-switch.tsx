@@ -16,9 +16,9 @@ export function ThemeSwitch() {
   const isDark = mounted && resolvedTheme === "dark"
 
   return (
-    <div className="flex items-center justify-between gap-6 px-3 py-2">
-      <span className="text-sm font-medium">Thème</span>
-      <div className="flex items-center gap-0.5 rounded-full bg-muted p-1">
+    <div className="flex items-center justify-between gap-4 px-2 py-1.5">
+      <span className="text-sm">Thème</span>
+      <div className="flex shrink-0 items-center gap-0.5 rounded-full bg-muted p-0.5">
         <button
           type="button"
           aria-label="Thème clair"

@@ -29,8 +29,6 @@ class PixelController extends Controller
 
     public function index(Request $request): AnonymousResourceCollection
     {
-        abort_unless(auth()->user()->hasPermission('pixels.view'), 403);
-
         $perPage = (int) $request->input('per_page', 15);
         $search = trim((string) $request->input('search', ''));
 
@@ -62,8 +60,6 @@ class PixelController extends Controller
 
     public function toggleActive(Pixel $pixel): PixelResource
     {
-        abort_unless(auth()->user()->hasPermission('pixels.edit'), 403);
-
         $pixel->update(['is_active' => ! $pixel->is_active]);
 
         return new PixelResource($pixel->fresh());
@@ -71,8 +67,6 @@ class PixelController extends Controller
 
     public function destroy(Pixel $pixel): JsonResponse
     {
-        abort_unless(auth()->user()->hasPermission('pixels.delete'), 403);
-
         $pixel->delete();
 
         return response()->json(['message' => 'Pixel supprimé.']);

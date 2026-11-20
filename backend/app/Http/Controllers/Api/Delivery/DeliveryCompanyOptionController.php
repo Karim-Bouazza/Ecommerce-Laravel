@@ -10,11 +10,6 @@ class DeliveryCompanyOptionController extends Controller
 {
     public function index(): JsonResponse
     {
-        abort_unless(
-            auth()->user()->hasPermission('orders.create') || auth()->user()->hasPermission('orders.edit'),
-            403
-        );
-
         $companies = DeliveryCompany::query()
             ->orderBy('name')
             ->get(['id', 'name']);

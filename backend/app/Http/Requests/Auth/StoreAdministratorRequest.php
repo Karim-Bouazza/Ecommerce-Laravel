@@ -7,11 +7,6 @@ use Illuminate\Validation\Rules\Password;
 
 class StoreAdministratorRequest extends FormRequest
 {
-    public function authorize(): bool
-    {
-        return $this->user()->hasPermission('administrateurs.create');
-    }
-
     /**
      * @return array<string, array<mixed>>
      */

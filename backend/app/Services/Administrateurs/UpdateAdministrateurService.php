@@ -5,6 +5,7 @@ namespace App\Services\Administrateurs;
 use App\Models\Users\User;
 use Illuminate\Support\Arr;
 use RuntimeException;
+use Spatie\Permission\Models\Role;
 
 class UpdateAdministrateurService
 {
@@ -15,7 +16,7 @@ class UpdateAdministrateurService
      */
     public function execute(User $user, array $data, ?User $actor = null): User
     {
-        $roleChanged = isset($data['role_id']) && (int) $data['role_id'] !== (int) $user->role_id;
+        $roleChanged = isset($data['role_id']) && (int) $data['role_id'] !== (int) $user->role?->id;
         $deactivated = array_key_exists('is_active', $data) && ! $data['is_active'] && $user->is_active;
 
         if ($roleChanged) {
@@ -35,12 +36,16 @@ class UpdateAdministrateurService
             unset($data['password']);
         }
 
-        $user->update(Arr::only($data, ['name', 'email', 'phone', 'role_id', 'password', 'is_active']));
+        $user->update(Arr::only($data, ['name', 'email', 'phone', 'password', 'is_active']));
+
+        if ($roleChanged) {
+            $user->syncRoles(Role::findById((int) $data['role_id'], 'web'));
+        }
 
         if ($deactivated || isset($data['password'])) {
             $this->safeguards->revokeSessions($user);
         }
 
-        return $user->load('role');
+        return $user->load('roles.permissions');
     }
 }

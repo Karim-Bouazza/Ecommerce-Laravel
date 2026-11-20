@@ -10,11 +10,6 @@ use Illuminate\Validation\Rule;
 
 class DashboardRequest extends FormRequest
 {
-    public function authorize(): bool
-    {
-        return $this->user()->hasPermission('tableau_de_bord.view');
-    }
-
     /**
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */

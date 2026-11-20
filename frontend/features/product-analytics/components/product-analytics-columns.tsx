@@ -124,6 +124,11 @@ export const productAnalyticsColumns: ColumnDef<ProductAnalyticsItem>[] = [
         : <span className="text-muted-foreground">—</span>,
   },
   {
+    accessorKey: "ad_spend",
+    header: "Dépenses Meta (DZD)",
+    cell: ({ row }) => formatPrice(row.original.ad_spend),
+  },
+  {
     accessorKey: "benefice_net",
     header: "Bénéfice Net (DZD)",
     cell: ({ row }) =>

@@ -16,8 +16,6 @@ class StockMovementController extends Controller
 
     public function index(Request $request): AnonymousResourceCollection
     {
-        abort_unless(auth()->user()->hasPermission('suivi_stock.view'), 403);
-
         $perPage = (int) $request->input('per_page', 15);
         $search = trim((string) $request->input('search', ''));
         $warehouseId = $request->input('warehouse_id');

@@ -2,18 +2,12 @@
 
 namespace Database\Seeders;
 
-use App\Models\Auth\Role;
 use App\Models\Users\User;
 use Illuminate\Database\Seeder;
+use Spatie\Permission\Models\Role;
 
 class AdminUserSeeder extends Seeder
 {
-    /**
-     * Creates (or updates) the bootstrap administrator from ADMIN_* env vars,
-     * so a fresh deploy always has a way into the admin without an
-     * interactive step. Safe to run on every deploy:
-     * updateOrCreate keys on email, so it never duplicates the account.
-     */
     public function run(): void
     {
         $email = env('ADMIN_EMAIL');
@@ -25,20 +19,18 @@ class AdminUserSeeder extends Seeder
             return;
         }
 
-        $role = Role::firstOrCreate(
-            ['slug' => 'administrateur'],
-            ['name' => 'Administrateur', 'is_system' => true],
-        );
+        $this->command?->call('permissions:sync');
 
-        User::updateOrCreate(
+        $user = User::updateOrCreate(
             ['email' => $email],
             [
                 'name' => env('ADMIN_NAME', 'Admin'),
                 'phone' => env('ADMIN_PHONE'),
                 'password' => $password,
                 'is_active' => true,
-                'role_id' => $role->id,
             ],
         );
+
+        $user->syncRoles(Role::findByName(config('permissions.system_roles')[0], 'web'));
     }
 }

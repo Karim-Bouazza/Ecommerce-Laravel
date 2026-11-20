@@ -10,11 +10,6 @@ use Illuminate\Validation\Rule;
 
 class OrderAnalysisRequest extends FormRequest
 {
-    public function authorize(): bool
-    {
-        return $this->user()->hasPermission('analytics_orders.view');
-    }
-
     /**
      * @return array<string, array<mixed>>
      */

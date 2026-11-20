@@ -19,8 +19,6 @@ class WarehouseController extends Controller
 {
     public function index(Request $request): AnonymousResourceCollection
     {
-        abort_unless(auth()->user()->hasPermission('entrepots.view'), 403);
-
         $perPage = (int) $request->input('per_page', 15);
         $search = trim((string) $request->input('search', ''));
 
@@ -58,8 +56,6 @@ class WarehouseController extends Controller
 
     public function toggleActive(Warehouse $warehouse): WarehouseResource
     {
-        abort_unless(auth()->user()->hasPermission('entrepots.edit'), 403);
-
         $warehouse = app(ToggleWarehouseActiveService::class)->execute($warehouse);
 
         return new WarehouseResource($warehouse->loadCount('stockMovements')->load(['wilayas:id', 'products:id']));
@@ -67,8 +63,6 @@ class WarehouseController extends Controller
 
     public function destroy(Warehouse $warehouse): JsonResponse
     {
-        abort_unless(auth()->user()->hasPermission('entrepots.delete'), 403);
-
         app(DeleteWarehouseService::class)->execute($warehouse);
 
         return response()->json(['message' => 'Entrepôt supprimé.']);

@@ -8,11 +8,6 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class StoreTransferRequest extends FormRequest
 {
-    public function authorize(): bool
-    {
-        return $this->user()->hasPermission('transferts.create');
-    }
-
     /**
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */

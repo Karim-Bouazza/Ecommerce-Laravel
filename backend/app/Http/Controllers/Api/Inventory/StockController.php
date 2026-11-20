@@ -17,8 +17,6 @@ class StockController extends Controller
 {
     public function index(Request $request): AnonymousResourceCollection
     {
-        abort_unless(auth()->user()->hasPermission('stock.view'), 403);
-
         $perPage = (int) $request->input('per_page', 15);
 
         $products = $this->filteredQuery($request)
@@ -31,8 +29,6 @@ class StockController extends Controller
 
     public function stats(Request $request): JsonResponse
     {
-        abort_unless(auth()->user()->hasPermission('stock.view'), 403);
-
         $totals = $this->filteredQuery($request)->get()->reduce(
             fn (array $totals, Product $product) => [
                 'confirme_sans_stock' => $totals['confirme_sans_stock'] + $product->confirme_sans_stock,

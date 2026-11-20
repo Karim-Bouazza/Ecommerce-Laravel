@@ -22,10 +22,12 @@ export type ProductAnalyticsItem = {
   marge_brute: number | null
   profit_pourcentage: number
   charge_totale: number
+  ad_spend: number
   benefice_net: number | null
   profit_net_pourcentage: number
   moyenne_par_piece: {
     charge: number
+    ad_spend: number
     benefice_net: number | null
   } | null
 }

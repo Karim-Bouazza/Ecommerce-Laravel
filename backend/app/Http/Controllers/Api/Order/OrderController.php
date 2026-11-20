@@ -81,8 +81,8 @@ class OrderController extends Controller
         };
 
         abort_unless(
-            auth()->user()->hasPermission('orders.view')
-                || ($groupPermission && auth()->user()->hasPermission($groupPermission)),
+            $request->user()->can('orders.view')
+                || ($groupPermission && $request->user()->can($groupPermission)),
             403
         );
 
@@ -143,12 +143,6 @@ class OrderController extends Controller
 
     public function generateName(Request $request): \Illuminate\Http\JsonResponse
     {
-        abort_unless(
-            auth()->user()->hasPermission('orders.create')
-                || auth()->user()->hasPermission('orders.edit'),
-            403
-        );
-
         $validated = $request->validate([
             'product_id' => ['required', 'integer', 'exists:products,id'],
             'variant' => ['nullable', 'string', 'max:255'],
@@ -201,8 +195,6 @@ class OrderController extends Controller
 
     public function statusHistory(Order $order): AnonymousResourceCollection
     {
-        abort_unless(auth()->user()->hasPermission('orders.view'), 403);
-
         $histories = $order->statusHistories()
             ->with('user')
             ->orderBy('created_at')
@@ -213,7 +205,6 @@ class OrderController extends Controller
 
     public function destroy(Order $order): Response
     {
-        abort_unless(auth()->user()->hasPermission('orders.delete'), 403);
         abort_unless(
             $order->status->canBeDeleted(),
             409,

@@ -5,6 +5,7 @@ namespace App\Http\Resources\Auth;
 use App\Support\PermissionRegistry;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Str;
 
 class RoleResource extends JsonResource
 {
@@ -13,14 +14,17 @@ class RoleResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $isSystem = PermissionRegistry::isSystemRole($this->name);
+
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'slug' => $this->slug,
-            'is_system' => $this->is_system,
-            'permissions' => $this->is_system
+            'slug' => Str::slug($this->name),
+            'is_system' => $isSystem,
+            'permissions' => $isSystem
                 ? ['Tous']
-                : collect($this->permissions ?? [])
+                : $this->permissions
+                    ->pluck('name')
                     ->map(fn (string $key) => PermissionRegistry::label($key))
                     ->values()
                     ->all(),

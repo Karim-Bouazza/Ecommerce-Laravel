@@ -7,16 +7,17 @@ use App\Http\Requests\Auth\IndexAdministratorRequest;
 use App\Http\Requests\Auth\StoreAdministratorRequest;
 use App\Http\Requests\Auth\UpdateAdministratorRequest;
 use App\Http\Resources\Auth\AdministratorResource;
-use App\Models\Auth\Role;
 use App\Models\Users\User;
 use App\Queries\Administrators\AdministratorIndexQuery;
 use App\Services\Administrateurs\CreateAdministrateurService;
 use App\Services\Administrateurs\DeleteAdministrateurService;
 use App\Services\Administrateurs\ToggleAdministrateurActiveService;
 use App\Services\Administrateurs\UpdateAdministrateurService;
+use App\Support\PermissionRegistry;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use RuntimeException;
+use Spatie\Permission\Models\Role;
 
 class AdministratorController extends Controller
 {
@@ -30,17 +31,12 @@ class AdministratorController extends Controller
      */
     public function roleOptions(): JsonResponse
     {
-        $user = auth()->user();
-
-        abort_unless(
-            $user->hasPermission('administrateurs.view')
-                || $user->hasPermission('administrateurs.create')
-                || $user->hasPermission('administrateurs.edit'),
-            403
-        );
-
         return response()->json(
-            Role::query()->orderBy('name')->get(['id', 'name', 'is_system'])
+            Role::query()->orderBy('name')->get(['id', 'name'])->map(fn (Role $role) => [
+                'id' => $role->id,
+                'name' => $role->name,
+                'is_system' => PermissionRegistry::isSystemRole($role->name),
+            ])
         );
     }
 
@@ -64,8 +60,6 @@ class AdministratorController extends Controller
 
     public function toggleActive(User $administrator): AdministratorResource|JsonResponse
     {
-        abort_unless(auth()->user()->hasPermission('administrateurs.edit'), 403);
-
         try {
             $user = app(ToggleAdministrateurActiveService::class)->execute($administrator, auth()->user());
         } catch (RuntimeException $exception) {
@@ -77,8 +71,6 @@ class AdministratorController extends Controller
 
     public function destroy(User $administrator): JsonResponse
     {
-        abort_unless(auth()->user()->hasPermission('administrateurs.delete'), 403);
-
         try {
             app(DeleteAdministrateurService::class)->execute($administrator, auth()->user());
         } catch (RuntimeException $exception) {

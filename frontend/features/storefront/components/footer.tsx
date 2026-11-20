@@ -80,7 +80,7 @@ export function Footer() {
     <footer className="mt-8 rounded-t-3xl bg-muted/60 text-foreground">
       <div className="mx-auto grid max-w-7xl grid-cols-1 gap-12 px-4 py-16 sm:px-6 lg:grid-cols-12 lg:gap-8 lg:px-8">
         <div className="lg:col-span-5">
-          <Link href="/" className="inline-flex items-center" aria-label="CodAvenir">
+          <Link href="/" className="inline-flex items-center" aria-label="ProSecurity DZ">
             <Image
               src="/logo.png"
               alt=""
@@ -132,7 +132,7 @@ export function Footer() {
 
       <div className="border-t border-border">
         <p className="mx-auto max-w-7xl px-4 py-5 text-center text-sm text-muted-foreground sm:px-6 lg:px-8">
-          Copyright © {new Date().getFullYear()} CodAvenir. Tous droits réservés.
+          Copyright © {new Date().getFullYear()} ProSecurity DZ. Tous droits réservés.
         </p>
       </div>
     </footer>

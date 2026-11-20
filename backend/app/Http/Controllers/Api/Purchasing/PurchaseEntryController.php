@@ -25,8 +25,6 @@ class PurchaseEntryController extends Controller
 
     public function index(Request $request): AnonymousResourceCollection
     {
-        abort_unless(auth()->user()->hasPermission('entrees_achat.view'), 403);
-
         $perPage = (int) $request->input('per_page', 15);
         $search = trim((string) $request->input('search', ''));
 
@@ -67,8 +65,6 @@ class PurchaseEntryController extends Controller
 
     public function confirm(PurchaseEntry $purchaseEntry): PurchaseEntryResource|JsonResponse
     {
-        abort_unless(auth()->user()->hasPermission('entrees_achat.edit'), 403);
-
         try {
             app(ConfirmPurchaseEntryService::class)->execute($purchaseEntry);
         } catch (RuntimeException $exception) {
@@ -80,8 +76,6 @@ class PurchaseEntryController extends Controller
 
     public function destroy(PurchaseEntry $purchaseEntry): JsonResponse
     {
-        abort_unless(auth()->user()->hasPermission('entrees_achat.delete'), 403);
-
         try {
             app(DeletePurchaseEntryService::class)->execute($purchaseEntry);
         } catch (RuntimeException $exception) {
@@ -106,8 +100,6 @@ class PurchaseEntryController extends Controller
 
     public function versements(PurchaseEntry $purchaseEntry): AnonymousResourceCollection
     {
-        abort_unless(auth()->user()->hasPermission('versements.view'), 403);
-
         $versements = $purchaseEntry->versements()
             ->with('wallet')
             ->orderByDesc('date')

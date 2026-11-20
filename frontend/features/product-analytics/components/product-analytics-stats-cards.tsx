@@ -1,6 +1,6 @@
 "use client"
 
-import { Percent, Receipt, ShoppingCart, TrendingUp, Wallet } from "lucide-react"
+import { Megaphone, Percent, Receipt, ShoppingCart, TrendingUp, Wallet } from "lucide-react"
 import { cn } from "cn"
 
 import { Card, CardContent } from "@/components/ui/card"
@@ -50,6 +50,13 @@ const stats = [
     icon: Receipt,
     iconClassName: "bg-orange-500/10 text-orange-600 dark:text-orange-400",
     format: (data: ProductAnalyticsStats) => formatPrice(data.charge_totale) ?? "—",
+  },
+  {
+    key: "ad_spend" as const,
+    label: "DÉPENSES META",
+    icon: Megaphone,
+    iconClassName: "bg-sky-500/10 text-sky-600 dark:text-sky-400",
+    format: (data: ProductAnalyticsStats) => formatPrice(data.ad_spend) ?? "—",
   },
   {
     key: "benefice_net" as const,

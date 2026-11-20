@@ -2,15 +2,12 @@
 
 namespace App\Services\Administrateurs;
 
-use App\Models\Auth\Role;
 use App\Models\Users\User;
+use App\Support\PermissionRegistry;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
+use Spatie\Permission\Models\Role;
 
-/**
- * Business rules that keep the back office reachable: nobody can lock themselves
- * out, and the last active system administrator can never be removed.
- */
 class AdministrateurSafeguards
 {
     public function assertNotSelf(User $target, ?User $actor, string $message): void
@@ -22,14 +19,14 @@ class AdministrateurSafeguards
 
     public function assertAnotherSystemAdminRemains(User $target): void
     {
-        if (! $target->role?->is_system || ! $target->is_active) {
+        if (! $target->isSystemAdmin() || ! $target->is_active) {
             return;
         }
 
         $others = User::query()
             ->whereKeyNot($target->getKey())
             ->where('is_active', true)
-            ->whereHas('role', fn ($query) => $query->where('is_system', true))
+            ->role(config('permissions.system_roles'))
             ->exists();
 
         if (! $others) {
@@ -39,12 +36,11 @@ class AdministrateurSafeguards
 
     public function isSystemRole(int $roleId): bool
     {
-        return (bool) Role::query()->whereKey($roleId)->value('is_system');
+        $name = Role::query()->whereKey($roleId)->value('name');
+
+        return $name !== null && PermissionRegistry::isSystemRole($name);
     }
 
-    /**
-     * Logs the user out of every device (sessions are stored in the database).
-     */
     public function revokeSessions(User $user): void
     {
         if (config('session.driver') === 'database') {

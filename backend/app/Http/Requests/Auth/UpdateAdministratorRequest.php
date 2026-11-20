@@ -8,11 +8,6 @@ use Illuminate\Validation\Rules\Password;
 
 class UpdateAdministratorRequest extends FormRequest
 {
-    public function authorize(): bool
-    {
-        return $this->user()->hasPermission('administrateurs.edit');
-    }
-
     /**
      * @return array<string, array<mixed>>
      */

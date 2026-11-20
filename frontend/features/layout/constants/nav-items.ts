@@ -135,10 +135,11 @@ export const NAV_SECTIONS: NavSection[] = [
         ],
       },
       {
-        label: "Adpilot",
+        label: "Meta Ads",
         href: "/admin/adpilot",
         icon: Network,
         items: [
+          { label: "Publicité", href: "/admin/adpilot/publicite", permission: "meta_ads.view" },
           { label: "Pixels", href: "/admin/adpilot/pixels", permission: "pixels.view" },
         ],
       },
