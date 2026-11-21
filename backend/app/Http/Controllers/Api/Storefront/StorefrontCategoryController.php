@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers\Api\Storefront;
 
+use App\Data\Storefront\StorefrontCategoryData;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\Storefront\StorefrontCategoryResource;
 use App\Models\Catalog\Category;
+use Spatie\LaravelData\DataCollection;
 
 class StorefrontCategoryController extends Controller
 {
-    public function index()
+    public function index(): DataCollection
     {
         $categories = Category::query()
             ->where('is_active', true)
@@ -17,6 +18,6 @@ class StorefrontCategoryController extends Controller
             ->orderBy('name')
             ->get();
 
-        return StorefrontCategoryResource::collection($categories);
+        return StorefrontCategoryData::collect($categories, DataCollection::class);
     }
 }

@@ -3,22 +3,22 @@
 namespace App\Http\Controllers\Api\Inventory;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Inventory\StoreTransferRequest;
-use App\Http\Resources\Inventory\TransferResource;
+use App\Data\Inventory\StoreTransferData;
+use App\Data\Inventory\TransferData;
 use App\Models\Inventory\WarehouseTransfer;
 use App\Services\Transfers\ConfirmTransferService;
 use App\Services\Transfers\CreateTransferService;
 use App\Services\Transfers\DeleteTransferService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use RuntimeException;
+use Spatie\LaravelData\PaginatedDataCollection;
 
 class TransferController extends Controller
 {
     protected const WITH = ['fromWarehouse', 'toWarehouse', 'items.product', 'creator'];
 
-    public function index(Request $request): AnonymousResourceCollection
+    public function index(Request $request): PaginatedDataCollection
     {
         $perPage = (int) $request->input('per_page', 15);
         $search = trim((string) $request->input('search', ''));
@@ -42,17 +42,19 @@ class TransferController extends Controller
             ->paginate($perPage)
             ->withQueryString();
 
-        return TransferResource::collection($transfers);
+        $transfers->through(fn (WarehouseTransfer $transfer) => TransferData::fromTransfer($transfer, (int) $warehouseId ?: null));
+
+        return TransferData::collect($transfers, PaginatedDataCollection::class);
     }
 
-    public function store(StoreTransferRequest $request): TransferResource
+    public function store(StoreTransferData $data): TransferData
     {
-        $transfer = app(CreateTransferService::class)->execute($request->validated());
+        $transfer = app(CreateTransferService::class)->execute($data);
 
-        return new TransferResource($transfer->fresh(self::WITH));
+        return TransferData::fromTransfer($transfer->fresh(self::WITH));
     }
 
-    public function confirm(WarehouseTransfer $transfer): TransferResource|JsonResponse
+    public function confirm(WarehouseTransfer $transfer): TransferData|JsonResponse
     {
         try {
             app(ConfirmTransferService::class)->execute($transfer);
@@ -60,7 +62,7 @@ class TransferController extends Controller
             return response()->json(['message' => $exception->getMessage()], 422);
         }
 
-        return new TransferResource($transfer->fresh(self::WITH));
+        return TransferData::fromTransfer($transfer->fresh(self::WITH));
     }
 
     public function destroy(WarehouseTransfer $transfer): JsonResponse

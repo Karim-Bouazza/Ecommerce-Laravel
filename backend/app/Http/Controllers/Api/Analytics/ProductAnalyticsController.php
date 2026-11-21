@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Api\Analytics;
 
+use App\Data\Analytics\ProductAnalyticsChartData;
+use App\Data\Analytics\ProductAnalyticsData;
+use App\Data\Analytics\ProductAnalyticsFilterData;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Analytics\ProductAnalyticsRequest;
-use App\Http\Resources\Analytics\ProductAnalyticsChartResource;
-use App\Http\Resources\Analytics\ProductAnalyticsResource;
 use App\Models\Catalog\Product;
 use App\Queries\Products\ProductAnalyticsQuery;
 use App\Services\Charges\AllocateChargesToProductsService;
@@ -14,7 +14,8 @@ use App\Support\Analytics\OrderRateCalculator;
 use App\Support\Analytics\ProductAnalyticsCalculator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Spatie\LaravelData\DataCollection;
+use Spatie\LaravelData\PaginatedDataCollection;
 
 class ProductAnalyticsController extends Controller
 {
@@ -24,9 +25,9 @@ class ProductAnalyticsController extends Controller
         private readonly GetProductAdSpendService $adSpend,
     ) {}
 
-    public function index(ProductAnalyticsRequest $request): AnonymousResourceCollection
+    public function index(ProductAnalyticsFilterData $request): PaginatedDataCollection
     {
-        $perPage = $request->integer('per_page', 15);
+        $perPage = $request->per_page ?? 15;
 
         $products = $this->filteredQuery($request)
             ->orderBy('name')
@@ -40,10 +41,12 @@ class ProductAnalyticsController extends Controller
             $product->setAttribute('ad_spend', $adSpends[$product->id] ?? 0.0);
         });
 
-        return ProductAnalyticsResource::collection($products);
+        $products->through(fn (Product $product) => ProductAnalyticsData::fromProduct($product));
+
+        return ProductAnalyticsData::collect($products, PaginatedDataCollection::class);
     }
 
-    public function stats(ProductAnalyticsRequest $request): JsonResponse
+    public function stats(ProductAnalyticsFilterData $request): JsonResponse
     {
         $keys = [
             'total_orders_count', 'total_quantity',
@@ -109,26 +112,26 @@ class ProductAnalyticsController extends Controller
         ]);
     }
 
-    public function chart(ProductAnalyticsRequest $request): AnonymousResourceCollection
+    public function chart(ProductAnalyticsFilterData $request): DataCollection
     {
-        $limit = $request->integer('limit', 10);
+        $limit = $request->limit ?? 10;
 
         $products = $this->filteredQuery($request)
             ->orderByDesc('delivered_count')
             ->limit($limit)
             ->get();
 
-        return ProductAnalyticsChartResource::collection($products);
+        return ProductAnalyticsChartData::collect($products, DataCollection::class);
     }
 
-    private function filteredQuery(ProductAnalyticsRequest $request): Builder
+    private function filteredQuery(ProductAnalyticsFilterData $request): Builder
     {
-        $search = trim((string) $request->input('search', ''));
+        $search = trim((string) ($request->search ?? ''));
         $dateFrom = $request->periodStart()?->toDateString();
         $dateTo = $request->periodEnd()?->toDateString();
-        $wilayaId = $request->input('wilaya_id');
-        $priceMin = $request->input('price_min');
-        $priceMax = $request->input('price_max');
+        $wilayaId = $request->wilaya_id;
+        $priceMin = $request->price_min;
+        $priceMax = $request->price_max;
 
         return $this->query->build(
             $search !== '' ? $search : null,

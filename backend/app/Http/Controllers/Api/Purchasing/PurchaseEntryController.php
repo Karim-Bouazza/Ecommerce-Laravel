@@ -3,11 +3,10 @@
 namespace App\Http\Controllers\Api\Purchasing;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Purchasing\StorePurchaseEntryRequest;
-use App\Http\Requests\Purchasing\StorePurchaseEntryVersementRequest;
-use App\Http\Requests\Purchasing\UpdatePurchaseEntryRequest;
-use App\Http\Resources\Purchasing\PurchaseEntryResource;
-use App\Http\Resources\Purchasing\PurchaseEntryVersementResource;
+use App\Data\Purchasing\EntryVersementData;
+use App\Data\Purchasing\PurchaseEntryData;
+use App\Data\Purchasing\SavePurchaseEntryData;
+use App\Data\Purchasing\StoreVersementData;
 use App\Models\Purchasing\PurchaseEntry;
 use App\Services\PurchaseEntries\ConfirmPurchaseEntryService;
 use App\Services\PurchaseEntries\CreatePurchaseEntryService;
@@ -16,14 +15,15 @@ use App\Services\PurchaseEntries\DeletePurchaseEntryService;
 use App\Services\PurchaseEntries\UpdatePurchaseEntryService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use RuntimeException;
+use Spatie\LaravelData\DataCollection;
+use Spatie\LaravelData\PaginatedDataCollection;
 
 class PurchaseEntryController extends Controller
 {
     protected const WITH = ['warehouse', 'fournisseur', 'items.product'];
 
-    public function index(Request $request): AnonymousResourceCollection
+    public function index(Request $request): PaginatedDataCollection
     {
         $perPage = (int) $request->input('per_page', 15);
         $search = trim((string) $request->input('search', ''));
@@ -42,28 +42,30 @@ class PurchaseEntryController extends Controller
             ->paginate($perPage)
             ->withQueryString();
 
-        return PurchaseEntryResource::collection($entries);
+        $entries->through(fn (PurchaseEntry $entry) => PurchaseEntryData::fromEntry($entry));
+
+        return PurchaseEntryData::collect($entries, PaginatedDataCollection::class);
     }
 
-    public function store(StorePurchaseEntryRequest $request): PurchaseEntryResource
+    public function store(SavePurchaseEntryData $data): PurchaseEntryData
     {
-        $entry = app(CreatePurchaseEntryService::class)->execute($request->validated());
+        $entry = app(CreatePurchaseEntryService::class)->execute($data);
 
-        return new PurchaseEntryResource($entry->fresh(self::WITH));
+        return PurchaseEntryData::fromEntry($entry->fresh(self::WITH));
     }
 
-    public function update(UpdatePurchaseEntryRequest $request, PurchaseEntry $purchaseEntry): PurchaseEntryResource|JsonResponse
+    public function update(SavePurchaseEntryData $data, PurchaseEntry $purchaseEntry): PurchaseEntryData|JsonResponse
     {
         try {
-            app(UpdatePurchaseEntryService::class)->execute($purchaseEntry, $request->validated());
+            app(UpdatePurchaseEntryService::class)->execute($purchaseEntry, $data);
         } catch (RuntimeException $exception) {
             return response()->json(['message' => $exception->getMessage()], 422);
         }
 
-        return new PurchaseEntryResource($purchaseEntry->fresh(self::WITH));
+        return PurchaseEntryData::fromEntry($purchaseEntry->fresh(self::WITH));
     }
 
-    public function confirm(PurchaseEntry $purchaseEntry): PurchaseEntryResource|JsonResponse
+    public function confirm(PurchaseEntry $purchaseEntry): PurchaseEntryData|JsonResponse
     {
         try {
             app(ConfirmPurchaseEntryService::class)->execute($purchaseEntry);
@@ -71,7 +73,7 @@ class PurchaseEntryController extends Controller
             return response()->json(['message' => $exception->getMessage()], 422);
         }
 
-        return new PurchaseEntryResource($purchaseEntry->fresh(self::WITH));
+        return PurchaseEntryData::fromEntry($purchaseEntry->fresh(self::WITH));
     }
 
     public function destroy(PurchaseEntry $purchaseEntry): JsonResponse
@@ -86,19 +88,19 @@ class PurchaseEntryController extends Controller
     }
 
     public function createVersement(
-        StorePurchaseEntryVersementRequest $request,
+        StoreVersementData $data,
         PurchaseEntry $purchaseEntry
-    ): PurchaseEntryResource|JsonResponse {
+    ): PurchaseEntryData|JsonResponse {
         try {
-            app(CreatePurchaseEntryVersementService::class)->execute($purchaseEntry, $request->validated());
+            app(CreatePurchaseEntryVersementService::class)->execute($purchaseEntry, $data);
         } catch (RuntimeException $exception) {
             return response()->json(['message' => $exception->getMessage()], 422);
         }
 
-        return new PurchaseEntryResource($purchaseEntry->fresh(self::WITH));
+        return PurchaseEntryData::fromEntry($purchaseEntry->fresh(self::WITH));
     }
 
-    public function versements(PurchaseEntry $purchaseEntry): AnonymousResourceCollection
+    public function versements(PurchaseEntry $purchaseEntry): DataCollection
     {
         $versements = $purchaseEntry->versements()
             ->with('wallet')
@@ -106,6 +108,6 @@ class PurchaseEntryController extends Controller
             ->orderByDesc('created_at')
             ->get();
 
-        return PurchaseEntryVersementResource::collection($versements);
+        return EntryVersementData::collect($versements, DataCollection::class);
     }
 }

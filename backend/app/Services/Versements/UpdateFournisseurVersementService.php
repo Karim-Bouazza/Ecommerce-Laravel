@@ -2,6 +2,7 @@
 
 namespace App\Services\Versements;
 
+use App\Data\Finance\SaveFournisseurVersementData;
 use App\Models\Purchasing\Fournisseur;
 use App\Models\Finance\Wallet;
 use App\Models\Finance\WalletTransaction;
@@ -10,9 +11,9 @@ use RuntimeException;
 
 class UpdateFournisseurVersementService
 {
-    public function execute(WalletTransaction $versement, array $data): WalletTransaction
+    public function execute(WalletTransaction $versement, SaveFournisseurVersementData $data): WalletTransaction
     {
-        $amount = (int) $data['amount'];
+        $amount = (int) $data->amount;
 
         if ($amount <= 0) {
             throw new RuntimeException('Le montant doit être supérieur à 0.');
@@ -20,14 +21,14 @@ class UpdateFournisseurVersementService
 
         return DB::transaction(function () use ($versement, $amount, $data): WalletTransaction {
             $versement = WalletTransaction::query()->lockForUpdate()->findOrFail($versement->id);
-            $fournisseur = Fournisseur::query()->findOrFail($data['fournisseur_id']);
+            $fournisseur = Fournisseur::query()->findOrFail($data->fournisseur_id);
 
             $oldWallet = Wallet::query()->lockForUpdate()->findOrFail($versement->wallet_id);
             $oldWallet->increment('balance', $versement->amount);
 
-            $newWallet = $oldWallet->id === (int) $data['wallet_id']
+            $newWallet = $oldWallet->id === (int) $data->wallet_id
                 ? $oldWallet->fresh()
-                : Wallet::query()->lockForUpdate()->findOrFail($data['wallet_id']);
+                : Wallet::query()->lockForUpdate()->findOrFail($data->wallet_id);
 
             if ($newWallet->balance < $amount) {
                 throw new RuntimeException("Solde insuffisant dans le portefeuille « {$newWallet->name} ».");
@@ -36,9 +37,9 @@ class UpdateFournisseurVersementService
             $versement->update([
                 'wallet_id' => $newWallet->id,
                 'fournisseur_id' => $fournisseur->id,
-                'date' => $data['date'],
+                'date' => $data->date,
                 'amount' => $amount,
-                'remark' => $data['remark'] ?? null,
+                'remark' => $data->remark,
             ]);
 
             $newWallet->decrement('balance', $amount);

@@ -3,20 +3,20 @@
 namespace App\Http\Controllers\Api\Order;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Order\UpdateClientRequest;
-use App\Http\Resources\Order\ClientResource;
+use App\Data\Order\ClientData;
+use App\Data\Order\UpdateClientData;
 use App\Models\Order\Client;
 use App\Services\Clients\DeleteClientService;
 use App\Services\Clients\ToggleClientBlacklistService;
 use App\Services\Clients\UpdateClientService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use RuntimeException;
+use Spatie\LaravelData\PaginatedDataCollection;
 
 class ClientController extends Controller
 {
-    public function index(Request $request): AnonymousResourceCollection
+    public function index(Request $request): PaginatedDataCollection
     {
         $perPage = (int) $request->input('per_page', 15);
         $search = trim((string) $request->input('search', ''));
@@ -27,10 +27,12 @@ class ClientController extends Controller
             ->paginate($perPage)
             ->withQueryString();
 
-        return ClientResource::collection($clients);
+        $clients->through(fn (Client $client) => ClientData::fromClient($client));
+
+        return ClientData::collect($clients, PaginatedDataCollection::class);
     }
 
-    public function blacklisted(Request $request): AnonymousResourceCollection
+    public function blacklisted(Request $request): PaginatedDataCollection
     {
         $perPage = (int) $request->input('per_page', 15);
         $search = trim((string) $request->input('search', ''));
@@ -41,7 +43,9 @@ class ClientController extends Controller
             ->paginate($perPage)
             ->withQueryString();
 
-        return ClientResource::collection($clients);
+        $clients->through(fn (Client $client) => ClientData::fromClient($client));
+
+        return ClientData::collect($clients, PaginatedDataCollection::class);
     }
 
     private function baseQuery(string $search)
@@ -59,18 +63,18 @@ class ClientController extends Controller
             });
     }
 
-    public function update(UpdateClientRequest $request, Client $client): ClientResource
+    public function update(UpdateClientData $data, Client $client): ClientData
     {
-        $client = app(UpdateClientService::class)->execute($client, $request->validated());
+        $client = app(UpdateClientService::class)->execute($client, $data);
 
-        return new ClientResource($client->load(['wilaya', 'commune']));
+        return ClientData::fromClient($client->load(['wilaya', 'commune']));
     }
 
-    public function toggleBlacklist(Client $client): ClientResource
+    public function toggleBlacklist(Client $client): ClientData
     {
         $client = app(ToggleClientBlacklistService::class)->execute($client);
 
-        return new ClientResource($client->load(['wilaya', 'commune']));
+        return ClientData::fromClient($client->load(['wilaya', 'commune']));
     }
 
     public function destroy(Client $client): JsonResponse

@@ -2,6 +2,7 @@
 
 namespace App\Services\Wallets;
 
+use App\Data\Finance\WalletMovementData;
 use App\Enums\Wallet\WalletTransactionCategory;
 use App\Enums\Wallet\WalletTransactionType;
 use App\Models\Finance\Wallet;
@@ -10,9 +11,9 @@ use RuntimeException;
 
 class WithdrawFromWalletService
 {
-    public function execute(Wallet $wallet, array $data): void
+    public function execute(Wallet $wallet, WalletMovementData $data): void
     {
-        $amount = (int) $data['amount'];
+        $amount = (int) $data->amount;
 
         if ($amount <= 0) {
             throw new RuntimeException('Le montant doit être supérieur à 0.');
@@ -26,11 +27,11 @@ class WithdrawFromWalletService
             }
 
             $wallet->transactions()->create([
-                'date' => $data['date'],
+                'date' => $data->date,
                 'type' => WalletTransactionType::Out,
                 'category' => WalletTransactionCategory::Withdrawal,
                 'amount' => $amount,
-                'remark' => $data['remark'] ?? null,
+                'remark' => $data->remark,
             ]);
 
             $wallet->decrement('balance', $amount);

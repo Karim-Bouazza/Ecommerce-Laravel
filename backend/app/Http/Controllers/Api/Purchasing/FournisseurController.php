@@ -3,20 +3,19 @@
 namespace App\Http\Controllers\Api\Purchasing;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Purchasing\StoreFournisseurRequest;
-use App\Http\Requests\Purchasing\UpdateFournisseurRequest;
-use App\Http\Resources\Purchasing\FournisseurResource;
+use App\Data\Purchasing\FournisseurData;
+use App\Data\Purchasing\SaveFournisseurData;
 use App\Models\Purchasing\Fournisseur;
 use App\Services\Fournisseurs\CreateFournisseurService;
 use App\Services\Fournisseurs\DeleteFournisseurService;
 use App\Services\Fournisseurs\UpdateFournisseurService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Spatie\LaravelData\PaginatedDataCollection;
 
 class FournisseurController extends Controller
 {
-    public function index(Request $request): AnonymousResourceCollection
+    public function index(Request $request): PaginatedDataCollection
     {
         $perPage = (int) $request->input('per_page', 15);
         $search = trim((string) $request->input('search', ''));
@@ -37,21 +36,23 @@ class FournisseurController extends Controller
             ->paginate($perPage)
             ->withQueryString();
 
-        return FournisseurResource::collection($fournisseurs);
+        $fournisseurs->through(fn (Fournisseur $fournisseur) => FournisseurData::fromFournisseur($fournisseur));
+
+        return FournisseurData::collect($fournisseurs, PaginatedDataCollection::class);
     }
 
-    public function store(StoreFournisseurRequest $request): FournisseurResource
+    public function store(SaveFournisseurData $data): FournisseurData
     {
-        $fournisseur = app(CreateFournisseurService::class)->execute($request->validated());
+        $fournisseur = app(CreateFournisseurService::class)->execute($data);
 
-        return new FournisseurResource($fournisseur);
+        return FournisseurData::fromFournisseur($fournisseur);
     }
 
-    public function update(UpdateFournisseurRequest $request, Fournisseur $fournisseur): FournisseurResource
+    public function update(SaveFournisseurData $data, Fournisseur $fournisseur): FournisseurData
     {
-        $fournisseur = app(UpdateFournisseurService::class)->execute($fournisseur, $request->validated());
+        $fournisseur = app(UpdateFournisseurService::class)->execute($fournisseur, $data);
 
-        return new FournisseurResource($fournisseur);
+        return FournisseurData::fromFournisseur($fournisseur);
     }
 
     public function destroy(Fournisseur $fournisseur): JsonResponse

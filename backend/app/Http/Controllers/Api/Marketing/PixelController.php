@@ -2,14 +2,13 @@
 
 namespace App\Http\Controllers\Api\Marketing;
 
+use App\Data\Marketing\PixelData;
+use App\Data\Marketing\SavePixelData;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Marketing\StorePixelRequest;
-use App\Http\Requests\Marketing\UpdatePixelRequest;
-use App\Http\Resources\Marketing\PixelResource;
 use App\Models\Marketing\Pixel;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Spatie\LaravelData\PaginatedDataCollection;
 
 class PixelController extends Controller
 {
@@ -27,7 +26,7 @@ class PixelController extends Controller
         return response()->json($pixels);
     }
 
-    public function index(Request $request): AnonymousResourceCollection
+    public function index(Request $request): PaginatedDataCollection
     {
         $perPage = (int) $request->input('per_page', 15);
         $search = trim((string) $request->input('search', ''));
@@ -41,28 +40,30 @@ class PixelController extends Controller
             ->paginate($perPage)
             ->withQueryString();
 
-        return PixelResource::collection($pixels);
+        $pixels->through(fn (Pixel $pixel) => PixelData::fromPixel($pixel));
+
+        return PixelData::collect($pixels, PaginatedDataCollection::class);
     }
 
-    public function store(StorePixelRequest $request): PixelResource
+    public function store(SavePixelData $data): PixelData
     {
-        $pixel = Pixel::create($request->validated());
+        $pixel = Pixel::create($data->toArray());
 
-        return new PixelResource($pixel);
+        return PixelData::fromPixel($pixel);
     }
 
-    public function update(UpdatePixelRequest $request, Pixel $pixel): PixelResource
+    public function update(SavePixelData $data, Pixel $pixel): PixelData
     {
-        $pixel->update($request->validated());
+        $pixel->update($data->toArray());
 
-        return new PixelResource($pixel->fresh());
+        return PixelData::fromPixel($pixel->fresh());
     }
 
-    public function toggleActive(Pixel $pixel): PixelResource
+    public function toggleActive(Pixel $pixel): PixelData
     {
         $pixel->update(['is_active' => ! $pixel->is_active]);
 
-        return new PixelResource($pixel->fresh());
+        return PixelData::fromPixel($pixel->fresh());
     }
 
     public function destroy(Pixel $pixel): JsonResponse

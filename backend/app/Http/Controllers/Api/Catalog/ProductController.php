@@ -2,44 +2,47 @@
 
 namespace App\Http\Controllers\Api\Catalog;
 
+use App\Data\Catalog\ProductData;
+use App\Data\Catalog\StoreProductData;
+use App\Data\Catalog\UpdateProductData;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Catalog\StoreProductRequest;
-use App\Http\Requests\Catalog\UpdateProductRequest;
-use App\Http\Resources\Catalog\ProductResource;
 use App\Models\Catalog\Product;
 use App\Services\Products\CreateProductService;
 use App\Services\Products\DeleteProductService;
 use App\Services\Products\UpdateProductService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Spatie\LaravelData\PaginatedDataCollection;
 
 class ProductController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request): PaginatedDataCollection
     {
         $perPage = (int) $request->input('per_page', 20);
         $search = trim((string) $request->input('search', ''));
 
         $products = Product::query()
             ->with(['category', 'specs', 'variants'])
-            ->when($search !== '', fn($query) => $query->where('name', 'like', "%{$search}%"))
+            ->when($search !== '', fn ($query) => $query->where('name', 'like', "%{$search}%"))
             ->paginate($perPage);
 
-        return ProductResource::collection($products);
+        $products->through(fn (Product $product) => ProductData::fromProduct($product));
+
+        return ProductData::collect($products, PaginatedDataCollection::class);
     }
 
-    public function store(StoreProductRequest $request): ProductResource
+    public function store(StoreProductData $data): ProductData
     {
-        $product = app(CreateProductService::class)->execute($request->validated(), $request->allFiles());
+        $product = app(CreateProductService::class)->execute($data);
 
-        return new ProductResource($product->load(['category', 'specs', 'variants']));
+        return ProductData::fromProduct($product->load(['category', 'specs', 'variants']));
     }
 
-    public function update(UpdateProductRequest $request, Product $product): ProductResource
+    public function update(UpdateProductData $data, Product $product): ProductData
     {
-        $product = app(UpdateProductService::class)->execute($product, $request->validated(), $request->allFiles());
+        $product = app(UpdateProductService::class)->execute($product, $data);
 
-        return new ProductResource($product->load(['category', 'specs', 'variants']));
+        return ProductData::fromProduct($product->load(['category', 'specs', 'variants']));
     }
 
     public function destroy(Product $product): JsonResponse

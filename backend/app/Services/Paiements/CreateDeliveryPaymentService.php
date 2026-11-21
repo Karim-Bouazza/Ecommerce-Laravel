@@ -2,6 +2,7 @@
 
 namespace App\Services\Paiements;
 
+use App\Data\Finance\SaveDeliveryPaymentData;
 use App\Enums\Wallet\WalletTransactionCategory;
 use App\Enums\Wallet\WalletTransactionType;
 use App\Models\Delivery\DeliveryCompanyIntegration;
@@ -12,25 +13,25 @@ use RuntimeException;
 
 class CreateDeliveryPaymentService
 {
-    public function execute(array $data): WalletTransaction
+    public function execute(SaveDeliveryPaymentData $data): WalletTransaction
     {
-        $amount = (int) $data['amount'];
+        $amount = (int) $data->amount;
 
         if ($amount <= 0) {
             throw new RuntimeException('Le montant doit être supérieur à 0.');
         }
 
         return DB::transaction(function () use ($amount, $data): WalletTransaction {
-            $partner = DeliveryCompanyIntegration::query()->findOrFail($data['delivery_company_integration_id']);
-            $wallet = Wallet::query()->lockForUpdate()->findOrFail($data['wallet_id']);
+            $partner = DeliveryCompanyIntegration::query()->findOrFail($data->delivery_company_integration_id);
+            $wallet = Wallet::query()->lockForUpdate()->findOrFail($data->wallet_id);
 
             $transaction = $wallet->transactions()->create([
                 'delivery_company_integration_id' => $partner->id,
-                'date' => $data['date'],
+                'date' => $data->date,
                 'type' => WalletTransactionType::In,
                 'category' => WalletTransactionCategory::Payment,
                 'amount' => $amount,
-                'remark' => $data['remark'] ?? null,
+                'remark' => $data->remark,
             ]);
 
             $wallet->increment('balance', $amount);

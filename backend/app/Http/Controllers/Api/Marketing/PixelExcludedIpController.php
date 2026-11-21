@@ -2,33 +2,32 @@
 
 namespace App\Http\Controllers\Api\Marketing;
 
+use App\Data\Marketing\PixelExcludedIpData;
+use App\Data\Marketing\StorePixelExcludedIpData;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Marketing\StorePixelExcludedIpRequest;
-use App\Http\Resources\Marketing\PixelExcludedIpResource;
 use App\Models\Marketing\PixelExcludedIp;
 use App\Services\PixelTracking\ExcludedIpMatcher;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Spatie\LaravelData\DataCollection;
 
 class PixelExcludedIpController extends Controller
 {
-    public function index(): AnonymousResourceCollection
+    public function index(): DataCollection
     {
-        return PixelExcludedIpResource::collection(
-            PixelExcludedIp::query()->orderByDesc('id')->get()
+        return PixelExcludedIpData::collect(
+            PixelExcludedIp::query()->orderByDesc('id')->get(),
+            DataCollection::class
         );
     }
 
-    public function store(StorePixelExcludedIpRequest $request): JsonResponse
+    public function store(StorePixelExcludedIpData $data): JsonResponse
     {
-        $data = $request->validated();
-
         $entry = PixelExcludedIp::create([
-            'pattern' => ExcludedIpMatcher::normalize($data['pattern']),
-            'note' => filled($data['note'] ?? null) ? trim($data['note']) : null,
+            'pattern' => ExcludedIpMatcher::normalize($data->pattern),
+            'note' => filled($data->note) ? trim($data->note) : null,
         ]);
 
-        return (new PixelExcludedIpResource($entry))->response()->setStatusCode(201);
+        return PixelExcludedIpData::fromEntry($entry)->toResponse(request())->setStatusCode(201);
     }
 
     public function destroy(PixelExcludedIp $pixelExcludedIp): JsonResponse

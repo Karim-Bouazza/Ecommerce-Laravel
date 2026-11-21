@@ -2,19 +2,19 @@
 
 namespace App\Http\Controllers\Api\Auth;
 
+use App\Data\Auth\LoginData;
+use App\Data\Auth\UpdateProfileData;
+use App\Data\Auth\UserData;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Auth\LoginRequest;
-use App\Http\Requests\Auth\UpdateProfileRequest;
-use App\Http\Resources\Auth\UserResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class AuthController extends Controller
 {
-    public function login(LoginRequest $request)
+    public function login(LoginData $data, Request $request)
     {
-        if (! Auth::attempt([...$request->only('email', 'password'), 'is_active' => true], $request->boolean('remember'))) {
+        if (! Auth::attempt(['email' => $data->email, 'password' => $data->password, 'is_active' => true], $data->remember)) {
             return response()->json([
                 'message' => 'Invalid credentials.',
             ], 401);
@@ -22,7 +22,7 @@ class AuthController extends Controller
 
         $request->session()->regenerate();
 
-        return new UserResource($request->user()->load('roles.permissions'));
+        return UserData::fromUser($request->user()->load('roles.permissions'));
     }
 
     public function logout(Request $request)
@@ -37,29 +37,29 @@ class AuthController extends Controller
 
     public function me(Request $request)
     {
-        return new UserResource($request->user()->load('roles.permissions'));
+        return UserData::fromUser($request->user()->load('roles.permissions'));
     }
 
-    public function updateProfile(UpdateProfileRequest $request): UserResource
+    public function updateProfile(UpdateProfileData $data, Request $request): UserData
     {
         $user = $request->user();
-        $data = $request->safe()->only(['name', 'email', 'phone']);
+        $attributes = $data->only('name', 'email', 'phone')->toArray();
 
-        if ($request->filled('password')) {
-            $data['password'] = $request->validated('password');
+        if (filled($data->password)) {
+            $attributes['password'] = $data->password;
         }
 
-        if ($request->hasFile('avatar')) {
+        if ($data->avatar !== null) {
             $previousAvatar = $user->avatar;
-            $data['avatar'] = $request->file('avatar')->store('avatars', 'public');
+            $attributes['avatar'] = $data->avatar->store('avatars', 'public');
 
             if ($previousAvatar) {
                 Storage::disk('public')->delete($previousAvatar);
             }
         }
 
-        $user->update($data);
+        $user->update($attributes);
 
-        return new UserResource($user->fresh()->load('roles.permissions'));
+        return UserData::fromUser($user->fresh()->load('roles.permissions'));
     }
 }

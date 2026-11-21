@@ -2,6 +2,7 @@
 
 namespace App\Services\PurchaseEntries;
 
+use App\Data\Purchasing\StoreVersementData;
 use App\Enums\Wallet\WalletTransactionCategory;
 use App\Enums\Wallet\WalletTransactionType;
 use App\Models\Purchasing\PurchaseEntry;
@@ -12,9 +13,9 @@ use RuntimeException;
 
 class CreatePurchaseEntryVersementService
 {
-    public function execute(PurchaseEntry $entry, array $data): WalletTransaction
+    public function execute(PurchaseEntry $entry, StoreVersementData $data): WalletTransaction
     {
-        $amount = (int) $data['amount'];
+        $amount = (int) $data->amount;
 
         if ($amount <= 0) {
             throw new RuntimeException('Le montant doit être supérieur à 0.');
@@ -33,7 +34,7 @@ class CreatePurchaseEntryVersementService
                 throw new RuntimeException('Le montant dépasse le restant à payer.');
             }
 
-            $wallet = Wallet::query()->lockForUpdate()->findOrFail($data['wallet_id']);
+            $wallet = Wallet::query()->lockForUpdate()->findOrFail($data->wallet_id);
 
             if ($wallet->balance < $amount) {
                 throw new RuntimeException("Solde insuffisant dans le portefeuille « {$wallet->name} ».");
@@ -41,11 +42,11 @@ class CreatePurchaseEntryVersementService
 
             $transaction = $wallet->transactions()->create([
                 'purchase_entry_id' => $entry->id,
-                'date' => $data['date'],
+                'date' => $data->date,
                 'type' => WalletTransactionType::Out,
                 'category' => WalletTransactionCategory::Versement,
                 'amount' => $amount,
-                'remark' => $data['remark'] ?? null,
+                'remark' => $data->remark,
             ]);
 
             $wallet->decrement('balance', $amount);

@@ -2,6 +2,7 @@
 
 namespace App\Services\Wallets;
 
+use App\Data\Finance\WalletTransferData;
 use App\Enums\Wallet\WalletTransactionCategory;
 use App\Enums\Wallet\WalletTransactionType;
 use App\Models\Finance\Wallet;
@@ -11,11 +12,11 @@ use RuntimeException;
 
 class TransferBetweenWalletsService
 {
-    public function execute(array $data): void
+    public function execute(WalletTransferData $data): void
     {
-        $fromWalletId = $data['from_wallet_id'];
-        $toWalletId = $data['to_wallet_id'];
-        $amount = (int) $data['amount'];
+        $fromWalletId = $data->from_wallet_id;
+        $toWalletId = $data->to_wallet_id;
+        $amount = (int) $data->amount;
 
         if ($fromWalletId === $toWalletId) {
             throw new RuntimeException('Le portefeuille source et destination doivent être différents.');
@@ -34,7 +35,7 @@ class TransferBetweenWalletsService
             }
 
             $transferGroupId = (string) Str::uuid();
-            $userRemark = $data['remark'] ?? null;
+            $userRemark = $data->remark;
 
             $outRemark = "Transfer to wallet: {$toWallet->name}.";
             $inRemark = "Transfer from wallet: {$fromWallet->name}.";
@@ -45,7 +46,7 @@ class TransferBetweenWalletsService
             }
 
             $fromWallet->transactions()->create([
-                'date' => $data['date'],
+                'date' => $data->date,
                 'type' => WalletTransactionType::Out,
                 'category' => WalletTransactionCategory::Withdrawal,
                 'amount' => $amount,
@@ -54,7 +55,7 @@ class TransferBetweenWalletsService
             ]);
 
             $toWallet->transactions()->create([
-                'date' => $data['date'],
+                'date' => $data->date,
                 'type' => WalletTransactionType::In,
                 'category' => WalletTransactionCategory::Deposit,
                 'amount' => $amount,

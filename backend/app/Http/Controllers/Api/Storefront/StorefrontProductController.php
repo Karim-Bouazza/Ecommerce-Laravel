@@ -2,16 +2,19 @@
 
 namespace App\Http\Controllers\Api\Storefront;
 
+use App\Data\Storefront\StorefrontProductData;
+use App\Data\Storefront\StorefrontProductDetailData;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\Storefront\StorefrontProductDetailResource;
-use App\Http\Resources\Storefront\StorefrontProductResource;
 use App\Models\Catalog\Product;
 use App\Models\Inventory\Stock;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Spatie\LaravelData\DataCollection;
+use Spatie\LaravelData\PaginatedDataCollection;
 
 class StorefrontProductController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
         $perPage = (int) $request->input('per_page', 20);
         $sort = $request->input('sort');
@@ -36,7 +39,10 @@ class StorefrontProductController extends Controller
             ->selectRaw('MIN(price) as min_price, MAX(price) as max_price')
             ->first();
 
-        return StorefrontProductResource::collection($products)->additional([
+        $products->through(fn (Product $product) => StorefrontProductData::fromProduct($product));
+
+        return response()->json([
+            ...StorefrontProductData::collect($products, PaginatedDataCollection::class)->toArray(),
             'price_bounds' => [
                 'min' => (int) ($priceBounds->min_price ?? 0),
                 'max' => (int) ($priceBounds->max_price ?? 0),
@@ -44,7 +50,7 @@ class StorefrontProductController extends Controller
         ]);
     }
 
-    public function deals(Request $request)
+    public function deals(Request $request): DataCollection
     {
         $limit = (int) $request->input('limit', 10);
         $limit = max(1, min($limit, 20));
@@ -57,10 +63,10 @@ class StorefrontProductController extends Controller
             ->limit($limit)
             ->get();
 
-        return StorefrontProductResource::collection($products);
+        return StorefrontProductData::collect($products, DataCollection::class);
     }
 
-    public function show(string $product)
+    public function show(string $product): StorefrontProductDetailData
     {
         // One query instead of route-model-binding + reload. baseQuery()
         // already filters is_active, so an inactive/missing product is a 404.
@@ -68,7 +74,7 @@ class StorefrontProductController extends Controller
             ->where('products.id', (int) $product)
             ->firstOrFail();
 
-        return new StorefrontProductDetailResource($product);
+        return StorefrontProductDetailData::fromProduct($product);
     }
 
     /**

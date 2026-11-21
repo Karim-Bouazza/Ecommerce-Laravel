@@ -2,13 +2,16 @@
 
 namespace App\Services\Administrateurs;
 
+use App\Data\Auth\StoreAdministratorData;
 use App\Models\Users\User;
 use Spatie\Permission\Models\Role;
 
 class CreateAdministrateurService
 {
-    public function execute(array $data): User
+    public function execute(StoreAdministratorData $input): User
     {
+        $data = $input->toArray();
+
         $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],

@@ -4,11 +4,11 @@ namespace App\Http\Controllers\Api\Purchasing;
 
 use App\Enums\Purchase\PurchaseEntryStatus;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Purchasing\StoreReturnEntryRequest;
-use App\Http\Requests\Purchasing\StoreReturnEntryVersementRequest;
-use App\Http\Requests\Purchasing\UpdateReturnEntryRequest;
-use App\Http\Resources\Purchasing\ReturnEntryResource;
-use App\Http\Resources\Purchasing\ReturnEntryVersementResource;
+use App\Data\Purchasing\EntryVersementData;
+use App\Data\Purchasing\ReturnEntryData;
+use App\Data\Purchasing\StoreReturnEntryData;
+use App\Data\Purchasing\StoreVersementData;
+use App\Data\Purchasing\UpdateReturnEntryData;
 use App\Models\Purchasing\PurchaseEntry;
 use App\Models\Purchasing\ReturnEntry;
 use App\Models\Purchasing\ReturnEntryItem;
@@ -19,14 +19,15 @@ use App\Services\ReturnEntries\DeleteReturnEntryService;
 use App\Services\ReturnEntries\UpdateReturnEntryService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use RuntimeException;
+use Spatie\LaravelData\DataCollection;
+use Spatie\LaravelData\PaginatedDataCollection;
 
 class ReturnEntryController extends Controller
 {
     protected const WITH = ['purchaseEntry', 'warehouse', 'fournisseur', 'items.product'];
 
-    public function index(Request $request): AnonymousResourceCollection
+    public function index(Request $request): PaginatedDataCollection
     {
         $perPage = (int) $request->input('per_page', 15);
         $search = trim((string) $request->input('search', ''));
@@ -45,32 +46,34 @@ class ReturnEntryController extends Controller
             ->paginate($perPage)
             ->withQueryString();
 
-        return ReturnEntryResource::collection($entries);
+        $entries->through(fn (ReturnEntry $entry) => ReturnEntryData::fromEntry($entry));
+
+        return ReturnEntryData::collect($entries, PaginatedDataCollection::class);
     }
 
-    public function store(StoreReturnEntryRequest $request): ReturnEntryResource|JsonResponse
+    public function store(StoreReturnEntryData $data): ReturnEntryData|JsonResponse
     {
         try {
-            $entry = app(CreateReturnEntryService::class)->execute($request->validated());
+            $entry = app(CreateReturnEntryService::class)->execute($data);
         } catch (RuntimeException $exception) {
             return response()->json(['message' => $exception->getMessage()], 422);
         }
 
-        return new ReturnEntryResource($entry->fresh(self::WITH));
+        return ReturnEntryData::fromEntry($entry->fresh(self::WITH));
     }
 
-    public function update(UpdateReturnEntryRequest $request, ReturnEntry $returnEntry): ReturnEntryResource|JsonResponse
+    public function update(UpdateReturnEntryData $data, ReturnEntry $returnEntry): ReturnEntryData|JsonResponse
     {
         try {
-            app(UpdateReturnEntryService::class)->execute($returnEntry, $request->validated());
+            app(UpdateReturnEntryService::class)->execute($returnEntry, $data);
         } catch (RuntimeException $exception) {
             return response()->json(['message' => $exception->getMessage()], 422);
         }
 
-        return new ReturnEntryResource($returnEntry->fresh(self::WITH));
+        return ReturnEntryData::fromEntry($returnEntry->fresh(self::WITH));
     }
 
-    public function confirm(ReturnEntry $returnEntry): ReturnEntryResource|JsonResponse
+    public function confirm(ReturnEntry $returnEntry): ReturnEntryData|JsonResponse
     {
         try {
             app(ConfirmReturnEntryService::class)->execute($returnEntry);
@@ -78,7 +81,7 @@ class ReturnEntryController extends Controller
             return response()->json(['message' => $exception->getMessage()], 422);
         }
 
-        return new ReturnEntryResource($returnEntry->fresh(self::WITH));
+        return ReturnEntryData::fromEntry($returnEntry->fresh(self::WITH));
     }
 
     public function destroy(ReturnEntry $returnEntry): JsonResponse
@@ -93,19 +96,19 @@ class ReturnEntryController extends Controller
     }
 
     public function createVersement(
-        StoreReturnEntryVersementRequest $request,
+        StoreVersementData $data,
         ReturnEntry $returnEntry
-    ): ReturnEntryResource|JsonResponse {
+    ): ReturnEntryData|JsonResponse {
         try {
-            app(CreateReturnEntryVersementService::class)->execute($returnEntry, $request->validated());
+            app(CreateReturnEntryVersementService::class)->execute($returnEntry, $data);
         } catch (RuntimeException $exception) {
             return response()->json(['message' => $exception->getMessage()], 422);
         }
 
-        return new ReturnEntryResource($returnEntry->fresh(self::WITH));
+        return ReturnEntryData::fromEntry($returnEntry->fresh(self::WITH));
     }
 
-    public function versements(ReturnEntry $returnEntry): AnonymousResourceCollection
+    public function versements(ReturnEntry $returnEntry): DataCollection
     {
         $versements = $returnEntry->versements()
             ->with('wallet')
@@ -113,7 +116,7 @@ class ReturnEntryController extends Controller
             ->orderByDesc('created_at')
             ->get();
 
-        return ReturnEntryVersementResource::collection($versements);
+        return EntryVersementData::collect($versements, DataCollection::class);
     }
 
     public function purchaseEntryOptions(): JsonResponse

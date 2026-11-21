@@ -3,11 +3,10 @@
 namespace App\Http\Controllers\Api\Finance;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Finance\StoreChargeRequest;
-use App\Http\Requests\Finance\StoreChargeVersementRequest;
-use App\Http\Requests\Finance\UpdateChargeRequest;
-use App\Http\Resources\Finance\ChargeResource;
-use App\Http\Resources\Finance\ChargeVersementResource;
+use App\Data\Finance\ChargeData;
+use App\Data\Finance\SaveChargeData;
+use App\Data\Purchasing\EntryVersementData;
+use App\Data\Purchasing\StoreVersementData;
 use App\Models\Finance\Charge;
 use App\Services\Charges\CalculateChargeAmountService;
 use App\Services\Charges\CreateChargeService;
@@ -17,14 +16,15 @@ use App\Services\Charges\ToggleChargeActiveService;
 use App\Services\Charges\UpdateChargeService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use RuntimeException;
+use Spatie\LaravelData\DataCollection;
+use Spatie\LaravelData\PaginatedDataCollection;
 
 class ChargeController extends Controller
 {
-    public function index(Request $request): AnonymousResourceCollection
+    public function index(Request $request): PaginatedDataCollection
     {
         $perPage = (int) $request->input('per_page', 15);
         $search = trim((string) $request->input('search', ''));
@@ -77,7 +77,9 @@ class ChargeController extends Controller
             $calculator->warm($charges->getCollection());
         }
 
-        return ChargeResource::collection($charges);
+        $charges->through(fn (Charge $charge) => ChargeData::fromCharge($charge));
+
+        return ChargeData::collect($charges, PaginatedDataCollection::class);
     }
 
     public function stats(): JsonResponse
@@ -107,29 +109,29 @@ class ChargeController extends Controller
         ]);
     }
 
-    public function store(StoreChargeRequest $request): ChargeResource
+    public function store(SaveChargeData $data): ChargeData
     {
-        $charge = app(CreateChargeService::class)->execute($request->chargeData());
+        $charge = app(CreateChargeService::class)->execute($data);
 
-        return new ChargeResource($charge->load('products:id,name'));
+        return ChargeData::fromCharge($charge->load('products:id,name'));
     }
 
-    public function update(UpdateChargeRequest $request, Charge $charge): ChargeResource|JsonResponse
+    public function update(SaveChargeData $data, Charge $charge): ChargeData|JsonResponse
     {
         try {
-            $charge = app(UpdateChargeService::class)->execute($charge, $request->chargeData());
+            $charge = app(UpdateChargeService::class)->execute($charge, $data);
         } catch (RuntimeException $exception) {
             return response()->json(['message' => $exception->getMessage()], 422);
         }
 
-        return new ChargeResource($charge->load('products:id,name'));
+        return ChargeData::fromCharge($charge->load('products:id,name'));
     }
 
-    public function toggleActive(Charge $charge): ChargeResource
+    public function toggleActive(Charge $charge): ChargeData
     {
         $charge = app(ToggleChargeActiveService::class)->execute($charge);
 
-        return new ChargeResource($charge->load('products:id,name'));
+        return ChargeData::fromCharge($charge->load('products:id,name'));
     }
 
     public function destroy(Charge $charge): JsonResponse
@@ -143,18 +145,18 @@ class ChargeController extends Controller
         return response()->json(['message' => 'Charge supprimée.']);
     }
 
-    public function createVersement(StoreChargeVersementRequest $request, Charge $charge): ChargeResource|JsonResponse
+    public function createVersement(StoreVersementData $data, Charge $charge): ChargeData|JsonResponse
     {
         try {
-            app(CreateChargeVersementService::class)->execute($charge, $request->validated());
+            app(CreateChargeVersementService::class)->execute($charge, $data);
         } catch (RuntimeException $exception) {
             return response()->json(['message' => $exception->getMessage()], 422);
         }
 
-        return new ChargeResource($charge->fresh()->load('products:id,name'));
+        return ChargeData::fromCharge($charge->fresh()->load('products:id,name'));
     }
 
-    public function versements(Charge $charge): AnonymousResourceCollection
+    public function versements(Charge $charge): DataCollection
     {
         $versements = $charge->versements()
             ->with('wallet')
@@ -162,7 +164,7 @@ class ChargeController extends Controller
             ->orderByDesc('created_at')
             ->get();
 
-        return ChargeVersementResource::collection($versements);
+        return EntryVersementData::collect($versements, DataCollection::class);
     }
 
     /**

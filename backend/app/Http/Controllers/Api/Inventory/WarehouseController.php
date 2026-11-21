@@ -3,9 +3,8 @@
 namespace App\Http\Controllers\Api\Inventory;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Inventory\StoreWarehouseRequest;
-use App\Http\Requests\Inventory\UpdateWarehouseRequest;
-use App\Http\Resources\Inventory\WarehouseResource;
+use App\Data\Inventory\SaveWarehouseData;
+use App\Data\Inventory\WarehouseData;
 use App\Models\Inventory\Warehouse;
 use App\Services\Warehouses\CreateWarehouseService;
 use App\Services\Warehouses\DeleteWarehouseService;
@@ -13,11 +12,11 @@ use App\Services\Warehouses\ToggleWarehouseActiveService;
 use App\Services\Warehouses\UpdateWarehouseService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Spatie\LaravelData\PaginatedDataCollection;
 
 class WarehouseController extends Controller
 {
-    public function index(Request $request): AnonymousResourceCollection
+    public function index(Request $request): PaginatedDataCollection
     {
         $perPage = (int) $request->input('per_page', 15);
         $search = trim((string) $request->input('search', ''));
@@ -37,28 +36,28 @@ class WarehouseController extends Controller
             ->paginate($perPage)
             ->withQueryString();
 
-        return WarehouseResource::collection($warehouses);
+        return WarehouseData::collect($warehouses, PaginatedDataCollection::class);
     }
 
-    public function store(StoreWarehouseRequest $request): WarehouseResource
+    public function store(SaveWarehouseData $data): WarehouseData
     {
-        $warehouse = app(CreateWarehouseService::class)->execute($request->validated());
+        $warehouse = app(CreateWarehouseService::class)->execute($data);
 
-        return new WarehouseResource($warehouse->loadCount('stockMovements')->load(['wilayas:id', 'products:id']));
+        return WarehouseData::fromWarehouse($warehouse->loadCount('stockMovements')->load(['wilayas:id', 'products:id']));
     }
 
-    public function update(UpdateWarehouseRequest $request, Warehouse $warehouse): WarehouseResource
+    public function update(SaveWarehouseData $data, Warehouse $warehouse): WarehouseData
     {
-        $warehouse = app(UpdateWarehouseService::class)->execute($warehouse, $request->validated());
+        $warehouse = app(UpdateWarehouseService::class)->execute($warehouse, $data);
 
-        return new WarehouseResource($warehouse->loadCount('stockMovements')->load(['wilayas:id', 'products:id']));
+        return WarehouseData::fromWarehouse($warehouse->loadCount('stockMovements')->load(['wilayas:id', 'products:id']));
     }
 
-    public function toggleActive(Warehouse $warehouse): WarehouseResource
+    public function toggleActive(Warehouse $warehouse): WarehouseData
     {
         $warehouse = app(ToggleWarehouseActiveService::class)->execute($warehouse);
 
-        return new WarehouseResource($warehouse->loadCount('stockMovements')->load(['wilayas:id', 'products:id']));
+        return WarehouseData::fromWarehouse($warehouse->loadCount('stockMovements')->load(['wilayas:id', 'products:id']));
     }
 
     public function destroy(Warehouse $warehouse): JsonResponse

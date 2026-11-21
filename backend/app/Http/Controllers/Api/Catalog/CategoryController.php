@@ -2,18 +2,17 @@
 
 namespace App\Http\Controllers\Api\Catalog;
 
+use App\Data\Catalog\CategoryData;
+use App\Data\Catalog\SaveCategoryData;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Catalog\StoreCategoryRequest;
-use App\Http\Requests\Catalog\UpdateCategoryRequest;
-use App\Http\Resources\Catalog\CategoryResource;
 use App\Models\Catalog\Category;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Spatie\LaravelData\PaginatedDataCollection;
 
 class CategoryController extends Controller
 {
-    public function index(Request $request): AnonymousResourceCollection
+    public function index(Request $request): PaginatedDataCollection
     {
         $perPage = (int) $request->input('per_page', 15);
         $search = trim((string) $request->input('search', ''));
@@ -27,7 +26,9 @@ class CategoryController extends Controller
             ->paginate($perPage)
             ->withQueryString();
 
-        return CategoryResource::collection($categories);
+        $categories->through(fn (Category $category) => CategoryData::fromCategory($category));
+
+        return CategoryData::collect($categories, PaginatedDataCollection::class);
     }
 
     public function options()
@@ -38,25 +39,25 @@ class CategoryController extends Controller
             ->get(['id', 'name']);
     }
 
-    public function store(StoreCategoryRequest $request): CategoryResource
+    public function store(SaveCategoryData $data): CategoryData
     {
-        $category = Category::create($request->validated());
+        $category = Category::create($data->toArray());
 
-        return new CategoryResource($category->loadCount('products'));
+        return CategoryData::fromCategory($category->loadCount('products'));
     }
 
-    public function update(UpdateCategoryRequest $request, Category $category): CategoryResource
+    public function update(SaveCategoryData $data, Category $category): CategoryData
     {
-        $category->update($request->validated());
+        $category->update($data->toArray());
 
-        return new CategoryResource($category->fresh()->loadCount('products'));
+        return CategoryData::fromCategory($category->fresh()->loadCount('products'));
     }
 
-    public function toggleActive(Category $category): CategoryResource
+    public function toggleActive(Category $category): CategoryData
     {
         $category->update(['is_active' => ! $category->is_active]);
 
-        return new CategoryResource($category->fresh()->loadCount('products'));
+        return CategoryData::fromCategory($category->fresh()->loadCount('products'));
     }
 
     public function destroy(Category $category): JsonResponse

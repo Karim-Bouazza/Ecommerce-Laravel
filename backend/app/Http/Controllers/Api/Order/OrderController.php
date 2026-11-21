@@ -2,15 +2,14 @@
 
 namespace App\Http\Controllers\Api\Order;
 
+use App\Data\Order\OrderData;
+use App\Data\Order\OrderStatusHistoryData;
+use App\Data\Order\SaveManualOrderData;
+use App\Data\Order\UpdateOrderStatusData;
 use App\Enums\Order\OrderStatus;
 use App\Enums\Order\OrderType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Order\CreateOrderRequest;
-use App\Http\Requests\Order\StoreManualOrderRequest;
-use App\Http\Requests\Order\UpdateManualOrderRequest;
-use App\Http\Requests\Order\UpdateOrderStatusRequest;
-use App\Http\Resources\Order\OrderResource;
-use App\Http\Resources\Order\OrderStatusHistoryResource;
 use App\Jobs\SendOrderToTelegram;
 use App\Models\Order\Order;
 use App\Models\Order\OrderStatusHistory;
@@ -20,10 +19,12 @@ use App\Services\PixelTracking\ExcludedIpMatcher;
 use App\Services\Orders\CreateOrderService;
 use App\Services\Orders\OrderStatusService;
 use App\Services\Orders\UpdateOrderService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
+use Spatie\LaravelData\DataCollection;
+use Spatie\LaravelData\PaginatedDataCollection;
 
 class OrderController extends Controller
 {
@@ -67,7 +68,7 @@ class OrderController extends Controller
         ], 201);
     }
 
-    public function index(Request $request): AnonymousResourceCollection
+    public function index(Request $request): JsonResponse
     {
         $statusGroup = trim((string) $request->input('status_group', ''));
 
@@ -128,7 +129,12 @@ class OrderController extends Controller
                 ->groupBy('status')
                 ->pluck('total', 'status');
 
-        return OrderResource::collection($orders)->additional([
+        $canViewFraud = (bool) $request->user()?->hasPermission('fraud.view');
+
+        $orders->through(fn (Order $order) => OrderData::fromOrder($order, $canViewFraud));
+
+        return response()->json([
+            ...OrderData::collect($orders, PaginatedDataCollection::class)->toArray(),
             'filters' => [
                 'statuses' => count($groupStatuses) > 1 ? OrderStatus::groupOptions($statusGroup) : [],
             ],
@@ -141,7 +147,12 @@ class OrderController extends Controller
         ]);
     }
 
-    public function generateName(Request $request): \Illuminate\Http\JsonResponse
+    private function canViewFraud(Request $request): bool
+    {
+        return (bool) $request->user()?->hasPermission('fraud.view');
+    }
+
+    public function generateName(Request $request): JsonResponse
     {
         $validated = $request->validate([
             'product_id' => ['required', 'integer', 'exists:products,id'],
@@ -156,28 +167,28 @@ class OrderController extends Controller
         return response()->json(['name' => $name]);
     }
 
-    public function storeManual(StoreManualOrderRequest $request): OrderResource
+    public function storeManual(SaveManualOrderData $data, Request $request): OrderData
     {
-        $data = $request->validated();
-        $data['type'] = OrderType::Manuelle->value;
+        $order = $this->createOrderService->execute([
+            ...$data->toArray(),
+            'type' => OrderType::Manuelle->value,
+        ]);
 
-        $order = $this->createOrderService->execute($data);
-
-        return new OrderResource($order->fresh(self::WITH));
+        return OrderData::fromOrder($order->fresh(self::WITH), $this->canViewFraud($request));
     }
 
-    public function update(UpdateManualOrderRequest $request, Order $order): OrderResource
+    public function update(SaveManualOrderData $data, Order $order, Request $request): OrderData
     {
         abort_unless($order->status->isEditable(), 409, "Cette commande ne peut plus être modifiée.");
 
-        $order = $this->updateOrderService->execute($order, $request->validated());
+        $order = $this->updateOrderService->execute($order, $data->toArray());
 
-        return new OrderResource($order->loadMissing(self::WITH));
+        return OrderData::fromOrder($order->loadMissing(self::WITH), $this->canViewFraud($request));
     }
 
-    public function updateStatus(UpdateOrderStatusRequest $request, Order $order): OrderResource
+    public function updateStatus(UpdateOrderStatusData $data, Order $order, Request $request): OrderData
     {
-        $status = OrderStatus::from($request->validated('status'));
+        $status = OrderStatus::from($data->status);
 
         $allowedStatuses = array_filter(
             $order->status->allowedTransitions(),
@@ -187,20 +198,20 @@ class OrderController extends Controller
         abort_unless(in_array($status, $allowedStatuses, true), 409, "Cette transition de statut n'est pas autorisée.");
 
         $order = $this->orderStatusService->change($order, $status, [
-            'date_report' => $request->validated('date_report'),
+            'date_report' => $data->date_report,
         ]);
 
-        return new OrderResource($order->fresh(self::WITH));
+        return OrderData::fromOrder($order->fresh(self::WITH), $this->canViewFraud($request));
     }
 
-    public function statusHistory(Order $order): AnonymousResourceCollection
+    public function statusHistory(Order $order): DataCollection
     {
         $histories = $order->statusHistories()
             ->with('user')
             ->orderBy('created_at')
             ->get();
 
-        return OrderStatusHistoryResource::collection($histories);
+        return OrderStatusHistoryData::collect($histories, DataCollection::class);
     }
 
     public function destroy(Order $order): Response

@@ -5,13 +5,11 @@ namespace App\Http\Controllers\Api\Finance;
 use App\Enums\Wallet\WalletTransactionCategory;
 use App\Enums\Wallet\WalletTransactionType;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Finance\StoreWalletDepositRequest;
-use App\Http\Requests\Finance\StoreWalletRequest;
-use App\Http\Requests\Finance\StoreWalletTransferRequest;
-use App\Http\Requests\Finance\StoreWalletWithdrawalRequest;
-use App\Http\Requests\Finance\UpdateWalletRequest;
-use App\Http\Resources\Finance\WalletResource;
-use App\Http\Resources\Finance\WalletTransactionResource;
+use App\Data\Finance\SaveWalletData;
+use App\Data\Finance\WalletData;
+use App\Data\Finance\WalletMovementData;
+use App\Data\Finance\WalletTransactionData;
+use App\Data\Finance\WalletTransferData;
 use App\Models\Finance\Wallet;
 use App\Models\Finance\WalletTransaction;
 use App\Services\Wallets\CreateWalletService;
@@ -22,12 +20,12 @@ use App\Services\Wallets\UpdateWalletService;
 use App\Services\Wallets\WithdrawFromWalletService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use RuntimeException;
+use Spatie\LaravelData\PaginatedDataCollection;
 
 class WalletController extends Controller
 {
-    public function index(Request $request): AnonymousResourceCollection
+    public function index(Request $request): PaginatedDataCollection
     {
         $perPage = (int) $request->input('per_page', 15);
         $search = trim((string) $request->input('search', ''));
@@ -40,27 +38,29 @@ class WalletController extends Controller
             ->paginate($perPage)
             ->withQueryString();
 
-        return WalletResource::collection($wallets);
+        $wallets->through(fn (Wallet $wallet) => WalletData::fromWallet($wallet));
+
+        return WalletData::collect($wallets, PaginatedDataCollection::class);
     }
 
-    public function store(StoreWalletRequest $request): JsonResponse
+    public function store(SaveWalletData $data): JsonResponse
     {
-        $wallet = app(CreateWalletService::class)->execute($request->validated());
+        $wallet = app(CreateWalletService::class)->execute($data);
 
-        return (new WalletResource($wallet))->response()->setStatusCode(201);
+        return WalletData::fromWallet($wallet)->toResponse(request())->setStatusCode(201);
     }
 
-    public function update(UpdateWalletRequest $request, Wallet $wallet): WalletResource
+    public function update(SaveWalletData $data, Wallet $wallet): WalletData
     {
-        $wallet = app(UpdateWalletService::class)->execute($wallet, $request->validated());
+        $wallet = app(UpdateWalletService::class)->execute($wallet, $data);
 
-        return new WalletResource($wallet);
+        return WalletData::fromWallet($wallet);
     }
 
-    public function deposit(StoreWalletDepositRequest $request, Wallet $wallet): JsonResponse
+    public function deposit(WalletMovementData $data, Wallet $wallet): JsonResponse
     {
         try {
-            app(DepositToWalletService::class)->execute($wallet, $request->validated());
+            app(DepositToWalletService::class)->execute($wallet, $data);
         } catch (RuntimeException $exception) {
             return response()->json(['message' => $exception->getMessage()], 422);
         }
@@ -68,10 +68,10 @@ class WalletController extends Controller
         return response()->json(['message' => 'Entrée enregistrée.']);
     }
 
-    public function withdraw(StoreWalletWithdrawalRequest $request, Wallet $wallet): JsonResponse
+    public function withdraw(WalletMovementData $data, Wallet $wallet): JsonResponse
     {
         try {
-            app(WithdrawFromWalletService::class)->execute($wallet, $request->validated());
+            app(WithdrawFromWalletService::class)->execute($wallet, $data);
         } catch (RuntimeException $exception) {
             return response()->json(['message' => $exception->getMessage()], 422);
         }
@@ -86,7 +86,7 @@ class WalletController extends Controller
         return response()->json(['message' => 'Portefeuille supprimé.']);
     }
 
-    public function transactions(Request $request, Wallet $wallet): AnonymousResourceCollection
+    public function transactions(Request $request, Wallet $wallet): PaginatedDataCollection
     {
         $perPage = (int) $request->input('per_page', 15);
         $category = $request->input('category');
@@ -103,13 +103,15 @@ class WalletController extends Controller
             ->paginate($perPage)
             ->withQueryString();
 
-        return WalletTransactionResource::collection($transactions);
+        $transactions->through(fn (WalletTransaction $transaction) => WalletTransactionData::fromTransaction($transaction));
+
+        return WalletTransactionData::collect($transactions, PaginatedDataCollection::class);
     }
 
-    public function transfer(StoreWalletTransferRequest $request): JsonResponse
+    public function transfer(WalletTransferData $data): JsonResponse
     {
         try {
-            app(TransferBetweenWalletsService::class)->execute($request->validated());
+            app(TransferBetweenWalletsService::class)->execute($data);
         } catch (RuntimeException $exception) {
             return response()->json(['message' => $exception->getMessage()], 422);
         }

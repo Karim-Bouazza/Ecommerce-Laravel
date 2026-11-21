@@ -4,21 +4,20 @@ namespace App\Http\Controllers\Api\Finance;
 
 use App\Enums\Wallet\WalletTransactionCategory;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Finance\StorePaiementRequest;
-use App\Http\Requests\Finance\UpdatePaiementRequest;
-use App\Http\Resources\Finance\PaiementResource;
+use App\Data\Finance\PaiementData;
+use App\Data\Finance\SaveDeliveryPaymentData;
 use App\Models\Finance\WalletTransaction;
 use App\Services\Paiements\CreateDeliveryPaymentService;
 use App\Services\Paiements\DeleteDeliveryPaymentService;
 use App\Services\Paiements\UpdateDeliveryPaymentService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use RuntimeException;
+use Spatie\LaravelData\PaginatedDataCollection;
 
 class PaiementController extends Controller
 {
-    public function index(Request $request): AnonymousResourceCollection
+    public function index(Request $request): PaginatedDataCollection
     {
         $perPage = (int) $request->input('per_page', 15);
         $search = trim((string) $request->input('search', ''));
@@ -39,34 +38,36 @@ class PaiementController extends Controller
             ->paginate($perPage)
             ->withQueryString();
 
-        return PaiementResource::collection($paiements);
+        $paiements->through(fn (WalletTransaction $paiement) => PaiementData::fromTransaction($paiement));
+
+        return PaiementData::collect($paiements, PaginatedDataCollection::class);
     }
 
-    public function store(StorePaiementRequest $request): JsonResponse
+    public function store(SaveDeliveryPaymentData $data): JsonResponse
     {
         try {
-            $paiement = app(CreateDeliveryPaymentService::class)->execute($request->validated());
+            $paiement = app(CreateDeliveryPaymentService::class)->execute($data);
         } catch (RuntimeException $exception) {
             return response()->json(['message' => $exception->getMessage()], 422);
         }
 
-        return (new PaiementResource($paiement->load(['wallet', 'deliveryCompanyIntegration', 'creator'])))
-            ->response()
+        return PaiementData::fromTransaction($paiement->load(['wallet', 'deliveryCompanyIntegration', 'creator']))
+            ->toResponse(request())
             ->setStatusCode(201);
     }
 
-    public function update(UpdatePaiementRequest $request, WalletTransaction $paiement): JsonResponse
+    public function update(SaveDeliveryPaymentData $data, WalletTransaction $paiement): JsonResponse
     {
         $this->authorizePaiement($paiement);
 
         try {
-            $paiement = app(UpdateDeliveryPaymentService::class)->execute($paiement, $request->validated());
+            $paiement = app(UpdateDeliveryPaymentService::class)->execute($paiement, $data);
         } catch (RuntimeException $exception) {
             return response()->json(['message' => $exception->getMessage()], 422);
         }
 
-        return (new PaiementResource($paiement->load(['wallet', 'deliveryCompanyIntegration', 'creator'])))
-            ->response();
+        return PaiementData::fromTransaction($paiement->load(['wallet', 'deliveryCompanyIntegration', 'creator']))
+            ->toResponse(request());
     }
 
     public function destroy(WalletTransaction $paiement): JsonResponse

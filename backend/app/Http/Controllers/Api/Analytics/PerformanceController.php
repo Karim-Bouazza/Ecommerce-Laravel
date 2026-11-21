@@ -2,21 +2,21 @@
 
 namespace App\Http\Controllers\Api\Analytics;
 
+use App\Data\Analytics\PerformanceFilterData;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Analytics\PerformanceRequest;
 use App\Services\Performance\GetPerformanceRevenueService;
 use App\Services\Performance\GetPerformanceSalesEvolutionService;
 use Illuminate\Http\JsonResponse;
 
 class PerformanceController extends Controller
 {
-    public function revenue(PerformanceRequest $request, GetPerformanceRevenueService $service): JsonResponse
+    public function revenue(PerformanceFilterData $data, GetPerformanceRevenueService $service): JsonResponse
     {
-        return response()->json($service->execute($request->filters()));
+        return response()->json($service->execute($data->filters()));
     }
 
-    public function salesEvolution(PerformanceRequest $request, GetPerformanceSalesEvolutionService $service): JsonResponse
+    public function salesEvolution(PerformanceFilterData $data, GetPerformanceSalesEvolutionService $service): JsonResponse
     {
-        return response()->json($service->execute($request->filters()));
+        return response()->json($service->execute($data->filters()));
     }
 }

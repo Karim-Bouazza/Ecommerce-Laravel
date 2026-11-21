@@ -6,7 +6,6 @@ use App\Enums\Fraud\FraudRiskLevel;
 use Carbon\CarbonInterface;
 use Spatie\LaravelData\Data;
 
-/** Outcome of scoring: totals per component plus the explanation. */
 class FraudScore extends Data
 {
     /**

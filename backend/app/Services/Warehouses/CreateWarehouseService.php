@@ -2,12 +2,15 @@
 
 namespace App\Services\Warehouses;
 
+use App\Data\Inventory\SaveWarehouseData;
 use App\Models\Inventory\Warehouse;
 
 class CreateWarehouseService
 {
-    public function execute(array $data): Warehouse
+    public function execute(SaveWarehouseData $input): Warehouse
     {
+        $data = $input->toArray();
+
         $warehouse = Warehouse::create([
             'name' => $data['name'],
             'phone' => $data['phone'] ?? null,

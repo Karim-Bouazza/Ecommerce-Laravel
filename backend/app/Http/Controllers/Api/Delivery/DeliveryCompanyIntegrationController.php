@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\Api\Delivery;
 
+use App\Data\Delivery\DeliveryCompanyIntegrationData;
+use App\Data\Delivery\SaveDeliveryCompanyIntegrationData;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Delivery\StoreDeliveryCompanyIntegrationRequest;
-use App\Http\Resources\Delivery\DeliveryCompanyIntegrationResource;
 use App\Models\Delivery\DeliveryCompanyIntegration;
 use App\Services\Partners\DeleteDeliveryCompanyIntegrationService;
 use App\Services\Partners\SaveDeliveryCompanyIntegrationService;
@@ -43,30 +43,24 @@ class DeliveryCompanyIntegrationController extends Controller
 
         if ($integration === null) {
             return response()->json([
-                'data' => [
-                    'company_key' => $companyKey,
-                    'name' => $company['name'],
-                    'base_url' => $company['base_url'],
-                    'has_token' => false,
-                    'updated_at' => null,
-                ],
+                'data' => DeliveryCompanyIntegrationData::unconfigured($companyKey, $company),
             ]);
         }
 
         return response()->json([
-            'data' => new DeliveryCompanyIntegrationResource($integration),
+            'data' => DeliveryCompanyIntegrationData::fromIntegration($integration),
         ]);
     }
 
-    public function update(StoreDeliveryCompanyIntegrationRequest $request, string $companyKey): JsonResponse
+    public function update(SaveDeliveryCompanyIntegrationData $data, string $companyKey): JsonResponse
     {
         abort_unless(DeliveryCompanyIntegrationRegistry::exists($companyKey), 404);
 
         $integration = app(SaveDeliveryCompanyIntegrationService::class)
-            ->execute($companyKey, $request->validated());
+            ->execute($companyKey, $data);
 
         return response()->json([
-            'data' => new DeliveryCompanyIntegrationResource($integration),
+            'data' => DeliveryCompanyIntegrationData::fromIntegration($integration),
         ]);
     }
 

@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\Api\Analytics;
 
+use App\Data\Analytics\WilayaAnalyticsData;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\Analytics\WilayaAnalyticsResource;
 use App\Models\Delivery\Wilaya;
 use App\Queries\Wilayas\WilayaAnalyticsQuery;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Spatie\LaravelData\PaginatedDataCollection;
 
 class WilayaAnalyticsController extends Controller
 {
@@ -15,7 +15,7 @@ class WilayaAnalyticsController extends Controller
     {
     }
 
-    public function index(Request $request): AnonymousResourceCollection
+    public function index(Request $request): PaginatedDataCollection
     {
         $perPage = (int) $request->input('per_page', 15);
         $search = trim((string) $request->input('search', ''));
@@ -43,6 +43,8 @@ class WilayaAnalyticsController extends Controller
             $wilaya->setAttribute('grand_returned_count', $totals['returned_count']);
         });
 
-        return WilayaAnalyticsResource::collection($wilayas);
+        $wilayas->through(fn (Wilaya $wilaya) => WilayaAnalyticsData::fromWilaya($wilaya));
+
+        return WilayaAnalyticsData::collect($wilayas, PaginatedDataCollection::class);
     }
 }

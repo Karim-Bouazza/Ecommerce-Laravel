@@ -2,14 +2,17 @@
 
 namespace App\Services\Roles;
 
+use App\Data\Auth\SaveRoleData;
 use App\Support\PermissionRegistry;
 use RuntimeException;
 use Spatie\Permission\Models\Role;
 
 class UpdateRoleService
 {
-    public function execute(Role $role, array $data): Role
+    public function execute(Role $role, SaveRoleData $input): Role
     {
+        $data = $input->toArray();
+
         if (PermissionRegistry::isSystemRole($role->name)) {
             throw new RuntimeException('Le rôle système ne peut pas être modifié.');
         }

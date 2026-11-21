@@ -3,19 +3,19 @@
 namespace App\Http\Controllers\Api\Inventory;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Inventory\AdjustStockRequest;
-use App\Http\Resources\Inventory\StockResource;
+use App\Data\Inventory\AdjustStockData;
+use App\Data\Inventory\StockData;
 use App\Models\Catalog\Product;
 use App\Models\Inventory\Warehouse;
 use App\Services\Warehouses\UpdateWarehouseStockService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Spatie\LaravelData\PaginatedDataCollection;
 
 class StockController extends Controller
 {
-    public function index(Request $request): AnonymousResourceCollection
+    public function index(Request $request): PaginatedDataCollection
     {
         $perPage = (int) $request->input('per_page', 15);
 
@@ -24,7 +24,7 @@ class StockController extends Controller
             ->paginate($perPage)
             ->withQueryString();
 
-        return StockResource::collection($products);
+        return StockData::collect($products, PaginatedDataCollection::class);
     }
 
     public function stats(Request $request): JsonResponse
@@ -71,19 +71,14 @@ class StockController extends Controller
             );
     }
 
-    public function adjust(AdjustStockRequest $request, Product $product): StockResource
+    public function adjust(AdjustStockData $data, Product $product): StockData
     {
-        $warehouse = Warehouse::findOrFail($request->validated('warehouse_id'));
+        $warehouse = Warehouse::findOrFail($data->warehouse_id);
 
-        app(UpdateWarehouseStockService::class)->execute(
-            $warehouse,
-            $product,
-            (int) $request->validated('adjustment'),
-            (float) $request->validated('purchase_price'),
-        );
+        app(UpdateWarehouseStockService::class)->execute($warehouse, $product, $data);
 
         $updated = Product::query()->whereKey($product->id)->withStockSums($warehouse->id)->firstOrFail();
 
-        return new StockResource($updated);
+        return StockData::from($updated);
     }
 }

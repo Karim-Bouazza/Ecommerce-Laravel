@@ -2,6 +2,8 @@
 
 namespace App\Services\ReturnEntries;
 
+use App\Data\Purchasing\ReturnEntryItemInputData;
+use App\Data\Purchasing\StoreReturnEntryData;
 use App\Models\Purchasing\PurchaseEntry;
 use App\Models\Purchasing\PurchaseEntryItem;
 use App\Models\Purchasing\ReturnEntry;
@@ -11,18 +13,18 @@ use RuntimeException;
 
 class CreateReturnEntryService
 {
-    public function execute(array $data): ReturnEntry
+    public function execute(StoreReturnEntryData $data): ReturnEntry
     {
         return DB::transaction(function () use ($data): ReturnEntry {
-            $purchaseEntry = PurchaseEntry::query()->lockForUpdate()->findOrFail($data['purchase_entry_id']);
-            $items = $data['items'] ?? [];
+            $purchaseEntry = PurchaseEntry::query()->lockForUpdate()->findOrFail($data->purchase_entry_id);
+            $items = $data->items;
 
             $entry = ReturnEntry::create([
                 'reference' => $this->generateReference(),
                 'purchase_entry_id' => $purchaseEntry->id,
                 'warehouse_id' => $purchaseEntry->warehouse_id,
                 'fournisseur_id' => $purchaseEntry->fournisseur_id,
-                'remark' => $data['remark'] ?? null,
+                'remark' => $data->remark,
                 'total' => 0,
             ]);
 
@@ -35,20 +37,20 @@ class CreateReturnEntryService
     }
 
     /**
-     * @param  array<int, array<string, mixed>>  $items
+     * @param  array<int, ReturnEntryItemInputData>  $items
      */
     protected function syncItems(ReturnEntry $entry, PurchaseEntry $purchaseEntry, array $items): int
     {
         $total = 0;
 
         foreach ($items as $item) {
-            $purchaseEntryItem = PurchaseEntryItem::query()->lockForUpdate()->findOrFail($item['purchase_entry_item_id']);
+            $purchaseEntryItem = PurchaseEntryItem::query()->lockForUpdate()->findOrFail($item->purchase_entry_item_id);
 
             if ($purchaseEntryItem->purchase_entry_id !== $purchaseEntry->id) {
                 throw new RuntimeException("Le produit sélectionné n'appartient pas à l'entrée d'achat choisie.");
             }
 
-            $quantity = (int) $item['quantity'];
+            $quantity = $item->quantity;
             $remaining = $this->remainingQuantity($purchaseEntryItem);
 
             if ($quantity > $remaining) {

@@ -2,6 +2,7 @@
 
 namespace App\Services\Versements;
 
+use App\Data\Finance\SaveFournisseurVersementData;
 use App\Enums\Wallet\WalletTransactionCategory;
 use App\Enums\Wallet\WalletTransactionType;
 use App\Models\Purchasing\Fournisseur;
@@ -12,17 +13,17 @@ use RuntimeException;
 
 class CreateFournisseurVersementService
 {
-    public function execute(array $data): WalletTransaction
+    public function execute(SaveFournisseurVersementData $data): WalletTransaction
     {
-        $amount = (int) $data['amount'];
+        $amount = (int) $data->amount;
 
         if ($amount <= 0) {
             throw new RuntimeException('Le montant doit être supérieur à 0.');
         }
 
         return DB::transaction(function () use ($amount, $data): WalletTransaction {
-            $fournisseur = Fournisseur::query()->findOrFail($data['fournisseur_id']);
-            $wallet = Wallet::query()->lockForUpdate()->findOrFail($data['wallet_id']);
+            $fournisseur = Fournisseur::query()->findOrFail($data->fournisseur_id);
+            $wallet = Wallet::query()->lockForUpdate()->findOrFail($data->wallet_id);
 
             if ($wallet->balance < $amount) {
                 throw new RuntimeException("Solde insuffisant dans le portefeuille « {$wallet->name} ».");
@@ -30,11 +31,11 @@ class CreateFournisseurVersementService
 
             $transaction = $wallet->transactions()->create([
                 'fournisseur_id' => $fournisseur->id,
-                'date' => $data['date'],
+                'date' => $data->date,
                 'type' => WalletTransactionType::Out,
                 'category' => WalletTransactionCategory::Versement,
                 'amount' => $amount,
-                'remark' => $data['remark'] ?? null,
+                'remark' => $data->remark,
             ]);
 
             $wallet->decrement('balance', $amount);

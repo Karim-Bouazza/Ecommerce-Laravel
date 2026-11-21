@@ -2,6 +2,7 @@
 
 namespace App\Services\Administrateurs;
 
+use App\Data\Auth\UpdateAdministratorData;
 use App\Models\Users\User;
 use Illuminate\Support\Arr;
 use RuntimeException;
@@ -14,8 +15,10 @@ class UpdateAdministrateurService
     /**
      * @throws RuntimeException when the change would lock the back office out
      */
-    public function execute(User $user, array $data, ?User $actor = null): User
+    public function execute(User $user, UpdateAdministratorData $input, ?User $actor = null): User
     {
+        $data = $input->toArray();
+
         $roleChanged = isset($data['role_id']) && (int) $data['role_id'] !== (int) $user->role?->id;
         $deactivated = array_key_exists('is_active', $data) && ! $data['is_active'] && $user->is_active;
 

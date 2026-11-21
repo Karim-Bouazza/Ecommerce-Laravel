@@ -2,6 +2,7 @@
 
 namespace App\Services\ReturnEntries;
 
+use App\Data\Purchasing\UpdateReturnEntryData;
 use App\Models\Purchasing\PurchaseEntryItem;
 use App\Models\Purchasing\ReturnEntry;
 use App\Models\Purchasing\ReturnEntryItem;
@@ -10,27 +11,27 @@ use RuntimeException;
 
 class UpdateReturnEntryService
 {
-    public function execute(ReturnEntry $entry, array $data): void
+    public function execute(ReturnEntry $entry, UpdateReturnEntryData $data): void
     {
         if (! $entry->isPending()) {
             throw new RuntimeException('Seule une entrée en attente peut être modifiée.');
         }
 
         DB::transaction(function () use ($entry, $data): void {
-            $items = $data['items'] ?? [];
+            $items = $data->items;
 
             $entry->items()->delete();
 
             $total = 0;
 
             foreach ($items as $item) {
-                $purchaseEntryItem = PurchaseEntryItem::query()->lockForUpdate()->findOrFail($item['purchase_entry_item_id']);
+                $purchaseEntryItem = PurchaseEntryItem::query()->lockForUpdate()->findOrFail($item->purchase_entry_item_id);
 
                 if ($purchaseEntryItem->purchase_entry_id !== $entry->purchase_entry_id) {
                     throw new RuntimeException("Le produit sélectionné n'appartient pas à l'entrée d'achat de ce retour.");
                 }
 
-                $quantity = (int) $item['quantity'];
+                $quantity = $item->quantity;
                 $remaining = $this->remainingQuantity($purchaseEntryItem, $entry->id);
 
                 if ($quantity > $remaining) {
@@ -53,7 +54,7 @@ class UpdateReturnEntryService
             }
 
             $entry->update([
-                'remark' => $data['remark'] ?? null,
+                'remark' => $data->remark,
                 'total' => $total,
             ]);
         });

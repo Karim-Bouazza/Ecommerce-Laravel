@@ -3,18 +3,18 @@
 namespace App\Http\Controllers\Api\Inventory;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\Inventory\StockMovementResource;
+use App\Data\Inventory\StockMovementData;
 use App\Models\Inventory\Warehouse;
 use App\Models\Inventory\WarehouseStockMovement;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Spatie\LaravelData\PaginatedDataCollection;
 
 class StockMovementController extends Controller
 {
     protected const WITH = ['product', 'warehouse', 'creator'];
 
-    public function index(Request $request): AnonymousResourceCollection
+    public function index(Request $request): PaginatedDataCollection
     {
         $perPage = (int) $request->input('per_page', 15);
         $search = trim((string) $request->input('search', ''));
@@ -41,6 +41,8 @@ class StockMovementController extends Controller
             ->paginate($perPage)
             ->withQueryString();
 
-        return StockMovementResource::collection($movements);
+        $movements->through(fn (WarehouseStockMovement $movement) => StockMovementData::fromMovement($movement));
+
+        return StockMovementData::collect($movements, PaginatedDataCollection::class);
     }
 }

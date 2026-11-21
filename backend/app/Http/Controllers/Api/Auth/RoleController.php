@@ -2,24 +2,23 @@
 
 namespace App\Http\Controllers\Api\Auth;
 
+use App\Data\Auth\RoleData;
+use App\Data\Auth\RoleDetailData;
+use App\Data\Auth\SaveRoleData;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Auth\StoreRoleRequest;
-use App\Http\Requests\Auth\UpdateRoleRequest;
-use App\Http\Resources\Auth\RoleDetailResource;
-use App\Http\Resources\Auth\RoleResource;
 use App\Services\Roles\CreateRoleService;
 use App\Services\Roles\DeleteRoleService;
 use App\Services\Roles\UpdateRoleService;
 use App\Support\PermissionRegistry;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use RuntimeException;
+use Spatie\LaravelData\PaginatedDataCollection;
 use Spatie\Permission\Models\Role;
 
 class RoleController extends Controller
 {
-    public function index(Request $request): AnonymousResourceCollection
+    public function index(Request $request): PaginatedDataCollection
     {
         $perPage = (int) $request->input('per_page', 15);
         $search = trim((string) $request->input('search', ''));
@@ -33,7 +32,9 @@ class RoleController extends Controller
             ->paginate($perPage)
             ->withQueryString();
 
-        return RoleResource::collection($roles);
+        $roles->through(fn (Role $role) => RoleData::fromRole($role));
+
+        return RoleData::collect($roles, PaginatedDataCollection::class);
     }
 
     public function permissions(): JsonResponse
@@ -52,27 +53,27 @@ class RoleController extends Controller
         return response()->json($groups);
     }
 
-    public function store(StoreRoleRequest $request): RoleDetailResource
+    public function store(SaveRoleData $data): RoleDetailData
     {
-        $role = app(CreateRoleService::class)->execute($request->validated());
+        $role = app(CreateRoleService::class)->execute($data);
 
-        return new RoleDetailResource($role);
+        return RoleDetailData::fromRole($role);
     }
 
-    public function show(Role $role): RoleDetailResource
+    public function show(Role $role): RoleDetailData
     {
-        return new RoleDetailResource($role);
+        return RoleDetailData::fromRole($role);
     }
 
-    public function update(UpdateRoleRequest $request, Role $role): RoleDetailResource|JsonResponse
+    public function update(SaveRoleData $data, Role $role): RoleDetailData|JsonResponse
     {
         try {
-            $role = app(UpdateRoleService::class)->execute($role, $request->validated());
+            $role = app(UpdateRoleService::class)->execute($role, $data);
         } catch (RuntimeException $exception) {
             return response()->json(['message' => $exception->getMessage()], 422);
         }
 
-        return new RoleDetailResource($role);
+        return RoleDetailData::fromRole($role);
     }
 
     public function destroy(Role $role): JsonResponse

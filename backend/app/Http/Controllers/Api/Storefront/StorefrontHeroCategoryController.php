@@ -2,56 +2,57 @@
 
 namespace App\Http\Controllers\Api\Storefront;
 
+use App\Data\Storefront\StorefrontHeroCategoryData;
+use App\Data\Storefront\StoreStorefrontHeroCategoryData;
+use App\Data\Storefront\UpdateStorefrontHeroCategoryData;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Storefront\StoreStorefrontHeroCategoryRequest;
-use App\Http\Requests\Storefront\UpdateStorefrontHeroCategoryRequest;
-use App\Http\Resources\Storefront\StorefrontHeroCategoryResource;
 use App\Models\Storefront\StorefrontHeroCategory;
 use Illuminate\Support\Facades\Storage;
+use Spatie\LaravelData\DataCollection;
 
 class StorefrontHeroCategoryController extends Controller
 {
-    public function index()
+    public function index(): DataCollection
     {
         $heroCategories = StorefrontHeroCategory::query()
             ->orderBy('position')
             ->with(['category' => fn ($query) => $query->withCount('products')])
             ->get();
 
-        return StorefrontHeroCategoryResource::collection($heroCategories);
+        return StorefrontHeroCategoryData::collect($heroCategories, DataCollection::class);
     }
 
-    public function store(StoreStorefrontHeroCategoryRequest $request)
+    public function store(StoreStorefrontHeroCategoryData $data): StorefrontHeroCategoryData
     {
         $position = (int) StorefrontHeroCategory::max('position') + 1;
 
         $heroCategory = StorefrontHeroCategory::create([
-            'category_id' => $request->validated('category_id'),
-            'image_path' => $request->file('image')->store('hero-categories', 'public'),
+            'category_id' => $data->category_id,
+            'image_path' => $data->image->store('hero-categories', 'public'),
             'position' => $position,
         ]);
 
-        return new StorefrontHeroCategoryResource(
+        return StorefrontHeroCategoryData::fromHeroCategory(
             $heroCategory->load(['category' => fn ($query) => $query->withCount('products')])
         );
     }
 
-    public function update(UpdateStorefrontHeroCategoryRequest $request, StorefrontHeroCategory $heroCategory)
+    public function update(UpdateStorefrontHeroCategoryData $data, StorefrontHeroCategory $heroCategory): StorefrontHeroCategoryData
     {
-        $data = $request->safe()->only(['category_id', 'position']);
+        $attributes = $data->only('category_id', 'position')->toArray();
         $previousPath = $heroCategory->getRawOriginal('image_path');
 
-        if ($request->hasFile('image')) {
-            $data['image_path'] = $request->file('image')->store('hero-categories', 'public');
+        if ($data->image !== null) {
+            $attributes['image_path'] = $data->image->store('hero-categories', 'public');
         }
 
-        $heroCategory->update($data);
+        $heroCategory->update($attributes);
 
-        if ($request->hasFile('image') && $previousPath) {
+        if ($data->image !== null && $previousPath) {
             Storage::disk('public')->delete($previousPath);
         }
 
-        return new StorefrontHeroCategoryResource(
+        return StorefrontHeroCategoryData::fromHeroCategory(
             $heroCategory->fresh()->load(['category' => fn ($query) => $query->withCount('products')])
         );
     }

@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\Api\Marketing;
 
+use App\Data\Marketing\MetaSpendData;
+use App\Data\Marketing\SaveMetaAppData;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Marketing\MetaSpendRequest;
-use App\Http\Requests\Marketing\SaveMetaAppRequest;
 use App\Models\Catalog\Product;
 use App\Models\Marketing\MetaCampaign;
 use App\Models\Marketing\MetaSetting;
@@ -28,9 +28,9 @@ class MetaAdsController extends Controller
         return response()->json(['data' => $this->connectionPayload(MetaSetting::current())]);
     }
 
-    public function saveApp(SaveMetaAppRequest $request, SaveMetaAppService $service): JsonResponse
+    public function saveApp(SaveMetaAppData $data, SaveMetaAppService $service): JsonResponse
     {
-        $setting = $service->execute($request->string('app_id')->toString(), $request->input('app_secret'));
+        $setting = $service->execute($data->app_id, $data->app_secret);
 
         return response()->json(['data' => $this->connectionPayload($setting)]);
     }
@@ -102,12 +102,12 @@ class MetaAdsController extends Controller
         return response()->json(['data' => $this->connectionPayload(MetaSetting::current())]);
     }
 
-    public function spend(MetaSpendRequest $request, GetCampaignSpendService $service): JsonResponse
+    public function spend(MetaSpendData $data, GetCampaignSpendService $service): JsonResponse
     {
         $campaigns = $this->guard(fn () => $service->execute(
-            CarbonImmutable::parse($request->input('date_from')),
-            CarbonImmutable::parse($request->input('date_to')),
-            $request->boolean('fresh'),
+            CarbonImmutable::parse($data->date_from),
+            CarbonImmutable::parse($data->date_to),
+            $data->fresh,
         ));
 
         if ($campaigns instanceof JsonResponse) {

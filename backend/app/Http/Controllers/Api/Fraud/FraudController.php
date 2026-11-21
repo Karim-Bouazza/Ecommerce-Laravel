@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers\Api\Fraud;
 
+use App\Data\Fraud\FraudAssessmentData;
+use App\Data\Fraud\FraudReviewData;
 use App\Enums\Fraud\FraudReviewLabel;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Fraud\FraudReviewRequest;
-use App\Http\Resources\Fraud\FraudAssessmentResource;
 use App\Models\Fraud\FraudAssessment;
 use App\Models\Order\Order;
 use App\Services\Fraud\FraudIdentifiers;
 use App\Services\Fraud\FraudReviewService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Spatie\LaravelData\PaginatedDataCollection;
 
 class FraudController extends Controller
 {
@@ -20,7 +20,7 @@ class FraudController extends Controller
 
     public function __construct(private readonly FraudReviewService $reviews) {}
 
-    public function index(Request $request): AnonymousResourceCollection
+    public function index(Request $request): PaginatedDataCollection
     {
         $search = trim((string) $request->input('search', ''));
         $level = $request->input('risk_level');
@@ -43,7 +43,11 @@ class FraudController extends Controller
             ->paginate((int) $request->input('per_page', 15))
             ->withQueryString();
 
-        return FraudAssessmentResource::collection($assessments);
+        $sensitive = $this->canViewSensitive($request);
+
+        $assessments->through(fn (FraudAssessment $assessment) => FraudAssessmentData::fromAssessment($assessment, $sensitive));
+
+        return FraudAssessmentData::collect($assessments, PaginatedDataCollection::class);
     }
 
     public function show(Request $request, Order $order): JsonResponse
@@ -53,7 +57,7 @@ class FraudController extends Controller
             ->where('order_id', $order->id)
             ->firstOrFail();
 
-        $base = (new FraudAssessmentResource($assessment))->toArray($request);
+        $base = FraudAssessmentData::fromAssessment($assessment, $this->canViewSensitive($request))->toArray();
 
         return response()->json([
             ...$base,
@@ -71,14 +75,14 @@ class FraudController extends Controller
         ]);
     }
 
-    public function review(FraudReviewRequest $request, Order $order): JsonResponse
+    public function review(FraudReviewData $data, Order $order, Request $request): JsonResponse
     {
         abort_unless(FraudAssessment::where('order_id', $order->id)->exists(), 404);
 
         $review = $this->reviews->setLabel(
             $order,
-            FraudReviewLabel::from($request->validated('label')),
-            $request->validated('reason'),
+            $data->label,
+            $data->reason,
             $request->user(),
         );
 
@@ -88,6 +92,11 @@ class FraudController extends Controller
             'reviewed_by' => $review->reviewer?->name,
             'reviewed_at' => $review->reviewed_at?->toIso8601String(),
         ]);
+    }
+
+    private function canViewSensitive(Request $request): bool
+    {
+        return (bool) $request->user()?->hasPermission('fraud.view_sensitive');
     }
 
     /** @return list<array<string, mixed>> */

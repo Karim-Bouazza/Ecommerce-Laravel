@@ -3,17 +3,18 @@
 namespace App\Http\Controllers\Api\Inventory;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\Inventory\StockAlertResource;
+use App\Data\Inventory\StockAlertData;
+use App\Models\Catalog\Product;
 use App\Models\Inventory\Stock;
 use App\Models\Inventory\Warehouse;
 use App\Services\Warehouses\WarehouseStockQueryService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Spatie\LaravelData\PaginatedDataCollection;
 
 class StockAlertController extends Controller
 {
-    public function index(Request $request): AnonymousResourceCollection
+    public function index(Request $request): PaginatedDataCollection
     {
         $warehouse = Warehouse::findOrFail($request->input('warehouse_id'));
 
@@ -56,6 +57,8 @@ class StockAlertController extends Controller
             ->paginate($perPage)
             ->withQueryString();
 
-        return StockAlertResource::collection($products);
+        $products->through(fn (Product $product) => StockAlertData::fromProduct($product));
+
+        return StockAlertData::collect($products, PaginatedDataCollection::class);
     }
 }

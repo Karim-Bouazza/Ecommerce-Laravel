@@ -4,9 +4,8 @@ namespace App\Http\Controllers\Api\Finance;
 
 use App\Enums\Wallet\WalletTransactionCategory;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Finance\StoreVersementRequest;
-use App\Http\Requests\Finance\UpdateVersementRequest;
-use App\Http\Resources\Finance\VersementResource;
+use App\Data\Finance\SaveFournisseurVersementData;
+use App\Data\Finance\VersementData;
 use App\Models\Purchasing\Fournisseur;
 use App\Models\Finance\WalletTransaction;
 use App\Services\Versements\CreateFournisseurVersementService;
@@ -14,12 +13,12 @@ use App\Services\Versements\DeleteFournisseurVersementService;
 use App\Services\Versements\UpdateFournisseurVersementService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use RuntimeException;
+use Spatie\LaravelData\PaginatedDataCollection;
 
 class VersementController extends Controller
 {
-    public function index(Request $request): AnonymousResourceCollection
+    public function index(Request $request): PaginatedDataCollection
     {
         $perPage = (int) $request->input('per_page', 15);
         $search = trim((string) $request->input('search', ''));
@@ -40,7 +39,9 @@ class VersementController extends Controller
             ->paginate($perPage)
             ->withQueryString();
 
-        return VersementResource::collection($versements);
+        $versements->through(fn (WalletTransaction $versement) => VersementData::fromTransaction($versement));
+
+        return VersementData::collect($versements, PaginatedDataCollection::class);
     }
 
     public function stats(): JsonResponse
@@ -61,31 +62,31 @@ class VersementController extends Controller
         ]);
     }
 
-    public function store(StoreVersementRequest $request): JsonResponse
+    public function store(SaveFournisseurVersementData $data): JsonResponse
     {
         try {
-            $versement = app(CreateFournisseurVersementService::class)->execute($request->validated());
+            $versement = app(CreateFournisseurVersementService::class)->execute($data);
         } catch (RuntimeException $exception) {
             return response()->json(['message' => $exception->getMessage()], 422);
         }
 
-        return (new VersementResource($versement->load(['wallet', 'fournisseur', 'creator'])))
-            ->response()
+        return VersementData::fromTransaction($versement->load(['wallet', 'fournisseur', 'creator']))
+            ->toResponse(request())
             ->setStatusCode(201);
     }
 
-    public function update(UpdateVersementRequest $request, WalletTransaction $versement): JsonResponse
+    public function update(SaveFournisseurVersementData $data, WalletTransaction $versement): JsonResponse
     {
         $this->authorizeVersement($versement);
 
         try {
-            $versement = app(UpdateFournisseurVersementService::class)->execute($versement, $request->validated());
+            $versement = app(UpdateFournisseurVersementService::class)->execute($versement, $data);
         } catch (RuntimeException $exception) {
             return response()->json(['message' => $exception->getMessage()], 422);
         }
 
-        return (new VersementResource($versement->load(['wallet', 'fournisseur', 'creator'])))
-            ->response();
+        return VersementData::fromTransaction($versement->load(['wallet', 'fournisseur', 'creator']))
+            ->toResponse(request());
     }
 
     public function destroy(WalletTransaction $versement): JsonResponse

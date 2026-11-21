@@ -2,6 +2,7 @@
 
 namespace App\Services\ReturnEntries;
 
+use App\Data\Purchasing\StoreVersementData;
 use App\Enums\Wallet\WalletTransactionCategory;
 use App\Enums\Wallet\WalletTransactionType;
 use App\Models\Purchasing\ReturnEntry;
@@ -12,9 +13,9 @@ use RuntimeException;
 
 class CreateReturnEntryVersementService
 {
-    public function execute(ReturnEntry $entry, array $data): WalletTransaction
+    public function execute(ReturnEntry $entry, StoreVersementData $data): WalletTransaction
     {
-        $amount = (int) $data['amount'];
+        $amount = (int) $data->amount;
 
         if ($amount <= 0) {
             throw new RuntimeException('Le montant doit être supérieur à 0.');
@@ -33,15 +34,15 @@ class CreateReturnEntryVersementService
                 throw new RuntimeException("Le paiement doit correspondre au montant restant ({$remaining} DZD). Les paiements partiels ne sont pas autorisés.");
             }
 
-            $wallet = Wallet::query()->lockForUpdate()->findOrFail($data['wallet_id']);
+            $wallet = Wallet::query()->lockForUpdate()->findOrFail($data->wallet_id);
 
             $transaction = $wallet->transactions()->create([
                 'return_entry_id' => $entry->id,
-                'date' => $data['date'],
+                'date' => $data->date,
                 'type' => WalletTransactionType::In,
                 'category' => WalletTransactionCategory::Deposit,
                 'amount' => $amount,
-                'remark' => $data['remark'] ?? null,
+                'remark' => $data->remark,
             ]);
 
             $wallet->increment('balance', $amount);

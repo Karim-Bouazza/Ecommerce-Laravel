@@ -2,55 +2,57 @@
 
 namespace App\Http\Controllers\Api\Storefront;
 
+use App\Data\Storefront\ReorderStorefrontItemsData;
+use App\Data\Storefront\SaveStorefrontFeatureData;
+use App\Data\Storefront\StorefrontFeatureData;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Storefront\ReorderStorefrontItemsRequest;
-use App\Http\Requests\Storefront\StorefrontFeatureRequest;
-use App\Http\Resources\Storefront\StorefrontFeatureResource;
 use App\Models\Storefront\StorefrontFeature;
 use App\Services\Storefront\ReorderStorefrontItemsService;
 use Illuminate\Support\Facades\Storage;
+use Spatie\LaravelData\DataCollection;
 
 class StorefrontFeatureController extends Controller
 {
-    public function index()
+    public function index(): DataCollection
     {
-        return StorefrontFeatureResource::collection(
-            StorefrontFeature::query()->orderBy('position')->orderBy('id')->get()
+        return StorefrontFeatureData::collect(
+            StorefrontFeature::query()->orderBy('position')->orderBy('id')->get(),
+            DataCollection::class
         );
     }
 
-    public function store(StorefrontFeatureRequest $request)
+    public function store(SaveStorefrontFeatureData $data): StorefrontFeatureData
     {
         $feature = StorefrontFeature::create([
-            ...$request->safe()->only(['title', 'description']),
-            'image_path' => $request->file('image')->store('storefront/features', 'public'),
+            ...$data->only('title', 'description')->toArray(),
+            'image_path' => $data->image->store('storefront/features', 'public'),
             'position' => (int) StorefrontFeature::max('position') + 1,
         ]);
 
-        return new StorefrontFeatureResource($feature);
+        return StorefrontFeatureData::fromFeature($feature);
     }
 
-    public function update(StorefrontFeatureRequest $request, StorefrontFeature $feature)
+    public function update(SaveStorefrontFeatureData $data, StorefrontFeature $feature): StorefrontFeatureData
     {
-        $data = $request->safe()->only(['title', 'description']);
+        $attributes = $data->only('title', 'description')->toArray();
         $previousPath = $feature->image_path;
 
-        if ($request->hasFile('image')) {
-            $data['image_path'] = $request->file('image')->store('storefront/features', 'public');
+        if ($data->image !== null) {
+            $attributes['image_path'] = $data->image->store('storefront/features', 'public');
         }
 
-        $feature->update($data);
+        $feature->update($attributes);
 
-        if ($request->hasFile('image') && $previousPath) {
+        if ($data->image !== null && $previousPath) {
             Storage::disk('public')->delete($previousPath);
         }
 
-        return new StorefrontFeatureResource($feature);
+        return StorefrontFeatureData::fromFeature($feature);
     }
 
-    public function reorder(ReorderStorefrontItemsRequest $request, ReorderStorefrontItemsService $reorder)
+    public function reorder(ReorderStorefrontItemsData $data, ReorderStorefrontItemsService $reorder): DataCollection
     {
-        $reorder->execute(StorefrontFeature::query(), $request->ids());
+        $reorder->execute(StorefrontFeature::query(), $data->orderedIds());
 
         return $this->index();
     }
@@ -59,6 +61,7 @@ class StorefrontFeatureController extends Controller
     {
         $path = $feature->image_path;
         $feature->delete();
+
         Storage::disk('public')->delete($path);
 
         return response()->noContent();

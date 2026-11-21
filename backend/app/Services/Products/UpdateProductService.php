@@ -2,15 +2,16 @@
 
 namespace App\Services\Products;
 
+use App\Data\Catalog\UpdateProductData;
 use App\Models\Catalog\Product;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Storage;
+use Spatie\LaravelData\Optional;
 
 class UpdateProductService
 {
-    public function execute(Product $product, array $data, array $images = []): Product
+    public function execute(Product $product, UpdateProductData $data): Product
     {
-        $product->update(Arr::only($data, [
+        $product->update($data->only(
             'category_id',
             'sku',
             'name',
@@ -21,40 +22,42 @@ class UpdateProductService
             'compare_price',
             'is_active',
             'is_new',
-        ]));
+        )->toArray());
 
         foreach ([1, 2, 3, 4] as $imageNumber) {
             $field = "image_{$imageNumber}";
-            if (isset($images[$field])) {
+            $upload = $data->{$field};
+
+            if ($upload !== null) {
                 $previousImage = $product->{$field};
-                $product->update([$field => $images[$field]->store('products', 'public')]);
+                $product->update([$field => $upload->store('products', 'public')]);
 
                 if ($previousImage) {
                     Storage::disk('public')->delete($previousImage);
                 }
-            } elseif (in_array($imageNumber, $data['remove_images'] ?? []) && $product->{$field}) {
+            } elseif (in_array($imageNumber, $data->remove_images) && $product->{$field}) {
                 $previousImage = $product->{$field};
                 $product->update([$field => null]);
                 Storage::disk('public')->delete($previousImage);
             }
         }
 
-        if (array_key_exists('specs', $data)) {
+        if (! $data->specs instanceof Optional) {
             $product->specs()->delete();
 
-            foreach ($data['specs'] ?? [] as $index => $spec) {
+            foreach ($data->specs as $index => $spec) {
                 $product->specs()->create([
-                    'label' => $spec['label'],
-                    'value' => $spec['value'],
+                    'label' => $spec->label,
+                    'value' => $spec->value,
                     'sort_order' => $index,
                 ]);
             }
         }
 
-        if (array_key_exists('variants', $data)) {
+        if (! $data->variants instanceof Optional) {
             $product->variants()->delete();
 
-            foreach ($data['variants'] ?? [] as $index => $label) {
+            foreach ($data->variants as $index => $label) {
                 $product->variants()->create([
                     'label' => $label,
                     'sort_order' => $index,

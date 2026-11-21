@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Api\Analytics;
 
+use App\Data\Analytics\DashboardFilterData;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Analytics\DashboardRequest;
 use App\Services\Dashboard\GetDashboardService;
 use Illuminate\Http\JsonResponse;
 
@@ -13,8 +13,8 @@ class DashboardController extends Controller
     {
     }
 
-    public function index(DashboardRequest $request): JsonResponse
+    public function index(DashboardFilterData $data): JsonResponse
     {
-        return response()->json($this->dashboard->execute($request->filters()));
+        return response()->json($this->dashboard->execute($data->filters()));
     }
 }

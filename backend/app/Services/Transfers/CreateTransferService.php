@@ -2,27 +2,26 @@
 
 namespace App\Services\Transfers;
 
+use App\Data\Inventory\StoreTransferData;
 use App\Models\Inventory\WarehouseTransfer;
 use Illuminate\Support\Facades\DB;
 
 class CreateTransferService
 {
-    public function execute(array $data): WarehouseTransfer
+    public function execute(StoreTransferData $data): WarehouseTransfer
     {
         return DB::transaction(function () use ($data): WarehouseTransfer {
-            $items = $data['items'] ?? [];
-
             $transfer = WarehouseTransfer::create([
                 'reference' => $this->generateReference(),
-                'from_warehouse_id' => $data['from_warehouse_id'],
-                'to_warehouse_id' => $data['to_warehouse_id'],
-                'remark' => $data['remark'] ?? null,
+                'from_warehouse_id' => $data->from_warehouse_id,
+                'to_warehouse_id' => $data->to_warehouse_id,
+                'remark' => $data->remark,
             ]);
 
-            foreach ($items as $item) {
+            foreach ($data->items as $item) {
                 $transfer->items()->create([
-                    'product_id' => $item['product_id'],
-                    'quantity' => (int) $item['quantity'],
+                    'product_id' => $item->product_id,
+                    'quantity' => $item->quantity,
                 ]);
             }
 

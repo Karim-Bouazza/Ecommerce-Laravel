@@ -2,6 +2,7 @@
 
 namespace App\Services\Paiements;
 
+use App\Data\Finance\SaveDeliveryPaymentData;
 use App\Models\Delivery\DeliveryCompanyIntegration;
 use App\Models\Finance\Wallet;
 use App\Models\Finance\WalletTransaction;
@@ -10,9 +11,9 @@ use RuntimeException;
 
 class UpdateDeliveryPaymentService
 {
-    public function execute(WalletTransaction $paiement, array $data): WalletTransaction
+    public function execute(WalletTransaction $paiement, SaveDeliveryPaymentData $data): WalletTransaction
     {
-        $amount = (int) $data['amount'];
+        $amount = (int) $data->amount;
 
         if ($amount <= 0) {
             throw new RuntimeException('Le montant doit être supérieur à 0.');
@@ -20,7 +21,7 @@ class UpdateDeliveryPaymentService
 
         return DB::transaction(function () use ($paiement, $amount, $data): WalletTransaction {
             $paiement = WalletTransaction::query()->lockForUpdate()->findOrFail($paiement->id);
-            $partner = DeliveryCompanyIntegration::query()->findOrFail($data['delivery_company_integration_id']);
+            $partner = DeliveryCompanyIntegration::query()->findOrFail($data->delivery_company_integration_id);
 
             $oldWallet = Wallet::query()->lockForUpdate()->findOrFail($paiement->wallet_id);
 
@@ -30,16 +31,16 @@ class UpdateDeliveryPaymentService
 
             $oldWallet->decrement('balance', $paiement->amount);
 
-            $newWallet = $oldWallet->id === (int) $data['wallet_id']
+            $newWallet = $oldWallet->id === (int) $data->wallet_id
                 ? $oldWallet->fresh()
-                : Wallet::query()->lockForUpdate()->findOrFail($data['wallet_id']);
+                : Wallet::query()->lockForUpdate()->findOrFail($data->wallet_id);
 
             $paiement->update([
                 'wallet_id' => $newWallet->id,
                 'delivery_company_integration_id' => $partner->id,
-                'date' => $data['date'],
+                'date' => $data->date,
                 'amount' => $amount,
-                'remark' => $data['remark'] ?? null,
+                'remark' => $data->remark,
             ]);
 
             $newWallet->increment('balance', $amount);

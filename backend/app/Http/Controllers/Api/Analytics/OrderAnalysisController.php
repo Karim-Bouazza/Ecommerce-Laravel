@@ -2,21 +2,21 @@
 
 namespace App\Http\Controllers\Api\Analytics;
 
+use App\Data\Analytics\OrderAnalysisFilterData;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Analytics\OrderAnalysisRequest;
 use App\Services\OrderAnalysis\GetOrderAnalysisService;
 use App\Services\OrderAnalysis\GetOrderStatusBreakdownService;
 use Illuminate\Http\JsonResponse;
 
 class OrderAnalysisController extends Controller
 {
-    public function overview(OrderAnalysisRequest $request, GetOrderAnalysisService $service): JsonResponse
+    public function overview(OrderAnalysisFilterData $data, GetOrderAnalysisService $service): JsonResponse
     {
-        return response()->json($service->execute($request->filters()));
+        return response()->json($service->execute($data->filters()));
     }
 
-    public function statuses(OrderAnalysisRequest $request, GetOrderStatusBreakdownService $service): JsonResponse
+    public function statuses(OrderAnalysisFilterData $data, GetOrderStatusBreakdownService $service): JsonResponse
     {
-        return response()->json($service->execute($request->filters()));
+        return response()->json($service->execute($data->filters()));
     }
 }

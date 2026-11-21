@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers\Api\Delivery;
 
-use App\Enums\Order\DeliveryType;
+use App\Data\Delivery\CalculatePackagePriceData;
+use App\Data\Delivery\PackagePriceData;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Delivery\CalculatePackagePriceRequest;
-use App\Http\Resources\Delivery\PackagePriceResource;
 use App\Services\Providers\ZimouDeliveryPriceService;
 use App\Services\Providers\ZimouPackagePriceService;
 use Illuminate\Http\JsonResponse;
@@ -34,20 +33,18 @@ class ProviderDeliveryPriceController extends Controller
         ]);
     }
 
-    public function calculatePackage(CalculatePackagePriceRequest $request): PackagePriceResource
+    public function calculatePackage(CalculatePackagePriceData $data): PackagePriceData
     {
-        $validated = $request->validated();
-
         $result = $this->zimouPackagePriceService->calculatePrice(
-            (int) $validated['price'],
-            (int) $validated['provider_wilaya_id'],
-            isset($validated['provider_commune_id']) ? (int) $validated['provider_commune_id'] : null,
-            DeliveryType::from($validated['delivery_type']),
-            (bool) ($validated['free_delivery'] ?? false),
-            (bool) ($validated['can_be_opened'] ?? false),
-            $validated['provider_office_id'] ?? null,
+            $data->price,
+            $data->provider_wilaya_id,
+            $data->provider_commune_id,
+            $data->delivery_type,
+            $data->free_delivery,
+            $data->can_be_opened,
+            $data->provider_office_id,
         );
 
-        return new PackagePriceResource($result);
+        return PackagePriceData::fromResult($result);
     }
 }
