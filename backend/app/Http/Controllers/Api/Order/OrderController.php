@@ -99,6 +99,16 @@ class OrderController extends Controller
             ? [$status]
             : $groupStatuses;
 
+        $latestActivitySort = fn ($query, bool $descending) => $query->orderBy(
+            DB::raw('coalesce((' . OrderStatusHistory::select('created_at')
+                ->whereColumn('order_id', 'orders.id')
+                ->latest('created_at')
+                ->limit(1)
+                ->toSql() . '), created_at)'),
+            $descending ? 'desc' : 'asc',
+        );
+        $latestActivity = AllowedSort::callback('latest_activity', $latestActivitySort);
+
         $orders = QueryBuilder::for(
             Order::query()
                 ->with(self::WITH)
@@ -112,19 +122,8 @@ class OrderController extends Controller
                 AllowedFilter::callback('status', fn () => null),
                 AllowedFilter::callback('status_group', fn () => null),
             )
-            ->allowedSorts(
-                AllowedSort::callback('latest_activity', fn ($query, bool $descending) => $query->orderBy(
-                    DB::raw('coalesce((' . OrderStatusHistory::select('created_at')
-                        ->whereColumn('order_id', 'orders.id')
-                        ->latest('created_at')
-                        ->limit(1)
-                        ->toSql() . '), created_at)'),
-                    $descending ? 'desc' : 'asc',
-                )),
-                'created_at',
-                'reference',
-            )
-            ->defaultSort('-latest_activity')
+            ->allowedSorts($latestActivity, 'created_at', 'reference')
+            ->defaultSort(AllowedSort::callback('-latest_activity', $latestActivitySort))
             ->paginate(ListQuery::perPage($request))
             ->withQueryString();
 
