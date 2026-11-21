@@ -47,14 +47,13 @@ class DashboardOrdersQuery
     {
         return $this->deliveredItems($filters)
             ->join('products', 'products.id', '=', 'order_items.product_id')
-            ->groupBy('products.id', 'products.name', 'products.image_1')
+            ->groupBy('products.id', 'products.name')
             ->orderByDesc('quantity')
             ->orderByDesc('sales')
             ->limit($limit)
             ->get([
                 'products.id',
                 'products.name',
-                'products.image_1',
                 DB::raw('COUNT(DISTINCT order_items.order_id) as delivered_orders'),
                 DB::raw('SUM(order_items.quantity) as quantity'),
                 DB::raw('SUM(order_items.total_price) as sales'),

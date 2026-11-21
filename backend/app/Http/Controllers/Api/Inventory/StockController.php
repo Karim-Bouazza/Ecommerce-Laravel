@@ -2,26 +2,27 @@
 
 namespace App\Http\Controllers\Api\Inventory;
 
-use App\Http\Controllers\Controller;
 use App\Data\Inventory\AdjustStockData;
 use App\Data\Inventory\StockData;
+use App\Http\Controllers\Controller;
 use App\Models\Catalog\Product;
 use App\Models\Inventory\Warehouse;
 use App\Services\Warehouses\UpdateWarehouseStockService;
-use Illuminate\Database\Eloquent\Builder;
+use App\Support\Query\Filters\CompareFilter;
+use App\Support\Query\Filters\SearchFilter;
+use App\Support\Query\ListQuery;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Spatie\LaravelData\PaginatedDataCollection;
+use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\QueryBuilder;
 
 class StockController extends Controller
 {
     public function index(Request $request): PaginatedDataCollection
     {
-        $perPage = (int) $request->input('per_page', 15);
-
         $products = $this->filteredQuery($request)
-            ->orderBy('name')
-            ->paginate($perPage)
+            ->paginate(ListQuery::perPage($request))
             ->withQueryString();
 
         return StockData::collect($products, PaginatedDataCollection::class);
@@ -41,34 +42,31 @@ class StockController extends Controller
         return response()->json($totals);
     }
 
-    private function filteredQuery(Request $request): Builder
+    private function filteredQuery(Request $request): QueryBuilder
     {
-        $search = trim((string) $request->input('search', ''));
-        $warehouseId = $request->input('warehouse_id');
-        $purchasePriceMin = $request->input('purchase_price_min');
-        $purchasePriceMax = $request->input('purchase_price_max');
-        $stockInterneMin = $request->input('stock_interne_min');
-        $stockInterneMax = $request->input('stock_interne_max');
+        $warehouseId = $request->query('warehouse_id') ?: null;
 
-        return Product::query()
-            ->withStockSums($warehouseId)
-            ->when($search !== '', fn (Builder $query) => $query->where('name', 'like', "%{$search}%"))
-            ->when(
-                $purchasePriceMin !== null,
-                fn (Builder $query) => $query->where('purchase_price', '>=', $purchasePriceMin)
+        return QueryBuilder::for(
+            Product::query()->withStockSums($warehouseId),
+            ListQuery::request($request, [
+                'search',
+                'warehouse_id',
+                'purchase_price_min',
+                'purchase_price_max',
+                'stock_interne_min',
+                'stock_interne_max',
+            ]),
+        )
+            ->allowedFilters(
+                AllowedFilter::custom('search', new SearchFilter(['name'])),
+                AllowedFilter::callback('warehouse_id', fn () => null),
+                AllowedFilter::custom('purchase_price_min', CompareFilter::min('purchase_price')),
+                AllowedFilter::custom('purchase_price_max', CompareFilter::max('purchase_price')),
+                AllowedFilter::custom('stock_interne_min', CompareFilter::min(Product::stockInterneSql())),
+                AllowedFilter::custom('stock_interne_max', CompareFilter::max(Product::stockInterneSql())),
             )
-            ->when(
-                $purchasePriceMax !== null,
-                fn (Builder $query) => $query->where('purchase_price', '<=', $purchasePriceMax)
-            )
-            ->when(
-                $stockInterneMin !== null,
-                fn (Builder $query) => $query->havingRaw(Product::stockInterneSql() . ' >= ?', [$stockInterneMin])
-            )
-            ->when(
-                $stockInterneMax !== null,
-                fn (Builder $query) => $query->havingRaw(Product::stockInterneSql() . ' <= ?', [$stockInterneMax])
-            );
+            ->allowedSorts('name', 'price', 'purchase_price', 'created_at')
+            ->defaultSort('name');
     }
 
     public function adjust(AdjustStockData $data, Product $product): StockData

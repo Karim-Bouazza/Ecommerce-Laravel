@@ -2,38 +2,36 @@
 
 namespace App\Http\Controllers\Api\Purchasing;
 
-use App\Http\Controllers\Controller;
 use App\Data\Purchasing\FournisseurData;
 use App\Data\Purchasing\SaveFournisseurData;
+use App\Http\Controllers\Controller;
 use App\Models\Purchasing\Fournisseur;
 use App\Services\Fournisseurs\CreateFournisseurService;
 use App\Services\Fournisseurs\DeleteFournisseurService;
 use App\Services\Fournisseurs\UpdateFournisseurService;
+use App\Support\Query\Filters\SearchFilter;
+use App\Support\Query\ListQuery;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Spatie\LaravelData\PaginatedDataCollection;
+use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\QueryBuilder;
 
 class FournisseurController extends Controller
 {
     public function index(Request $request): PaginatedDataCollection
     {
-        $perPage = (int) $request->input('per_page', 15);
-        $search = trim((string) $request->input('search', ''));
-
-        $fournisseurs = Fournisseur::query()
-            ->withSum('completedPurchaseEntries as total_dues_sum', 'total')
-            ->withSum('completedPurchaseEntryVersements as entries_paid_amount', 'amount')
-            ->withSum('versements as direct_paid_amount', 'amount')
-            ->when($search !== '', function ($query) use ($search) {
-                $query->where(function ($query) use ($search) {
-                    $query->where('name', 'like', "%{$search}%")
-                        ->orWhere('phone', 'like', "%{$search}%")
-                        ->orWhere('address', 'like', "%{$search}%")
-                        ->orWhere('remark', 'like', "%{$search}%");
-                });
-            })
-            ->orderByDesc('created_at')
-            ->paginate($perPage)
+        $fournisseurs = QueryBuilder::for(
+            Fournisseur::query()
+                ->withSum('completedPurchaseEntries as total_dues_sum', 'total')
+                ->withSum('completedPurchaseEntryVersements as entries_paid_amount', 'amount')
+                ->withSum('versements as direct_paid_amount', 'amount'),
+            ListQuery::request($request, ['search']),
+        )
+            ->allowedFilters(AllowedFilter::custom('search', new SearchFilter(['name', 'phone', 'address', 'remark'])))
+            ->allowedSorts('name', 'created_at')
+            ->defaultSort('-created_at')
+            ->paginate(ListQuery::perPage($request))
             ->withQueryString();
 
         $fournisseurs->through(fn (Fournisseur $fournisseur) => FournisseurData::fromFournisseur($fournisseur));

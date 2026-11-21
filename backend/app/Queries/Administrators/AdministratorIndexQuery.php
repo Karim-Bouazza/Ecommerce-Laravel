@@ -3,31 +3,34 @@
 namespace App\Queries\Administrators;
 
 use App\Models\Users\User;
+use App\Support\Query\Filters\SearchFilter;
+use App\Support\Query\ListQuery;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Request;
+use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\QueryBuilder;
 
 class AdministratorIndexQuery
 {
-    /**
-     * @param  array{search?: ?string, role_id?: ?int, status?: ?string, per_page?: ?int}  $filters
-     */
-    public function paginate(array $filters): LengthAwarePaginator
+    public function paginate(Request $request): LengthAwarePaginator
     {
-        $search = trim((string) ($filters['search'] ?? ''));
-
-        return User::query()
-            ->with('roles:id,name')
-            ->when($search !== '', function ($query) use ($search) {
-                $query->where(function ($query) use ($search) {
-                    $query->where('name', 'like', "%{$search}%")
-                        ->orWhere('email', 'like', "%{$search}%")
-                        ->orWhere('phone', 'like', "%{$search}%");
-                });
-            })
-            ->when($filters['role_id'] ?? null, fn ($query, $roleId) => $query->whereHas('roles', fn ($roles) => $roles->whereKey($roleId)))
-            ->when(($filters['status'] ?? null) === 'active', fn ($query) => $query->where('is_active', true))
-            ->when(($filters['status'] ?? null) === 'inactive', fn ($query) => $query->where('is_active', false))
-            ->orderByDesc('created_at')
-            ->paginate($filters['per_page'] ?? 15)
+        return QueryBuilder::for(
+            User::query()->with(['roles:id,name', 'media']),
+            ListQuery::request($request, ['search', 'role_id', 'status']),
+        )
+            ->allowedFilters(
+                AllowedFilter::custom('search', new SearchFilter(['name', 'email', 'phone'])),
+                AllowedFilter::callback('role_id', fn (Builder $query, $value) => $query->whereHas('roles', fn ($roles) => $roles->whereKey($value))),
+                AllowedFilter::callback('status', fn (Builder $query, $value) => match ($value) {
+                    'active' => $query->where('is_active', true),
+                    'inactive' => $query->where('is_active', false),
+                    default => $query,
+                }),
+            )
+            ->allowedSorts('name', 'email', 'created_at')
+            ->defaultSort('-created_at')
+            ->paginate(ListQuery::perPage($request))
             ->withQueryString();
     }
 }

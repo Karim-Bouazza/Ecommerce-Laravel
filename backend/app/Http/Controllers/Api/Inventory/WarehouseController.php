@@ -11,6 +11,10 @@ use App\Services\Warehouses\DeleteWarehouseService;
 use App\Services\Warehouses\ToggleWarehouseActiveService;
 use App\Services\Warehouses\UpdateWarehouseService;
 use Illuminate\Http\JsonResponse;
+use App\Support\Query\Filters\SearchFilter;
+use App\Support\Query\ListQuery;
+use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\QueryBuilder;
 use Illuminate\Http\Request;
 use Spatie\LaravelData\PaginatedDataCollection;
 
@@ -18,22 +22,16 @@ class WarehouseController extends Controller
 {
     public function index(Request $request): PaginatedDataCollection
     {
-        $perPage = (int) $request->input('per_page', 15);
-        $search = trim((string) $request->input('search', ''));
-
-        $warehouses = Warehouse::query()
-            ->with(['wilayas:id', 'products:id'])
-            ->withCount('stockMovements')
-            ->when($search !== '', function ($query) use ($search) {
-                $query->where(function ($query) use ($search) {
-                    $query->where('name', 'like', "%{$search}%")
-                        ->orWhere('phone', 'like', "%{$search}%")
-                        ->orWhere('address', 'like', "%{$search}%")
-                        ->orWhere('remark', 'like', "%{$search}%");
-                });
-            })
-            ->orderByDesc('created_at')
-            ->paginate($perPage)
+        $warehouses = QueryBuilder::for(
+            Warehouse::query()->with(['wilayas:id', 'products:id'])->withCount('stockMovements'),
+            ListQuery::request($request, ['search']),
+        )
+            ->allowedFilters(
+                AllowedFilter::custom('search', new SearchFilter(['name', 'phone', 'address', 'remark'])),
+            )
+            ->allowedSorts('name', 'created_at')
+            ->defaultSort('-created_at')
+            ->paginate(ListQuery::perPage($request))
             ->withQueryString();
 
         return WarehouseData::collect($warehouses, PaginatedDataCollection::class);

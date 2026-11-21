@@ -4,7 +4,6 @@ namespace App\Data\Auth;
 
 use App\Models\Users\User;
 use App\Support\PermissionRegistry;
-use Illuminate\Support\Facades\Storage;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Optional;
 
@@ -26,7 +25,7 @@ class UserData extends Data
             name: $user->name,
             email: $user->email,
             phone: $user->phone,
-            avatar: $user->avatar ? Storage::url($user->avatar) : null,
+            avatar: $user->mediaUrl('avatar'),
             role: $user->relationLoaded('roles')
                 ? ($user->role ? [
                     'id' => $user->role->id,

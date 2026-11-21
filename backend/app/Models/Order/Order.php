@@ -3,20 +3,23 @@
 namespace App\Models\Order;
 
 use App\Enums\Order\DeliveryType;
-use App\Enums\Order\OrderStatus;
 use App\Enums\Order\OrderType;
 use App\Enums\Order\PaymentStatus;
 use App\Models\Delivery\DeliveryCompany;
 use App\Models\Fraud\FraudAssessment;
 use App\Models\Fraud\FraudReview;
+use App\States\Order\OrderState;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Spatie\ModelStates\HasStates;
 
 class Order extends Model
 {
+    use HasStates;
+
     protected $fillable = [
         'client_id',
         'reference',
@@ -44,7 +47,7 @@ class Order extends Model
     ];
 
     protected $casts = [
-        'status' => OrderStatus::class,
+        'status' => OrderState::class,
         'scheduled_at' => 'datetime',
         'date_report' => 'datetime',
         'payment_status' => PaymentStatus::class,

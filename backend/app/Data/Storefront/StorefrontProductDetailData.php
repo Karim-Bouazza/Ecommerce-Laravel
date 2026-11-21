@@ -3,7 +3,6 @@
 namespace App\Data\Storefront;
 
 use App\Models\Catalog\Product;
-use Illuminate\Support\Facades\Storage;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Optional;
 
@@ -54,11 +53,7 @@ class StorefrontProductDetailData extends Data
             is_new: $product->is_new,
             in_stock: (int) $product->total_stock > 0,
             stock: (int) $product->total_stock,
-            images: collect([$product->image_1, $product->image_2, $product->image_3, $product->image_4])
-                ->filter()
-                ->values()
-                ->map(fn (string $path) => Storage::url($path))
-                ->all(),
+            images: array_values(array_filter($product->imageUrls())),
         );
     }
 }

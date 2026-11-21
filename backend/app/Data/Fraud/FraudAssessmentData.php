@@ -48,7 +48,7 @@ class FraudAssessmentData extends Data
         return new self(
             order_id: $assessment->order_id,
             order_reference: $order?->reference,
-            order_status: $order?->status?->value,
+            order_status: $order?->status?->getValue(),
             order_status_label: $order?->status?->label(),
             customer_name: $order?->client ? trim($order->client->first_name . ' ' . $order->client->last_name) : null,
             customer_phone: self::phone($order?->client?->phone_number, $sensitive),

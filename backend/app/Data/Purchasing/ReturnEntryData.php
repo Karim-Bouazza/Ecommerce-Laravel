@@ -51,7 +51,7 @@ class ReturnEntryData extends Data
                 ? $entry->items->map(fn ($item) => EntryItemData::fromReturnItem($item))->all()
                 : new Optional(),
             total: $entry->total,
-            status: $entry->status->value,
+            status: $entry->status->getValue(),
             status_label: $entry->status->label(),
             status_color: $entry->status->color(),
             payment_status: $paymentStatus->value,

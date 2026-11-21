@@ -10,6 +10,11 @@ use App\Services\Transfers\ConfirmTransferService;
 use App\Services\Transfers\CreateTransferService;
 use App\Services\Transfers\DeleteTransferService;
 use Illuminate\Http\JsonResponse;
+use App\Support\Query\Filters\SearchFilter;
+use App\Support\Query\ListQuery;
+use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\QueryBuilder;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use RuntimeException;
 use Spatie\LaravelData\PaginatedDataCollection;
@@ -20,26 +25,21 @@ class TransferController extends Controller
 
     public function index(Request $request): PaginatedDataCollection
     {
-        $perPage = (int) $request->input('per_page', 15);
-        $search = trim((string) $request->input('search', ''));
-        $warehouseId = $request->input('warehouse_id');
+        $warehouseId = $request->query('warehouse_id');
 
-        $transfers = WarehouseTransfer::query()
-            ->with(self::WITH)
-            ->when($warehouseId, function ($query) use ($warehouseId) {
-                $query->where(function ($query) use ($warehouseId) {
-                    $query->where('from_warehouse_id', $warehouseId)
-                        ->orWhere('to_warehouse_id', $warehouseId);
-                });
-            })
-            ->when($search !== '', function ($query) use ($search) {
-                $query->where(function ($query) use ($search) {
-                    $query->where('reference', 'like', "%{$search}%")
-                        ->orWhereHas('items.product', fn ($query) => $query->where('name', 'like', "%{$search}%"));
-                });
-            })
-            ->orderByDesc('created_at')
-            ->paginate($perPage)
+        $transfers = QueryBuilder::for(
+            WarehouseTransfer::query()->with(self::WITH),
+            ListQuery::request($request, ['search', 'warehouse_id']),
+        )
+            ->allowedFilters(
+                AllowedFilter::callback('warehouse_id', fn (Builder $query, $value) => $query->where(
+                    fn (Builder $query) => $query->where('from_warehouse_id', $value)->orWhere('to_warehouse_id', $value)
+                )),
+                AllowedFilter::custom('search', new SearchFilter(['reference'], ['items.product' => ['name']])),
+            )
+            ->allowedSorts('created_at', 'reference')
+            ->defaultSort('-created_at')
+            ->paginate(ListQuery::perPage($request))
             ->withQueryString();
 
         $transfers->through(fn (WarehouseTransfer $transfer) => TransferData::fromTransfer($transfer, (int) $warehouseId ?: null));

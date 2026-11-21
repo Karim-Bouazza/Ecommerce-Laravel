@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\Api\Finance;
 
-use App\Http\Controllers\Controller;
 use App\Data\Finance\ChargeData;
 use App\Data\Finance\SaveChargeData;
 use App\Data\Purchasing\EntryVersementData;
 use App\Data\Purchasing\StoreVersementData;
+use App\Http\Controllers\Controller;
 use App\Models\Finance\Charge;
 use App\Services\Charges\CalculateChargeAmountService;
 use App\Services\Charges\CreateChargeService;
@@ -14,6 +14,8 @@ use App\Services\Charges\CreateChargeVersementService;
 use App\Services\Charges\DeleteChargeService;
 use App\Services\Charges\ToggleChargeActiveService;
 use App\Services\Charges\UpdateChargeService;
+use App\Support\Query\Filters\SearchFilter;
+use App\Support\Query\ListQuery;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -21,43 +23,43 @@ use Illuminate\Support\Collection;
 use RuntimeException;
 use Spatie\LaravelData\DataCollection;
 use Spatie\LaravelData\PaginatedDataCollection;
+use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\QueryBuilder;
 
 class ChargeController extends Controller
 {
     public function index(Request $request): PaginatedDataCollection
     {
-        $perPage = (int) $request->input('per_page', 15);
-        $search = trim((string) $request->input('search', ''));
-        $tab = $request->input('tab', 'charges');
-        $dateFrom = $request->input('date_from');
-        $dateTo = $request->input('date_to');
-        $productId = $request->input('product_id');
-        $type = $request->input('type');
-        $category = $request->input('category');
-        $paymentStatus = $request->input('payment_status');
+        $perPage = ListQuery::perPage($request);
+        $tab = $request->query('tab', 'charges');
+        $paymentStatus = $request->query('payment_status');
 
-        $charges = Charge::query()
-            ->with(['products:id,name', 'pauses'])
-            ->withSum('versements as paid_amount_sum', 'amount')
-            ->when($tab === 'recurring', function ($query) {
-                $query->whereIn('type', ['per_order', 'recurring']);
-            }, function ($query) {
-                $query->where('type', 'normal');
-            })
-            ->when($search !== '', function ($query) use ($search) {
-                $query->where('name', 'like', "%{$search}%");
-            })
-            ->when($dateFrom, fn ($query) => $query->whereRaw('COALESCE(starts_at, DATE(created_at)) >= ?', [$dateFrom]))
-            ->when($dateTo, fn ($query) => $query->whereRaw('COALESCE(starts_at, DATE(created_at)) <= ?', [$dateTo]))
-            ->when($productId, function ($query) use ($productId) {
-                $query->where(function ($query) use ($productId) {
+        $charges = QueryBuilder::for(
+            Charge::query()
+                ->with(['products:id,name', 'pauses'])
+                ->withSum('versements as paid_amount_sum', 'amount')
+                ->when($tab === 'recurring', function ($query) {
+                    $query->whereIn('type', ['per_order', 'recurring']);
+                }, function ($query) {
+                    $query->where('type', 'normal');
+                }),
+            ListQuery::request($request, ['search', 'tab', 'date_from', 'date_to', 'product_id', 'type', 'category', 'payment_status']),
+        )
+            ->allowedFilters(
+                AllowedFilter::custom('search', new SearchFilter(['name'])),
+                AllowedFilter::callback('tab', fn () => null),
+                AllowedFilter::callback('payment_status', fn () => null),
+                AllowedFilter::callback('date_from', fn ($query, $value) => $query->whereRaw('COALESCE(starts_at, DATE(created_at)) >= ?', [$value])),
+                AllowedFilter::callback('date_to', fn ($query, $value) => $query->whereRaw('COALESCE(starts_at, DATE(created_at)) <= ?', [$value])),
+                AllowedFilter::callback('product_id', fn ($query, $value) => $query->where(function ($query) use ($value) {
                     $query->where('all_products', true)
-                        ->orWhereHas('products', fn ($query) => $query->where('products.id', $productId));
-                });
-            })
-            ->when($type, fn ($query) => $query->where('type', $type))
-            ->when($category, fn ($query) => $query->where('category', $category))
-            ->orderByDesc('created_at');
+                        ->orWhereHas('products', fn ($query) => $query->where('products.id', $value));
+                })),
+                AllowedFilter::exact('type'),
+                AllowedFilter::exact('category'),
+            )
+            ->allowedSorts('name', 'created_at', 'starts_at')
+            ->defaultSort('-created_at');
 
         // The amount owed by per-order and recurring charges is computed, so the
         // payment status cannot be filtered in SQL.

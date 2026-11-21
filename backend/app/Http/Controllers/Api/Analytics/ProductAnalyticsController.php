@@ -12,10 +12,14 @@ use App\Services\Charges\AllocateChargesToProductsService;
 use App\Services\Meta\GetProductAdSpendService;
 use App\Support\Analytics\OrderRateCalculator;
 use App\Support\Analytics\ProductAnalyticsCalculator;
+use App\Support\Query\Filters\SearchFilter;
+use App\Support\Query\ListQuery;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Spatie\LaravelData\DataCollection;
 use Spatie\LaravelData\PaginatedDataCollection;
+use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\QueryBuilder;
 
 class ProductAnalyticsController extends Controller
 {
@@ -124,22 +128,25 @@ class ProductAnalyticsController extends Controller
         return ProductAnalyticsChartData::collect($products, DataCollection::class);
     }
 
-    private function filteredQuery(ProductAnalyticsFilterData $request): Builder
+    private function filteredQuery(ProductAnalyticsFilterData $request): QueryBuilder
     {
-        $search = trim((string) ($request->search ?? ''));
         $dateFrom = $request->periodStart()?->toDateString();
         $dateTo = $request->periodEnd()?->toDateString();
         $wilayaId = $request->wilaya_id;
         $priceMin = $request->price_min;
         $priceMax = $request->price_max;
 
-        return $this->query->build(
-            $search !== '' ? $search : null,
+        $query = $this->query->build(
+            null,
             $dateFrom,
             $dateTo,
             $wilayaId !== null ? (int) $wilayaId : null,
             $priceMin !== null ? (float) $priceMin : null,
             $priceMax !== null ? (float) $priceMax : null,
         );
+
+        return QueryBuilder::for($query, ListQuery::request(request(), ['search']))
+            ->allowedFilters(AllowedFilter::custom('search', new SearchFilter(['name'])))
+            ->allowedSorts('name', 'price', 'purchase_price', 'created_at');
     }
 }

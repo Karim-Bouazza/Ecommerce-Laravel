@@ -70,7 +70,7 @@ class StorefrontSectionProductController extends Controller
     private function query(StorefrontProductSection $section): Builder
     {
         return StorefrontSectionProduct::inSection($section)
-            ->with('product.specs')
+            ->with(['product.specs', 'product.media'])
             ->orderBy('position')
             ->orderBy('id');
     }

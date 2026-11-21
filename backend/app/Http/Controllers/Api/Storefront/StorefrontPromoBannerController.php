@@ -8,7 +8,6 @@ use App\Data\Storefront\StorefrontPromoBannerData;
 use App\Http\Controllers\Controller;
 use App\Models\Storefront\StorefrontPromoBanner;
 use App\Services\Storefront\ReorderStorefrontItemsService;
-use Illuminate\Support\Facades\Storage;
 use Spatie\LaravelData\DataCollection;
 
 class StorefrontPromoBannerController extends Controller
@@ -25,27 +24,18 @@ class StorefrontPromoBannerController extends Controller
     {
         $banner = StorefrontPromoBanner::create([
             ...$data->fields(),
-            'image_path' => $data->image->store('storefront/promo-banners', 'public'),
             'position' => (int) StorefrontPromoBanner::max('position') + 1,
         ]);
+
+        $banner->setImage($data->image);
 
         return StorefrontPromoBannerData::fromBanner($banner);
     }
 
     public function update(SaveStorefrontPromoBannerData $data, StorefrontPromoBanner $banner): StorefrontPromoBannerData
     {
-        $attributes = $data->fields();
-        $previousPath = $banner->image_path;
-
-        if ($data->image !== null) {
-            $attributes['image_path'] = $data->image->store('storefront/promo-banners', 'public');
-        }
-
-        $banner->update($attributes);
-
-        if ($data->image !== null && $previousPath) {
-            Storage::disk('public')->delete($previousPath);
-        }
+        $banner->update($data->fields());
+        $banner->setImage($data->image);
 
         return StorefrontPromoBannerData::fromBanner($banner);
     }
@@ -59,10 +49,7 @@ class StorefrontPromoBannerController extends Controller
 
     public function destroy(StorefrontPromoBanner $banner)
     {
-        $path = $banner->image_path;
         $banner->delete();
-
-        Storage::disk('public')->delete($path);
 
         return response()->noContent();
     }

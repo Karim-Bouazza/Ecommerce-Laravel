@@ -22,7 +22,8 @@ class ProductAnalyticsQuery
         $returned = [OrderStatus::Returned, OrderStatus::ReturnInProgress];
 
         return Product::query()
-            ->select(['id', 'name', 'image_1', 'purchase_price', 'price'])
+            ->with('media')
+            ->select(['id', 'name', 'purchase_price', 'price'])
             ->withCount(['orderItems as total_orders_count' => $this->dateScope($dateFrom, $dateTo, $wilayaId)])
             ->withSum(['orderItems as total_quantity' => $this->dateScope($dateFrom, $dateTo, $wilayaId)], 'quantity')
             ->withCount(['orderItems as confirmed_no_stock_count' => $this->statusScope(OrderStatus::ConfirmedNoStock, $dateFrom, $dateTo, $wilayaId)])

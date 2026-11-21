@@ -3,7 +3,6 @@
 namespace App\Data\Storefront;
 
 use App\Models\Storefront\StorefrontSectionProduct;
-use Illuminate\Support\Facades\Storage;
 use Spatie\LaravelData\Data;
 
 class StorefrontSectionProductData extends Data
@@ -31,10 +30,7 @@ class StorefrontSectionProductData extends Data
         $product = $item->product;
         $hasDiscount = $product->compare_price !== null && $product->compare_price > $product->price;
 
-        $images = collect([$product->image_1, $product->image_2, $product->image_3, $product->image_4])
-            ->filter()
-            ->values()
-            ->map(fn (string $path) => Storage::url($path));
+        $images = collect(array_values(array_filter($product->imageUrls())));
 
         return new self(
             id: $item->id,

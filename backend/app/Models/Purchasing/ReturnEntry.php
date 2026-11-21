@@ -3,17 +3,21 @@
 namespace App\Models\Purchasing;
 
 use App\Enums\Return\ReturnEntryPaymentStatus;
-use App\Enums\Return\ReturnEntryStatus;
 use App\Enums\Wallet\WalletTransactionCategory;
 use App\Models\Finance\WalletTransaction;
 use App\Models\Inventory\Warehouse;
 use App\Models\Users\User;
+use App\States\Return\Pending;
+use App\States\Return\ReturnEntryState;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Spatie\ModelStates\HasStates;
 
 class ReturnEntry extends Model
 {
+    use HasStates;
+
     protected ?int $paidAmountCache = null;
 
     protected $fillable = [
@@ -29,7 +33,7 @@ class ReturnEntry extends Model
     ];
 
     protected $casts = [
-        'status' => ReturnEntryStatus::class,
+        'status' => ReturnEntryState::class,
         'total' => 'integer',
         'confirmed_at' => 'datetime',
     ];
@@ -68,7 +72,7 @@ class ReturnEntry extends Model
 
     public function isPending(): bool
     {
-        return $this->status === ReturnEntryStatus::Pending;
+        return $this->status->equals(Pending::class);
     }
 
     public function versements(): HasMany

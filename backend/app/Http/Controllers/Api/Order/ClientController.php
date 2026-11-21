@@ -2,29 +2,30 @@
 
 namespace App\Http\Controllers\Api\Order;
 
-use App\Http\Controllers\Controller;
 use App\Data\Order\ClientData;
 use App\Data\Order\UpdateClientData;
+use App\Http\Controllers\Controller;
 use App\Models\Order\Client;
 use App\Services\Clients\DeleteClientService;
 use App\Services\Clients\ToggleClientBlacklistService;
 use App\Services\Clients\UpdateClientService;
+use App\Support\Query\Filters\SearchFilter;
+use App\Support\Query\ListQuery;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use RuntimeException;
 use Spatie\LaravelData\PaginatedDataCollection;
+use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\QueryBuilder;
 
 class ClientController extends Controller
 {
     public function index(Request $request): PaginatedDataCollection
     {
-        $perPage = (int) $request->input('per_page', 15);
-        $search = trim((string) $request->input('search', ''));
-
-        $clients = $this->baseQuery($search)
+        $clients = $this->baseQuery($request)
             ->where('is_blacklisted', false)
-            ->orderByDesc('created_at')
-            ->paginate($perPage)
+            ->defaultSort('-created_at')
+            ->paginate(ListQuery::perPage($request))
             ->withQueryString();
 
         $clients->through(fn (Client $client) => ClientData::fromClient($client));
@@ -34,13 +35,10 @@ class ClientController extends Controller
 
     public function blacklisted(Request $request): PaginatedDataCollection
     {
-        $perPage = (int) $request->input('per_page', 15);
-        $search = trim((string) $request->input('search', ''));
-
-        $clients = $this->baseQuery($search)
+        $clients = $this->baseQuery($request)
             ->where('is_blacklisted', true)
-            ->orderByDesc('blacklisted_at')
-            ->paginate($perPage)
+            ->defaultSort('-blacklisted_at')
+            ->paginate(ListQuery::perPage($request))
             ->withQueryString();
 
         $clients->through(fn (Client $client) => ClientData::fromClient($client));
@@ -48,19 +46,19 @@ class ClientController extends Controller
         return ClientData::collect($clients, PaginatedDataCollection::class);
     }
 
-    private function baseQuery(string $search)
+    private function baseQuery(Request $request): QueryBuilder
     {
-        return Client::query()
-            ->with(['wilaya', 'commune'])
-            ->when($search !== '', function ($query) use ($search) {
-                $query->where(function ($query) use ($search) {
-                    $query->where('first_name', 'like', "%{$search}%")
-                        ->orWhere('last_name', 'like', "%{$search}%")
-                        ->orWhere('phone_number', 'like', "%{$search}%")
-                        ->orWhereHas('wilaya', fn ($query) => $query->where('name', 'like', "%{$search}%"))
-                        ->orWhereHas('commune', fn ($query) => $query->where('name', 'like', "%{$search}%"));
-                });
-            });
+        return QueryBuilder::for(
+            Client::query()->with(['wilaya', 'commune']),
+            ListQuery::request($request, ['search']),
+        )
+            ->allowedFilters(
+                AllowedFilter::custom('search', new SearchFilter(
+                    ['first_name', 'last_name', 'phone_number'],
+                    ['wilaya' => ['name'], 'commune' => ['name']],
+                )),
+            )
+            ->allowedSorts('first_name', 'last_name', 'created_at', 'blacklisted_at');
     }
 
     public function update(UpdateClientData $data, Client $client): ClientData

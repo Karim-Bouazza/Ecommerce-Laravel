@@ -10,26 +10,28 @@ use App\Services\Roles\CreateRoleService;
 use App\Services\Roles\DeleteRoleService;
 use App\Services\Roles\UpdateRoleService;
 use App\Support\PermissionRegistry;
+use App\Support\Query\Filters\SearchFilter;
+use App\Support\Query\ListQuery;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use RuntimeException;
 use Spatie\LaravelData\PaginatedDataCollection;
 use Spatie\Permission\Models\Role;
+use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\QueryBuilder;
 
 class RoleController extends Controller
 {
     public function index(Request $request): PaginatedDataCollection
     {
-        $perPage = (int) $request->input('per_page', 15);
-        $search = trim((string) $request->input('search', ''));
-
-        $roles = Role::query()
-            ->with('permissions:id,name')
-            ->when($search !== '', function ($query) use ($search) {
-                $query->where('name', 'like', "%{$search}%");
-            })
-            ->orderByDesc('created_at')
-            ->paginate($perPage)
+        $roles = QueryBuilder::for(
+            Role::query()->with('permissions:id,name'),
+            ListQuery::request($request, ['search']),
+        )
+            ->allowedFilters(AllowedFilter::custom('search', new SearchFilter(['name'])))
+            ->allowedSorts('name', 'created_at')
+            ->defaultSort('-created_at')
+            ->paginate(ListQuery::perPage($request))
             ->withQueryString();
 
         $roles->through(fn (Role $role) => RoleData::fromRole($role));

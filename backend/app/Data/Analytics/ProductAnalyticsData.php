@@ -5,7 +5,6 @@ namespace App\Data\Analytics;
 use App\Models\Catalog\Product;
 use App\Support\Analytics\OrderRateCalculator;
 use App\Support\Analytics\ProductAnalyticsCalculator;
-use Illuminate\Support\Facades\Storage;
 use Spatie\LaravelData\Data;
 
 class ProductAnalyticsData extends Data
@@ -48,7 +47,7 @@ class ProductAnalyticsData extends Data
         return new self(
             id: $product->id,
             name: $product->name,
-            image: $product->image_1 ? Storage::url($product->image_1) : null,
+            image: $product->mediaUrl('image_1'),
             nombre_commandes: [
                 'count' => (int) $product->total_orders_count,
                 'quantity' => (int) $product->total_quantity,

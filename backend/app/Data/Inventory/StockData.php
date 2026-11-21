@@ -3,7 +3,6 @@
 namespace App\Data\Inventory;
 
 use App\Models\Catalog\Product;
-use Illuminate\Support\Facades\Storage;
 use Spatie\LaravelData\Data;
 
 class StockData extends Data
@@ -28,7 +27,7 @@ class StockData extends Data
         return new self(
             id: $product->id,
             name: $product->name,
-            image: $product->image_1 ? Storage::url($product->image_1) : null,
+            image: $product->mediaUrl('image_1'),
             stock_interne: $product->stock_interne,
             stock_reserve: $product->stock_reserve,
             stock_en_livraison: $product->stock_en_livraison,

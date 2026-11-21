@@ -22,7 +22,7 @@ function fraudApiUser(array $permissions): User
 function fraudApiOrder($test): Order
 {
     Notification::fake();
-    $product = Product::create(['name' => 'P', 'description' => 'd', 'price' => 1000, 'stock' => 5, 'image_1' => 'a.jpg']);
+    $product = Product::create(['name' => 'P', 'description' => 'd', 'price' => 1000, 'stock' => 5]);
     $wilaya = Wilaya::create(['name' => 'W', 'code' => 998]);
 
     $id = $test->withServerVariables(['REMOTE_ADDR' => '203.0.113.50'])->postJson('/api/v1/orders', [
@@ -66,5 +66,5 @@ test('reviewing requires permission and a reason, and records the reviewer', fun
         ->assertJsonPath('label', 'CONFIRMED_FAKE')
         ->assertJsonPath('reviewed_by', $reviewer->name);
 
-    expect($order->fresh()->status->value)->toBe('pending');
+    expect($order->fresh()->status->getValue())->toBe('pending');
 });

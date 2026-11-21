@@ -7,31 +7,46 @@ use App\Data\Storefront\StorefrontProductDetailData;
 use App\Http\Controllers\Controller;
 use App\Models\Catalog\Product;
 use App\Models\Inventory\Stock;
+use App\Support\Query\Filters\CompareFilter;
+use App\Support\Query\Filters\SearchFilter;
+use App\Support\Query\ListQuery;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Spatie\LaravelData\DataCollection;
 use Spatie\LaravelData\PaginatedDataCollection;
+use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\AllowedSort;
+use Spatie\QueryBuilder\QueryBuilder;
 
 class StorefrontProductController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        $perPage = (int) $request->input('per_page', 20);
-        $sort = $request->input('sort');
-        $categoryIds = array_filter(explode(',', (string) $request->input('category_id', '')));
-
-        $products = $this->baseQuery()
-            ->when(count($categoryIds) > 0, fn ($query) => $query->whereIn('category_id', $categoryIds))
-            ->when($request->filled('search'), fn ($query) => $query->where('name', 'like', '%'.$request->input('search').'%'))
-            ->when($request->boolean('is_new'), fn ($query) => $query->where('is_new', true))
-            ->when($request->filled('price_min'), fn ($query) => $query->where('price', '>=', (int) $request->input('price_min')))
-            ->when($request->filled('price_max'), fn ($query) => $query->where('price', '<=', (int) $request->input('price_max')))
-            ->when($request->has('in_stock'), fn ($query) => $query->having('total_stock', $request->boolean('in_stock') ? '>' : '<=', 0))
-            ->when($sort === 'price_asc', fn ($query) => $query->orderBy('price'))
-            ->when($sort === 'price_desc', fn ($query) => $query->orderByDesc('price'))
-            ->when($sort === 'newest', fn ($query) => $query->orderByDesc('is_new')->orderByDesc('created_at'))
-            ->when(!in_array($sort, ['price_asc', 'price_desc', 'newest'], true), fn ($query) => $query->orderByDesc('created_at'))
-            ->paginate($perPage)
+        $products = QueryBuilder::for(
+            $this->baseQuery(),
+            ListQuery::request($request, ['search', 'category_id', 'is_new', 'price_min', 'price_max', 'in_stock']),
+        )
+            ->allowedFilters(
+                AllowedFilter::exact('category_id'),
+                AllowedFilter::custom('search', new SearchFilter(['name'])),
+                AllowedFilter::callback('is_new', fn ($query, $value) => filter_var($value, FILTER_VALIDATE_BOOLEAN)
+                    ? $query->where('is_new', true)
+                    : $query),
+                AllowedFilter::custom('price_min', CompareFilter::min('price')),
+                AllowedFilter::custom('price_max', CompareFilter::max('price')),
+                AllowedFilter::callback('in_stock', fn ($query, $value) => $query->having(
+                    'total_stock',
+                    filter_var($value, FILTER_VALIDATE_BOOLEAN) ? '>' : '<=',
+                    0,
+                )),
+            )
+            ->allowedSorts(
+                AllowedSort::callback('price_asc', fn ($query) => $query->orderBy('price')),
+                AllowedSort::callback('price_desc', fn ($query) => $query->orderByDesc('price')),
+                AllowedSort::callback('newest', fn ($query) => $query->orderByDesc('is_new')->orderByDesc('created_at')),
+            )
+            ->defaultSort('-created_at')
+            ->paginate(ListQuery::perPage($request, 20))
             ->withQueryString();
 
         $priceBounds = Product::query()
@@ -89,7 +104,7 @@ class StorefrontProductController extends Controller
 
         return Product::query()
             ->where('is_active', true)
-            ->with(['category', 'specs', 'variants'])
+            ->with(['category', 'specs', 'variants', 'media'])
             ->leftJoinSub($stockTotals, 'stock_totals', 'stock_totals.product_id', '=', 'products.id')
             ->select('products.*')
             ->selectRaw('COALESCE(stock_totals.total_quantity, 0) as total_stock');

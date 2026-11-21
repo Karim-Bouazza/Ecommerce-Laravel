@@ -3,17 +3,21 @@
 namespace App\Models\Purchasing;
 
 use App\Enums\Purchase\PurchaseEntryPaymentStatus;
-use App\Enums\Purchase\PurchaseEntryStatus;
 use App\Enums\Wallet\WalletTransactionCategory;
 use App\Models\Finance\WalletTransaction;
 use App\Models\Inventory\Warehouse;
 use App\Models\Users\User;
+use App\States\Purchase\Pending;
+use App\States\Purchase\PurchaseEntryState;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Spatie\ModelStates\HasStates;
 
 class PurchaseEntry extends Model
 {
+    use HasStates;
+
     protected ?int $paidAmountCache = null;
 
     protected $fillable = [
@@ -28,7 +32,7 @@ class PurchaseEntry extends Model
     ];
 
     protected $casts = [
-        'status' => PurchaseEntryStatus::class,
+        'status' => PurchaseEntryState::class,
         'total' => 'integer',
         'confirmed_at' => 'datetime',
     ];
@@ -72,7 +76,7 @@ class PurchaseEntry extends Model
 
     public function isPending(): bool
     {
-        return $this->status === PurchaseEntryStatus::Pending;
+        return $this->status->equals(Pending::class);
     }
 
     public function paidAmount(): int

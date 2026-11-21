@@ -2,22 +2,26 @@
 
 namespace App\Http\Controllers\Api\Purchasing;
 
-use App\Http\Controllers\Controller;
 use App\Data\Purchasing\EntryVersementData;
 use App\Data\Purchasing\PurchaseEntryData;
 use App\Data\Purchasing\SavePurchaseEntryData;
 use App\Data\Purchasing\StoreVersementData;
+use App\Http\Controllers\Controller;
 use App\Models\Purchasing\PurchaseEntry;
 use App\Services\PurchaseEntries\ConfirmPurchaseEntryService;
 use App\Services\PurchaseEntries\CreatePurchaseEntryService;
 use App\Services\PurchaseEntries\CreatePurchaseEntryVersementService;
 use App\Services\PurchaseEntries\DeletePurchaseEntryService;
 use App\Services\PurchaseEntries\UpdatePurchaseEntryService;
+use App\Support\Query\Filters\SearchFilter;
+use App\Support\Query\ListQuery;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use RuntimeException;
 use Spatie\LaravelData\DataCollection;
 use Spatie\LaravelData\PaginatedDataCollection;
+use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\QueryBuilder;
 
 class PurchaseEntryController extends Controller
 {
@@ -25,21 +29,18 @@ class PurchaseEntryController extends Controller
 
     public function index(Request $request): PaginatedDataCollection
     {
-        $perPage = (int) $request->input('per_page', 15);
-        $search = trim((string) $request->input('search', ''));
-
-        $entries = PurchaseEntry::query()
-            ->with(self::WITH)
-            ->withSum('versements as paid_amount_sum', 'amount')
-            ->when($search !== '', function ($query) use ($search) {
-                $query->where(function ($query) use ($search) {
-                    $query->where('reference', 'like', "%{$search}%")
-                        ->orWhereHas('fournisseur', fn ($query) => $query->where('name', 'like', "%{$search}%"))
-                        ->orWhereHas('warehouse', fn ($query) => $query->where('name', 'like', "%{$search}%"));
-                });
-            })
-            ->orderByDesc('created_at')
-            ->paginate($perPage)
+        $entries = QueryBuilder::for(
+            PurchaseEntry::query()
+                ->with(self::WITH)
+                ->withSum('versements as paid_amount_sum', 'amount'),
+            ListQuery::request($request, ['search']),
+        )
+            ->allowedFilters(
+                AllowedFilter::custom('search', new SearchFilter(['reference'], ['fournisseur' => ['name'], 'warehouse' => ['name']])),
+            )
+            ->allowedSorts('reference', 'created_at')
+            ->defaultSort('-created_at')
+            ->paginate(ListQuery::perPage($request))
             ->withQueryString();
 
         $entries->through(fn (PurchaseEntry $entry) => PurchaseEntryData::fromEntry($entry));

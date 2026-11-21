@@ -2,11 +2,14 @@
 
 namespace App\Models\Storefront;
 
+use App\Models\Concerns\HasImages;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Storage;
+use Spatie\MediaLibrary\HasMedia;
 
-class StorefrontPromoBanner extends Model
+class StorefrontPromoBanner extends Model implements HasMedia
 {
+    use HasImages;
+
     /** Two banners side by side. */
     public const MAX_ITEMS = 2;
 
@@ -17,7 +20,6 @@ class StorefrontPromoBanner extends Model
         'button_label',
         'link_url',
         'highlight',
-        'image_path',
         'position',
     ];
 
@@ -28,6 +30,11 @@ class StorefrontPromoBanner extends Model
 
     public function imageUrl(): ?string
     {
-        return $this->image_path ? Storage::disk('public')->url($this->image_path) : null;
+        return $this->mediaUrl('image');
+    }
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('image')->singleFile();
     }
 }

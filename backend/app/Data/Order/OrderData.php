@@ -62,7 +62,7 @@ class OrderData extends Data
             id: $order->id,
             reference: $order->reference,
             ip_address: $order->ip_address,
-            status: $order->status->value,
+            status: $order->status->getValue(),
             status_label: $order->status->label(),
             status_color: $order->status->color(),
             is_editable: $order->status->isEditable(),

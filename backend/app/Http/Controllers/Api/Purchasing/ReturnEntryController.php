@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers\Api\Purchasing;
 
-use App\Enums\Purchase\PurchaseEntryStatus;
-use App\Http\Controllers\Controller;
 use App\Data\Purchasing\EntryVersementData;
 use App\Data\Purchasing\ReturnEntryData;
 use App\Data\Purchasing\StoreReturnEntryData;
 use App\Data\Purchasing\StoreVersementData;
 use App\Data\Purchasing\UpdateReturnEntryData;
+use App\States\Purchase\Completed;
+use App\Http\Controllers\Controller;
 use App\Models\Purchasing\PurchaseEntry;
 use App\Models\Purchasing\ReturnEntry;
 use App\Models\Purchasing\ReturnEntryItem;
@@ -17,11 +17,15 @@ use App\Services\ReturnEntries\CreateReturnEntryService;
 use App\Services\ReturnEntries\CreateReturnEntryVersementService;
 use App\Services\ReturnEntries\DeleteReturnEntryService;
 use App\Services\ReturnEntries\UpdateReturnEntryService;
+use App\Support\Query\Filters\SearchFilter;
+use App\Support\Query\ListQuery;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use RuntimeException;
 use Spatie\LaravelData\DataCollection;
 use Spatie\LaravelData\PaginatedDataCollection;
+use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\QueryBuilder;
 
 class ReturnEntryController extends Controller
 {
@@ -29,21 +33,18 @@ class ReturnEntryController extends Controller
 
     public function index(Request $request): PaginatedDataCollection
     {
-        $perPage = (int) $request->input('per_page', 15);
-        $search = trim((string) $request->input('search', ''));
-
-        $entries = ReturnEntry::query()
-            ->with(self::WITH)
-            ->withSum('versements as paid_amount_sum', 'amount')
-            ->when($search !== '', function ($query) use ($search) {
-                $query->where(function ($query) use ($search) {
-                    $query->where('reference', 'like', "%{$search}%")
-                        ->orWhereHas('fournisseur', fn ($query) => $query->where('name', 'like', "%{$search}%"))
-                        ->orWhereHas('warehouse', fn ($query) => $query->where('name', 'like', "%{$search}%"));
-                });
-            })
-            ->orderByDesc('created_at')
-            ->paginate($perPage)
+        $entries = QueryBuilder::for(
+            ReturnEntry::query()
+                ->with(self::WITH)
+                ->withSum('versements as paid_amount_sum', 'amount'),
+            ListQuery::request($request, ['search']),
+        )
+            ->allowedFilters(
+                AllowedFilter::custom('search', new SearchFilter(['reference'], ['fournisseur' => ['name'], 'warehouse' => ['name']])),
+            )
+            ->allowedSorts('reference', 'created_at')
+            ->defaultSort('-created_at')
+            ->paginate(ListQuery::perPage($request))
             ->withQueryString();
 
         $entries->through(fn (ReturnEntry $entry) => ReturnEntryData::fromEntry($entry));
@@ -122,7 +123,7 @@ class ReturnEntryController extends Controller
     public function purchaseEntryOptions(): JsonResponse
     {
         $options = PurchaseEntry::query()
-            ->where('status', PurchaseEntryStatus::Completed)
+            ->where('status', Completed::getMorphClass())
             ->with(['warehouse', 'fournisseur'])
             ->orderByDesc('created_at')
             ->get()

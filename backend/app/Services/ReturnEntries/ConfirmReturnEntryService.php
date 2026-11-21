@@ -2,7 +2,7 @@
 
 namespace App\Services\ReturnEntries;
 
-use App\Enums\Return\ReturnEntryStatus;
+use App\States\Return\Completed;
 use App\Enums\Stock\StockMovementType;
 use App\Models\Purchasing\ReturnEntry;
 use App\Models\Inventory\Stock;
@@ -32,10 +32,8 @@ class ConfirmReturnEntryService
                 ]);
             }
 
-            $entry->update([
-                'status' => ReturnEntryStatus::Completed,
-                'confirmed_at' => now(),
-            ]);
+            $entry->confirmed_at = now();
+            $entry->status->transitionTo(Completed::class);
         });
     }
 }

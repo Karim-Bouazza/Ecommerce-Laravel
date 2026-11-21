@@ -4,7 +4,6 @@ namespace App\Services\Products;
 
 use App\Data\Catalog\UpdateProductData;
 use App\Models\Catalog\Product;
-use Illuminate\Support\Facades\Storage;
 use Spatie\LaravelData\Optional;
 
 class UpdateProductService
@@ -25,20 +24,13 @@ class UpdateProductService
         )->toArray());
 
         foreach ([1, 2, 3, 4] as $imageNumber) {
-            $field = "image_{$imageNumber}";
-            $upload = $data->{$field};
+            $collection = "image_{$imageNumber}";
+            $upload = $data->{$collection};
 
             if ($upload !== null) {
-                $previousImage = $product->{$field};
-                $product->update([$field => $upload->store('products', 'public')]);
-
-                if ($previousImage) {
-                    Storage::disk('public')->delete($previousImage);
-                }
-            } elseif (in_array($imageNumber, $data->remove_images) && $product->{$field}) {
-                $previousImage = $product->{$field};
-                $product->update([$field => null]);
-                Storage::disk('public')->delete($previousImage);
+                $product->setImage($upload, $collection);
+            } elseif (in_array($imageNumber, $data->remove_images)) {
+                $product->removeImage($collection);
             }
         }
 

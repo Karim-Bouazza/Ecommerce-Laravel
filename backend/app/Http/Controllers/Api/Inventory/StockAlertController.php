@@ -8,7 +8,11 @@ use App\Models\Catalog\Product;
 use App\Models\Inventory\Stock;
 use App\Models\Inventory\Warehouse;
 use App\Services\Warehouses\WarehouseStockQueryService;
-use Illuminate\Database\Eloquent\Builder;
+use App\Support\Query\Filters\CompareFilter;
+use App\Support\Query\Filters\SearchFilter;
+use App\Support\Query\ListQuery;
+use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\QueryBuilder;
 use Illuminate\Http\Request;
 use Spatie\LaravelData\PaginatedDataCollection;
 
@@ -18,43 +22,24 @@ class StockAlertController extends Controller
     {
         $warehouse = Warehouse::findOrFail($request->input('warehouse_id'));
 
-        $perPage = (int) $request->input('per_page', 15);
-        $search = trim((string) $request->input('search', ''));
-        $purchasePriceMin = $request->input('purchase_price_min');
-        $purchasePriceMax = $request->input('purchase_price_max');
-        $stockInterneMin = $request->input('stock_interne_min');
-        $stockInterneMax = $request->input('stock_interne_max');
-
-        $products = app(WarehouseStockQueryService::class)
-            ->lowStockQuery($warehouse)
-            ->when($search !== '', fn (Builder $query) => $query->where('products.name', 'like', "%{$search}%"))
-            ->when(
-                $purchasePriceMin !== null,
-                fn (Builder $query) => $query->where('products.purchase_price', '>=', $purchasePriceMin)
+        $products = QueryBuilder::for(
+            app(WarehouseStockQueryService::class)->lowStockQuery($warehouse),
+            ListQuery::request($request, ['search', 'warehouse_id', 'purchase_price_min', 'purchase_price_max', 'stock_interne_min', 'stock_interne_max']),
+        )
+            ->allowedFilters(
+                AllowedFilter::custom('search', new SearchFilter(['products.name'])),
+                AllowedFilter::callback('warehouse_id', fn () => null),
+                AllowedFilter::custom('purchase_price_min', CompareFilter::min('products.purchase_price')),
+                AllowedFilter::custom('purchase_price_max', CompareFilter::max('products.purchase_price')),
+                AllowedFilter::custom('stock_interne_min', CompareFilter::min('coalesce(stock_ledger.available_quantity, 0)')),
+                AllowedFilter::custom('stock_interne_max', CompareFilter::max('coalesce(stock_ledger.available_quantity, 0)')),
             )
-            ->when(
-                $purchasePriceMax !== null,
-                fn (Builder $query) => $query->where('products.purchase_price', '<=', $purchasePriceMax)
-            )
-            ->when(
-                $stockInterneMin !== null,
-                fn (Builder $query) => $query->whereRaw(
-                    'coalesce(stock_ledger.available_quantity, 0) >= ?',
-                    [$stockInterneMin]
-                )
-            )
-            ->when(
-                $stockInterneMax !== null,
-                fn (Builder $query) => $query->whereRaw(
-                    'coalesce(stock_ledger.available_quantity, 0) <= ?',
-                    [$stockInterneMax]
-                )
-            )
+            ->allowedSorts('products.name', 'products.purchase_price')
             ->withSum(['orderItems as reserved_quantity' => Stock::reservedItemsQuery($warehouse->id)], 'quantity')
             ->withSum(['orderItems as in_delivery_quantity' => Stock::inDeliveryItemsQuery($warehouse->id)], 'quantity')
             ->withSum(['orderItems as in_return_quantity' => Stock::inReturnItemsQuery($warehouse->id)], 'quantity')
             ->withSum(['orderItems as sold_quantity' => Stock::soldItemsQuery($warehouse->id)], 'quantity')
-            ->paginate($perPage)
+            ->paginate(ListQuery::perPage($request))
             ->withQueryString();
 
         $products->through(fn (Product $product) => StockAlertData::fromProduct($product));

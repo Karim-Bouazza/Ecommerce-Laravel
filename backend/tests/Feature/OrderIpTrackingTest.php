@@ -17,7 +17,6 @@ function orderIpTestProduct(): Product
         'description' => 'Test product description',
         'price' => 1000,
         'stock' => 10,
-        'image_1' => 'test.jpg',
     ]);
 }
 

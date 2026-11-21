@@ -2,41 +2,41 @@
 
 namespace App\Http\Controllers\Api\Finance;
 
-use App\Enums\Wallet\WalletTransactionCategory;
-use App\Http\Controllers\Controller;
 use App\Data\Finance\SaveFournisseurVersementData;
 use App\Data\Finance\VersementData;
-use App\Models\Purchasing\Fournisseur;
+use App\Enums\Wallet\WalletTransactionCategory;
+use App\Http\Controllers\Controller;
 use App\Models\Finance\WalletTransaction;
+use App\Models\Purchasing\Fournisseur;
 use App\Services\Versements\CreateFournisseurVersementService;
 use App\Services\Versements\DeleteFournisseurVersementService;
 use App\Services\Versements\UpdateFournisseurVersementService;
+use App\Support\Query\Filters\SearchFilter;
+use App\Support\Query\ListQuery;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use RuntimeException;
 use Spatie\LaravelData\PaginatedDataCollection;
+use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\QueryBuilder;
 
 class VersementController extends Controller
 {
     public function index(Request $request): PaginatedDataCollection
     {
-        $perPage = (int) $request->input('per_page', 15);
-        $search = trim((string) $request->input('search', ''));
-
-        $versements = WalletTransaction::query()
-            ->with(['wallet', 'fournisseur', 'creator'])
-            ->where('category', WalletTransactionCategory::Versement)
-            ->whereNotNull('fournisseur_id')
-            ->when($search !== '', function ($query) use ($search) {
-                $query->where(function ($query) use ($search) {
-                    $query->where('reference', 'like', "%{$search}%")
-                        ->orWhere('remark', 'like', "%{$search}%")
-                        ->orWhereHas('wallet', fn ($query) => $query->where('name', 'like', "%{$search}%"))
-                        ->orWhereHas('fournisseur', fn ($query) => $query->where('name', 'like', "%{$search}%"));
-                });
-            })
-            ->orderByDesc('created_at')
-            ->paginate($perPage)
+        $versements = QueryBuilder::for(
+            WalletTransaction::query()
+                ->with(['wallet', 'fournisseur', 'creator'])
+                ->where('category', WalletTransactionCategory::Versement)
+                ->whereNotNull('fournisseur_id'),
+            ListQuery::request($request, ['search']),
+        )
+            ->allowedFilters(
+                AllowedFilter::custom('search', new SearchFilter(['reference', 'remark'], ['wallet' => ['name'], 'fournisseur' => ['name']])),
+            )
+            ->allowedSorts('created_at', 'amount', 'reference')
+            ->defaultSort('-created_at')
+            ->paginate(ListQuery::perPage($request))
             ->withQueryString();
 
         $versements->through(fn (WalletTransaction $versement) => VersementData::fromTransaction($versement));

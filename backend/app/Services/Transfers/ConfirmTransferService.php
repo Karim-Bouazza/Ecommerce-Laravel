@@ -3,9 +3,9 @@
 namespace App\Services\Transfers;
 
 use App\Enums\Stock\StockMovementType;
-use App\Enums\Stock\TransferStatus;
 use App\Models\Inventory\Stock;
 use App\Models\Inventory\WarehouseTransfer;
+use App\States\Transfer\Completed;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
@@ -59,10 +59,8 @@ class ConfirmTransferService
                 ]);
             }
 
-            $transfer->update([
-                'status' => TransferStatus::Completed,
-                'confirmed_at' => now(),
-            ]);
+            $transfer->confirmed_at = now();
+            $transfer->status->transitionTo(Completed::class);
         });
     }
 }

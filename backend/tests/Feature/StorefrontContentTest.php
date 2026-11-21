@@ -17,7 +17,6 @@ function storefrontTestProduct(string $name, bool $active = true): Product
         'price' => 1000,
         'compare_price' => 1500,
         'stock' => 10,
-        'image_1' => 'test.jpg',
         'is_active' => $active,
     ]);
 }
@@ -82,8 +81,9 @@ it('manages the feature cards with their image', function () {
     ], ['Accept' => 'application/json'])->assertCreated();
 
     $feature = StorefrontFeature::findOrFail($response->json('id'));
-    $firstPath = $feature->image_path;
-    Storage::disk('public')->assertExists($firstPath);
+    $firstMedia = $feature->getFirstMedia('image');
+    expect($firstMedia)->not->toBeNull();
+    Storage::disk('public')->assertExists($firstMedia->getPathRelativeToRoot());
 
     $this->post("/api/v1/site-settings/features/{$feature->id}", [
         '_method' => 'PUT',
@@ -91,7 +91,8 @@ it('manages the feature cards with their image', function () {
         'image' => storefrontTestImage(),
     ], ['Accept' => 'application/json'])->assertOk();
 
-    Storage::disk('public')->assertMissing($firstPath);
+    Storage::disk('public')->assertMissing($firstMedia->getPathRelativeToRoot());
+    expect($feature->fresh()->getMedia('image'))->toHaveCount(1);
     expect($feature->fresh()->title)->toBe('Vision 4K');
 
     $this->deleteJson("/api/v1/site-settings/features/{$feature->id}")->assertNoContent();

@@ -7,7 +7,6 @@ use App\Data\Storefront\StoreStorefrontHeroCategoryData;
 use App\Data\Storefront\UpdateStorefrontHeroCategoryData;
 use App\Http\Controllers\Controller;
 use App\Models\Storefront\StorefrontHeroCategory;
-use Illuminate\Support\Facades\Storage;
 use Spatie\LaravelData\DataCollection;
 
 class StorefrontHeroCategoryController extends Controller
@@ -28,9 +27,10 @@ class StorefrontHeroCategoryController extends Controller
 
         $heroCategory = StorefrontHeroCategory::create([
             'category_id' => $data->category_id,
-            'image_path' => $data->image->store('hero-categories', 'public'),
             'position' => $position,
         ]);
+
+        $heroCategory->setImage($data->image);
 
         return StorefrontHeroCategoryData::fromHeroCategory(
             $heroCategory->load(['category' => fn ($query) => $query->withCount('products')])
@@ -39,18 +39,8 @@ class StorefrontHeroCategoryController extends Controller
 
     public function update(UpdateStorefrontHeroCategoryData $data, StorefrontHeroCategory $heroCategory): StorefrontHeroCategoryData
     {
-        $attributes = $data->only('category_id', 'position')->toArray();
-        $previousPath = $heroCategory->getRawOriginal('image_path');
-
-        if ($data->image !== null) {
-            $attributes['image_path'] = $data->image->store('hero-categories', 'public');
-        }
-
-        $heroCategory->update($attributes);
-
-        if ($data->image !== null && $previousPath) {
-            Storage::disk('public')->delete($previousPath);
-        }
+        $heroCategory->update($data->only('category_id', 'position')->toArray());
+        $heroCategory->setImage($data->image);
 
         return StorefrontHeroCategoryData::fromHeroCategory(
             $heroCategory->fresh()->load(['category' => fn ($query) => $query->withCount('products')])
@@ -59,12 +49,7 @@ class StorefrontHeroCategoryController extends Controller
 
     public function destroy(StorefrontHeroCategory $heroCategory)
     {
-        $path = $heroCategory->getRawOriginal('image_path');
         $heroCategory->delete();
-
-        if ($path) {
-            Storage::disk('public')->delete($path);
-        }
 
         return response()->noContent();
     }

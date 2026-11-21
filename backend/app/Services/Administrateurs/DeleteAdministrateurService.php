@@ -3,7 +3,6 @@
 namespace App\Services\Administrateurs;
 
 use App\Models\Users\User;
-use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 
 class DeleteAdministrateurService
@@ -19,10 +18,6 @@ class DeleteAdministrateurService
         $this->safeguards->assertAnotherSystemAdminRemains($user);
 
         $this->safeguards->revokeSessions($user);
-
-        if ($user->avatar) {
-            Storage::disk('public')->delete($user->avatar);
-        }
 
         $user->delete();
     }

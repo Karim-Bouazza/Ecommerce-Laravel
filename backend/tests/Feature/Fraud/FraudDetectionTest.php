@@ -26,7 +26,6 @@ beforeEach(function () {
         'description' => 'Test product description',
         'price' => 1000,
         'stock' => 10,
-        'image_1' => 'test.jpg',
     ]);
     $this->fraudWilaya = Wilaya::create(['name' => 'Test Wilaya', 'code' => 999]);
 });
@@ -163,7 +162,7 @@ test('a missing fingerprint still allows assessment from remaining signals', fun
 
 test('cancelled and delivered orders never create confirmed-fraud points', function (OrderStatus $status) {
     $previous = fraudOrder($this, ['fp' => 'same', 'phone' => '0555444444']);
-    $previous->update(['status' => $status]);
+    $previous->update(['status' => $status->value]);
 
     $new = fraudOrder($this, ['fp' => 'same', 'phone' => '0555444444']);
 
@@ -263,7 +262,7 @@ test('changing a review label updates later orders historical score', function (
     $reviews->setLabel($earlier, FraudReviewLabel::Legitimate, 'Customer confirmed', $reviewer);
     expect(fraudAssessment($later)->historical_points)->toBe(0)->and(fraudAssessment($later)->score)->toBe(5);
 
-    expect($earlier->fresh()->status)->toBe(OrderStatus::New); // status never touched by review
+    expect($earlier->fresh()->status->getValue())->toBe(OrderStatus::New->value); // status never touched by review
 });
 
 test('a failing fraud assessment never blocks order creation', function () {

@@ -2,7 +2,7 @@
 
 namespace App\Models\Purchasing;
 
-use App\Enums\Purchase\PurchaseEntryStatus;
+use App\States\Purchase\Completed;
 use App\Enums\Wallet\WalletTransactionCategory;
 use App\Models\Finance\WalletTransaction;
 use Illuminate\Database\Eloquent\Model;
@@ -25,7 +25,7 @@ class Fournisseur extends Model
 
     public function completedPurchaseEntries(): HasMany
     {
-        return $this->purchaseEntries()->where('status', PurchaseEntryStatus::Completed);
+        return $this->purchaseEntries()->where('status', Completed::getMorphClass());
     }
 
     /**
@@ -51,7 +51,7 @@ class Fournisseur extends Model
             'id',
             'id'
         )
-            ->where('purchase_entries.status', PurchaseEntryStatus::Completed)
+            ->where('purchase_entries.status', Completed::getMorphClass())
             ->where('wallet_transactions.category', WalletTransactionCategory::Versement);
     }
 

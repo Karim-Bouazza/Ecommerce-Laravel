@@ -1,21 +1,20 @@
 <?php
 
-namespace App\Services\Orders\StatusTransitions\Handlers;
+namespace App\States\Order\Transitions;
 
-use App\Enums\Order\OrderStatus;
 use App\Enums\Stock\StockMovementType;
-use App\Models\Order\Order;
 use App\Models\Inventory\Stock;
 use App\Models\Inventory\Warehouse;
-use App\Services\Orders\StatusTransitions\OrderStatusTransitionHandler;
+use App\Models\Order\Order;
+use Spatie\ModelStates\DefaultTransition;
 
-class DeliveredOrderTransitionHandler implements OrderStatusTransitionHandler
+class DeliverOrder extends DefaultTransition
 {
-    public function execute(Order $order, OrderStatus $to, array $data = []): void
+    public function handle(): Order
     {
-        $this->writeOutMovements($order);
+        $this->writeOutMovements($this->model);
 
-        $order->update(['status' => $to]);
+        return parent::handle();
     }
 
     private function writeOutMovements(Order $order): void

@@ -3,7 +3,6 @@
 namespace App\Data\Catalog;
 
 use App\Models\Catalog\Product;
-use Illuminate\Support\Facades\Storage;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Optional;
 
@@ -51,11 +50,8 @@ class ProductData extends Data
             total_stock: $product->totalStock(),
             is_active: $product->is_active,
             is_new: $product->is_new,
-            image: $product->image_1 ? Storage::url($product->image_1) : null,
-            images: collect([$product->image_1, $product->image_2, $product->image_3, $product->image_4])
-                ->map(fn (?string $image) => $image ? Storage::url($image) : null)
-                ->values()
-                ->all(),
+            image: $product->mediaUrl('image_1'),
+            images: $product->imageUrls(),
         );
     }
 }

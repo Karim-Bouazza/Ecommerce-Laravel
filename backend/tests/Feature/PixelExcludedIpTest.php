@@ -24,7 +24,7 @@ function pixelIpUser(array $permissions): User
 function pixelIpOrderFrom($test, string $ip)
 {
     Notification::fake();
-    $product = Product::create(['name' => 'P', 'description' => 'd', 'price' => 1000, 'stock' => 5, 'image_1' => 'a.jpg']);
+    $product = Product::create(['name' => 'P', 'description' => 'd', 'price' => 1000, 'stock' => 5]);
     $wilaya = Wilaya::create(['name' => 'W'.uniqid(), 'code' => random_int(100, 9999)]);
 
     return $test->withServerVariables(['REMOTE_ADDR' => $ip])->postJson('/api/v1/orders', [

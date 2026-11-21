@@ -6,8 +6,12 @@ use App\Data\Analytics\WilayaAnalyticsData;
 use App\Http\Controllers\Controller;
 use App\Models\Delivery\Wilaya;
 use App\Queries\Wilayas\WilayaAnalyticsQuery;
+use App\Support\Query\Filters\SearchFilter;
+use App\Support\Query\ListQuery;
 use Illuminate\Http\Request;
 use Spatie\LaravelData\PaginatedDataCollection;
+use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\QueryBuilder;
 
 class WilayaAnalyticsController extends Controller
 {
@@ -18,7 +22,6 @@ class WilayaAnalyticsController extends Controller
     public function index(Request $request): PaginatedDataCollection
     {
         $perPage = (int) $request->input('per_page', 15);
-        $search = trim((string) $request->input('search', ''));
         $dateFrom = $request->input('date_from');
         $dateTo = $request->input('date_to');
         $productId = $request->input('product_id');
@@ -29,8 +32,12 @@ class WilayaAnalyticsController extends Controller
         $priceMin = $priceMin !== null ? (float) $priceMin : null;
         $priceMax = $priceMax !== null ? (float) $priceMax : null;
 
-        $wilayas = $this->query
-            ->build($search !== '' ? $search : null, $dateFrom, $dateTo, $productId, $priceMin, $priceMax)
+        $wilayas = QueryBuilder::for(
+            $this->query->build(null, $dateFrom, $dateTo, $productId, $priceMin, $priceMax),
+            ListQuery::request($request, ['search']),
+        )
+            ->allowedFilters(AllowedFilter::custom('search', new SearchFilter(['name'])))
+            ->allowedSorts('name')
             ->orderByDesc('total_orders_count')
             ->paginate($perPage)
             ->withQueryString();

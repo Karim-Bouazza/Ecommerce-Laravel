@@ -7,6 +7,11 @@ use App\Data\Inventory\StockMovementData;
 use App\Models\Inventory\Warehouse;
 use App\Models\Inventory\WarehouseStockMovement;
 use Illuminate\Http\JsonResponse;
+use App\Support\Query\Filters\DateFilter;
+use App\Support\Query\Filters\SearchFilter;
+use App\Support\Query\ListQuery;
+use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\QueryBuilder;
 use Illuminate\Http\Request;
 use Spatie\LaravelData\PaginatedDataCollection;
 
@@ -16,29 +21,21 @@ class StockMovementController extends Controller
 
     public function index(Request $request): PaginatedDataCollection
     {
-        $perPage = (int) $request->input('per_page', 15);
-        $search = trim((string) $request->input('search', ''));
-        $warehouseId = $request->input('warehouse_id');
-        $productId = $request->input('product_id');
-        $type = $request->input('type');
-        $dateFrom = $request->input('date_from');
-        $dateTo = $request->input('date_to');
-
-        $movements = WarehouseStockMovement::query()
-            ->with(self::WITH)
-            ->when($warehouseId, fn ($query) => $query->where('warehouse_id', $warehouseId))
-            ->when($productId, fn ($query) => $query->where('product_id', $productId))
-            ->when($type, fn ($query) => $query->where('type', $type))
-            ->when($dateFrom, fn ($query) => $query->whereDate('created_at', '>=', $dateFrom))
-            ->when($dateTo, fn ($query) => $query->whereDate('created_at', '<=', $dateTo))
-            ->when($search !== '', function ($query) use ($search) {
-                $query->where(function ($query) use ($search) {
-                    $query->whereHas('product', fn ($query) => $query->where('name', 'like', "%{$search}%"))
-                        ->orWhereHas('creator', fn ($query) => $query->where('name', 'like', "%{$search}%"));
-                });
-            })
-            ->orderByDesc('created_at')
-            ->paginate($perPage)
+        $movements = QueryBuilder::for(
+            WarehouseStockMovement::query()->with(self::WITH),
+            ListQuery::request($request, ['search', 'warehouse_id', 'product_id', 'type', 'date_from', 'date_to']),
+        )
+            ->allowedFilters(
+                AllowedFilter::exact('warehouse_id'),
+                AllowedFilter::exact('product_id'),
+                AllowedFilter::exact('type'),
+                AllowedFilter::custom('date_from', DateFilter::from('created_at')),
+                AllowedFilter::custom('date_to', DateFilter::to('created_at')),
+                AllowedFilter::custom('search', new SearchFilter([], ['product' => ['name'], 'creator' => ['name']])),
+            )
+            ->allowedSorts('created_at', 'type', 'resulting_quantity')
+            ->defaultSort('-created_at')
+            ->paginate(ListQuery::perPage($request))
             ->withQueryString();
 
         $movements->through(fn (WarehouseStockMovement $movement) => StockMovementData::fromMovement($movement));

@@ -10,9 +10,12 @@ use App\Models\Fraud\FraudAssessment;
 use App\Models\Order\Order;
 use App\Services\Fraud\FraudIdentifiers;
 use App\Services\Fraud\FraudReviewService;
+use App\Support\Query\ListQuery;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Spatie\LaravelData\PaginatedDataCollection;
+use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\QueryBuilder;
 
 class FraudController extends Controller
 {
@@ -22,25 +25,26 @@ class FraudController extends Controller
 
     public function index(Request $request): PaginatedDataCollection
     {
-        $search = trim((string) $request->input('search', ''));
-        $level = $request->input('risk_level');
-        $label = $request->input('review_label');
+        $assessments = QueryBuilder::for(
+            FraudAssessment::query()->with(self::WITH),
+            ListQuery::request($request, ['search', 'risk_level', 'review_label']),
+        )
+            ->allowedFilters(
+                AllowedFilter::exact('risk_level'),
+                AllowedFilter::callback('review_label', fn ($query, $label) => $label === FraudReviewLabel::Unknown->value
+                    ? $query->whereDoesntHave('order.fraudReview', fn ($review) => $review->where('label', '!=', FraudReviewLabel::Unknown->value))
+                    : $query->whereHas('order.fraudReview', fn ($review) => $review->where('label', $label))),
+                AllowedFilter::callback('search', function ($query, $value) {
+                    $search = trim(is_array($value) ? implode(',', $value) : (string) $value);
 
-        $assessments = FraudAssessment::query()
-            ->with(self::WITH)
-            ->when($level, fn ($q) => $q->where('risk_level', $level))
-            ->when($label === FraudReviewLabel::Unknown->value, fn ($q) => $q->whereDoesntHave(
-                'order.fraudReview', fn ($r) => $r->where('label', '!=', FraudReviewLabel::Unknown->value)
-            ))
-            ->when($label && $label !== FraudReviewLabel::Unknown->value, fn ($q) => $q->whereHas(
-                'order.fraudReview', fn ($r) => $r->where('label', $label)
-            ))
-            ->when($search !== '', fn ($q) => $q->whereHas('order', fn ($o) => $o
-                ->where('reference', 'like', "%{$search}%")
-                ->orWhereHas('client', fn ($c) => $c->where('phone_number', 'like', "%{$search}%"))))
-            ->orderByDesc('score')
-            ->orderByDesc('id')
-            ->paginate((int) $request->input('per_page', 15))
+                    $query->whereHas('order', fn ($order) => $order
+                        ->where('reference', 'like', "%{$search}%")
+                        ->orWhereHas('client', fn ($client) => $client->where('phone_number', 'like', "%{$search}%")));
+                }),
+            )
+            ->allowedSorts('score', 'assessed_at', 'created_at')
+            ->defaultSort('-score', '-id')
+            ->paginate(ListQuery::perPage($request))
             ->withQueryString();
 
         $sensitive = $this->canViewSensitive($request);
@@ -131,7 +135,7 @@ class FraudController extends Controller
             return [
                 'order_id' => $other->order_id,
                 'reference' => $order?->reference,
-                'status' => $order?->status?->value,
+                'status' => $order?->status?->getValue(),
                 'status_label' => $order?->status?->label(),
                 'review_label' => $order?->fraudReview?->label?->value ?? 'UNKNOWN',
                 'shared' => $shared,

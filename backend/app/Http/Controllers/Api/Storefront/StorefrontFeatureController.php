@@ -8,7 +8,6 @@ use App\Data\Storefront\StorefrontFeatureData;
 use App\Http\Controllers\Controller;
 use App\Models\Storefront\StorefrontFeature;
 use App\Services\Storefront\ReorderStorefrontItemsService;
-use Illuminate\Support\Facades\Storage;
 use Spatie\LaravelData\DataCollection;
 
 class StorefrontFeatureController extends Controller
@@ -25,27 +24,18 @@ class StorefrontFeatureController extends Controller
     {
         $feature = StorefrontFeature::create([
             ...$data->only('title', 'description')->toArray(),
-            'image_path' => $data->image->store('storefront/features', 'public'),
             'position' => (int) StorefrontFeature::max('position') + 1,
         ]);
+
+        $feature->setImage($data->image);
 
         return StorefrontFeatureData::fromFeature($feature);
     }
 
     public function update(SaveStorefrontFeatureData $data, StorefrontFeature $feature): StorefrontFeatureData
     {
-        $attributes = $data->only('title', 'description')->toArray();
-        $previousPath = $feature->image_path;
-
-        if ($data->image !== null) {
-            $attributes['image_path'] = $data->image->store('storefront/features', 'public');
-        }
-
-        $feature->update($attributes);
-
-        if ($data->image !== null && $previousPath) {
-            Storage::disk('public')->delete($previousPath);
-        }
+        $feature->update($data->only('title', 'description')->toArray());
+        $feature->setImage($data->image);
 
         return StorefrontFeatureData::fromFeature($feature);
     }
@@ -59,10 +49,7 @@ class StorefrontFeatureController extends Controller
 
     public function destroy(StorefrontFeature $feature)
     {
-        $path = $feature->image_path;
         $feature->delete();
-
-        Storage::disk('public')->delete($path);
 
         return response()->noContent();
     }

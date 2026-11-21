@@ -2,7 +2,7 @@
 
 namespace App\Data\Purchasing;
 
-use App\Enums\Purchase\PurchaseEntryStatus;
+use App\States\Purchase\Completed;
 use App\Models\Purchasing\PurchaseEntry;
 use Closure;
 use Spatie\LaravelData\Attributes\DataCollectionOf;
@@ -33,7 +33,7 @@ class StoreReturnEntryData extends Data
         return function (string $attribute, mixed $value, Closure $fail) {
             $entry = PurchaseEntry::find($value);
 
-            if ($entry && $entry->status !== PurchaseEntryStatus::Completed) {
+            if ($entry && ! $entry->status->equals(Completed::class)) {
                 $fail("L'entrée d'achat sélectionnée doit être confirmée avant de pouvoir créer un retour.");
             }
         };

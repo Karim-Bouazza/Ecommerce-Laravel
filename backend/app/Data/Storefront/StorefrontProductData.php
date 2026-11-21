@@ -3,7 +3,6 @@
 namespace App\Data\Storefront;
 
 use App\Models\Catalog\Product;
-use Illuminate\Support\Facades\Storage;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Optional;
 
@@ -38,7 +37,7 @@ class StorefrontProductData extends Data
                 : null,
             is_new: $product->is_new,
             in_stock: (int) $product->total_stock > 0,
-            image: $product->image_1 ? Storage::url($product->image_1) : null,
+            image: $product->mediaUrl('image_1'),
         );
     }
 }

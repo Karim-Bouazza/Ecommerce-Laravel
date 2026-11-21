@@ -2,10 +2,10 @@
 
 namespace App\Services\Dashboard;
 
+use App\Models\Catalog\Product;
 use App\Queries\Dashboard\DashboardOrdersQuery;
 use App\Support\Analytics\OrderRateCalculator;
 use App\Support\Dashboard\DashboardFilters;
-use Illuminate\Support\Facades\Storage;
 
 class GetDashboardService
 {
@@ -21,6 +21,12 @@ class GetDashboardService
     public function execute(DashboardFilters $filters): array
     {
         $counts = $this->query->counts($filters);
+        $topProducts = $this->query->topProducts($filters, self::TOP_PRODUCTS_LIMIT);
+        $images = Product::query()
+            ->with('media')
+            ->whereIn('id', $topProducts->pluck('id'))
+            ->get()
+            ->mapWithKeys(fn (Product $product) => [$product->id => $product->mediaUrl('image_1')]);
 
         return [
             'filters' => [
@@ -33,11 +39,11 @@ class GetDashboardService
                 'delivered_orders' => $this->metric($counts['delivered'], $counts['total']),
                 'sales' => ['amount' => $this->query->deliveredSales($filters)],
             ],
-            'top_products' => $this->query->topProducts($filters, self::TOP_PRODUCTS_LIMIT)
+            'top_products' => $topProducts
                 ->map(fn (object $row) => [
                     'id' => (int) $row->id,
                     'name' => $row->name,
-                    'image' => $row->image_1 ? Storage::url($row->image_1) : null,
+                    'image' => $images[$row->id] ?? null,
                     'delivered_orders' => (int) $row->delivered_orders,
                     'quantity' => (int) $row->quantity,
                     'sales' => (float) $row->sales,

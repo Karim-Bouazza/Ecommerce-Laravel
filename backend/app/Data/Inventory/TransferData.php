@@ -43,7 +43,7 @@ class TransferData extends Data
             items: $transfer->relationLoaded('items')
                 ? $transfer->items->map(fn ($item) => TransferItemData::fromItem($item))->all()
                 : new Optional(),
-            status: $transfer->status->value,
+            status: $transfer->status->getValue(),
             status_label: $transfer->status->label(),
             status_color: $transfer->status->color(),
             creator_name: $transfer->relationLoaded('creator') ? $transfer->creator?->name : new Optional(),

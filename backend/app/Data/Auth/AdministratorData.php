@@ -4,7 +4,6 @@ namespace App\Data\Auth;
 
 use App\Models\Users\User;
 use App\Support\PermissionRegistry;
-use Illuminate\Support\Facades\Storage;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Optional;
 
@@ -29,7 +28,7 @@ class AdministratorData extends Data
             name: $user->name,
             email: $user->email,
             phone: $user->phone,
-            avatar: $user->avatar ? Storage::url($user->avatar) : null,
+            avatar: $user->mediaUrl('avatar'),
             is_active: $user->is_active,
             is_current: $current?->is($user) ?? false,
             role: $user->relationLoaded('roles')

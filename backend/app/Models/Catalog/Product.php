@@ -2,6 +2,7 @@
 
 namespace App\Models\Catalog;
 
+use App\Models\Concerns\HasImages;
 use App\Models\Inventory\Stock;
 use App\Models\Inventory\WarehouseStockMovement;
 use App\Models\Order\OrderItem;
@@ -10,6 +11,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
+use Spatie\MediaLibrary\HasMedia;
 
 /**
  * @property int|float|null $stock_in
@@ -31,8 +33,10 @@ use Illuminate\Support\Facades\DB;
  * @property-read float|null $valeur_du_stock
  * @property-read float $valeur_en_livraison
  */
-class Product extends Model
+class Product extends Model implements HasMedia
 {
+    use HasImages;
+
     protected $fillable = [
         'category_id',
         'sku',
@@ -43,10 +47,6 @@ class Product extends Model
         'purchase_price',
         'compare_price',
         'stock_minimum',
-        'image_1',
-        'image_2',
-        'image_3',
-        'image_4',
         'is_active',
         'is_new',
     ];
@@ -56,6 +56,22 @@ class Product extends Model
         'is_new' => 'boolean',
         'stock_minimum' => 'integer',
     ];
+
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('image_1')->singleFile();
+        $this->addMediaCollection('image_2')->singleFile();
+        $this->addMediaCollection('image_3')->singleFile();
+        $this->addMediaCollection('image_4')->singleFile();
+    }
+
+    public function imageUrls(): array
+    {
+        return collect(['image_1', 'image_2', 'image_3', 'image_4'])
+            ->map(fn (string $collection) => $this->mediaUrl($collection))
+            ->all();
+    }
 
     public function category()
     {
@@ -100,11 +116,11 @@ class Product extends Model
             ->selectRaw('product_id, SUM(quantite_interne) AS quantite_interne');
 
         return $query
+            ->with('media')
             ->leftJoinSub($internal, 'stock_internal', 'stock_internal.product_id', '=', 'products.id')
             ->select([
                 'products.id',
                 'products.name',
-                'products.image_1',
                 'products.purchase_price',
                 'stock_internal.quantite_interne',
             ])

@@ -6,9 +6,13 @@ use App\Data\Marketing\PixelData;
 use App\Data\Marketing\SavePixelData;
 use App\Http\Controllers\Controller;
 use App\Models\Marketing\Pixel;
+use App\Support\Query\Filters\SearchFilter;
+use App\Support\Query\ListQuery;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Spatie\LaravelData\PaginatedDataCollection;
+use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\QueryBuilder;
 
 class PixelController extends Controller
 {
@@ -28,16 +32,14 @@ class PixelController extends Controller
 
     public function index(Request $request): PaginatedDataCollection
     {
-        $perPage = (int) $request->input('per_page', 15);
-        $search = trim((string) $request->input('search', ''));
-
-        $pixels = Pixel::query()
-            ->when($search !== '', function ($query) use ($search) {
-                $query->where('name', 'like', "%{$search}%")
-                    ->orWhere('pixel_id', 'like', "%{$search}%");
-            })
-            ->orderByDesc('created_at')
-            ->paginate($perPage)
+        $pixels = QueryBuilder::for(
+            Pixel::query(),
+            ListQuery::request($request, ['search']),
+        )
+            ->allowedFilters(AllowedFilter::custom('search', new SearchFilter(['name', 'pixel_id'])))
+            ->allowedSorts('name', 'created_at')
+            ->defaultSort('-created_at')
+            ->paginate(ListQuery::perPage($request))
             ->withQueryString();
 
         $pixels->through(fn (Pixel $pixel) => PixelData::fromPixel($pixel));

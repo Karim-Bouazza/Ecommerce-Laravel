@@ -8,7 +8,6 @@ use App\Data\Auth\UserData;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 
 class AuthController extends Controller
 {
@@ -49,14 +48,7 @@ class AuthController extends Controller
             $attributes['password'] = $data->password;
         }
 
-        if ($data->avatar !== null) {
-            $previousAvatar = $user->avatar;
-            $attributes['avatar'] = $data->avatar->store('avatars', 'public');
-
-            if ($previousAvatar) {
-                Storage::disk('public')->delete($previousAvatar);
-            }
-        }
+        $user->setImage($data->avatar, 'avatar');
 
         $user->update($attributes);
 

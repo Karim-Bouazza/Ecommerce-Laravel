@@ -2,7 +2,7 @@
 
 namespace App\Services\PurchaseEntries;
 
-use App\Enums\Purchase\PurchaseEntryStatus;
+use App\States\Purchase\Completed;
 use App\Enums\Stock\StockMovementType;
 use App\Models\Purchasing\PurchaseEntry;
 use App\Models\Inventory\Stock;
@@ -32,10 +32,8 @@ class ConfirmPurchaseEntryService
                 ]);
             }
 
-            $entry->update([
-                'status' => PurchaseEntryStatus::Completed,
-                'confirmed_at' => now(),
-            ]);
+            $entry->confirmed_at = now();
+            $entry->status->transitionTo(Completed::class);
         });
     }
 }

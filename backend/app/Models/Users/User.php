@@ -3,16 +3,18 @@
 namespace App\Models\Users;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Models\Concerns\HasImages;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Spatie\MediaLibrary\HasMedia;
 use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable
+class User extends Authenticatable implements HasMedia
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, HasRoles, Notifiable;
+    use HasFactory, HasImages, HasRoles, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -23,7 +25,6 @@ class User extends Authenticatable
         'name',
         'email',
         'phone',
-        'avatar',
         'password',
         'is_active',
     ];
@@ -65,5 +66,10 @@ class User extends Authenticatable
     public function hasPermission(string $key): bool
     {
         return $this->isSystemAdmin() || $this->checkPermissionTo($key);
+    }
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('avatar')->singleFile();
     }
 }

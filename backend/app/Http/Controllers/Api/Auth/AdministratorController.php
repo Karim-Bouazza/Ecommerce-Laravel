@@ -24,7 +24,7 @@ class AdministratorController extends Controller
 {
     public function index(IndexAdministratorData $data, AdministratorIndexQuery $query, Request $request): PaginatedDataCollection
     {
-        $administrators = $query->paginate($data->toArray());
+        $administrators = $query->paginate($request);
 
         $administrators->through(fn (User $user) => AdministratorData::fromUser($user, $request->user()));
 

@@ -62,7 +62,7 @@ class CreateOrderService
                 'client_id' => $client->id,
                 'reference' => $reference,
                 'ip_address' => $data['ip_address'] ?? null,
-                'status' => OrderStatus::New,
+                'status' => OrderStatus::New->value,
                 'type' => $orderType,
                 'subtotal' => 0,
                 'delivery_price' => $data['delivery_price'] ?? 0,
@@ -112,7 +112,7 @@ class CreateOrderService
 
             OrderStatusHistory::create([
                 'order_id' => $order->id,
-                'status' => $order->status,
+                'status' => $order->status->status(),
                 'user_id' => null,
             ]);
 

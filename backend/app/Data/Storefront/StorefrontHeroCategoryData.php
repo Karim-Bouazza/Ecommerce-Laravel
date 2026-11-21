@@ -21,7 +21,7 @@ class StorefrontHeroCategoryData extends Data
         return new self(
             id: $heroCategory->id,
             position: $heroCategory->position,
-            image_url: $heroCategory->image_url,
+            image_url: $heroCategory->mediaUrl('image'),
             category_id: $heroCategory->category_id,
             category_name: $heroCategory->category->name,
             item_count: $heroCategory->category->products_count ?? $heroCategory->category->products()->count(),

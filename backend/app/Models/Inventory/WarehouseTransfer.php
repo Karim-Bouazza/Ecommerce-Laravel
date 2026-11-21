@@ -2,14 +2,18 @@
 
 namespace App\Models\Inventory;
 
-use App\Enums\Stock\TransferStatus;
 use App\Models\Users\User;
+use App\States\Transfer\Pending;
+use App\States\Transfer\TransferState;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Spatie\ModelStates\HasStates;
 
 class WarehouseTransfer extends Model
 {
+    use HasStates;
+
     protected $fillable = [
         'reference',
         'from_warehouse_id',
@@ -21,7 +25,7 @@ class WarehouseTransfer extends Model
     ];
 
     protected $casts = [
-        'status' => TransferStatus::class,
+        'status' => TransferState::class,
         'confirmed_at' => 'datetime',
     ];
 
@@ -54,6 +58,6 @@ class WarehouseTransfer extends Model
 
     public function isPending(): bool
     {
-        return $this->status === TransferStatus::Pending;
+        return $this->status->equals(Pending::class);
     }
 }

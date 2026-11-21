@@ -6,24 +6,26 @@ use App\Data\Catalog\CategoryData;
 use App\Data\Catalog\SaveCategoryData;
 use App\Http\Controllers\Controller;
 use App\Models\Catalog\Category;
+use App\Support\Query\Filters\SearchFilter;
+use App\Support\Query\ListQuery;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Spatie\LaravelData\PaginatedDataCollection;
+use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\QueryBuilder;
 
 class CategoryController extends Controller
 {
     public function index(Request $request): PaginatedDataCollection
     {
-        $perPage = (int) $request->input('per_page', 15);
-        $search = trim((string) $request->input('search', ''));
-
-        $categories = Category::query()
-            ->withCount('products')
-            ->when($search !== '', function ($query) use ($search) {
-                $query->where('name', 'like', "%{$search}%");
-            })
-            ->orderByDesc('created_at')
-            ->paginate($perPage)
+        $categories = QueryBuilder::for(
+            Category::query()->withCount('products'),
+            ListQuery::request($request, ['search']),
+        )
+            ->allowedFilters(AllowedFilter::custom('search', new SearchFilter(['name'])))
+            ->allowedSorts('name', 'created_at')
+            ->defaultSort('-created_at')
+            ->paginate(ListQuery::perPage($request))
             ->withQueryString();
 
         $categories->through(fn (Category $category) => CategoryData::fromCategory($category));

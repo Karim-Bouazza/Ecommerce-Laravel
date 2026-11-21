@@ -11,20 +11,25 @@ use App\Enums\Order\OrderType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Order\CreateOrderRequest;
 use App\Jobs\SendOrderToTelegram;
+use App\Models\Catalog\Product;
 use App\Models\Order\Order;
 use App\Models\Order\OrderStatusHistory;
-use App\Models\Catalog\Product;
 use App\Services\Fraud\FraudDetectionService;
-use App\Services\PixelTracking\ExcludedIpMatcher;
 use App\Services\Orders\CreateOrderService;
 use App\Services\Orders\OrderStatusService;
 use App\Services\Orders\UpdateOrderService;
+use App\Services\PixelTracking\ExcludedIpMatcher;
+use App\Support\Query\Filters\SearchFilter;
+use App\Support\Query\ListQuery;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Spatie\LaravelData\DataCollection;
 use Spatie\LaravelData\PaginatedDataCollection;
+use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\AllowedSort;
+use Spatie\QueryBuilder\QueryBuilder;
 
 class OrderController extends Controller
 {
@@ -87,9 +92,6 @@ class OrderController extends Controller
             403
         );
 
-        $perPage = (int) $request->input('per_page', 15);
-        $search = trim((string) $request->input('search', ''));
-
         $groupStatuses = $statusGroup !== '' ? OrderStatus::forGroup($statusGroup) : [];
 
         $status = OrderStatus::tryFrom(trim((string) $request->input('status', '')));
@@ -97,28 +99,33 @@ class OrderController extends Controller
             ? [$status]
             : $groupStatuses;
 
-        $orders = Order::query()
-            ->with(self::WITH)
-            ->when($statusGroup !== '', function ($query) use ($filteredStatuses) {
-                $query->whereIn('status', array_column($filteredStatuses, 'value'));
-            })
-            ->when($search !== '', function ($query) use ($search) {
-                $query->where(function ($query) use ($search) {
-                    $query->where('reference', 'like', "%{$search}%")
-                        ->orWhereHas('client', fn($query) => $query
-                            ->where('first_name', 'like', "%{$search}%")
-                            ->orWhere('last_name', 'like', "%{$search}%")
-                            ->orWhere('phone_number', 'like', "%{$search}%"));
-                });
-            })
-            ->orderByDesc(
-                DB::raw('coalesce((' . OrderStatusHistory::select('created_at')
-                    ->whereColumn('order_id', 'orders.id')
-                    ->latest('created_at')
-                    ->limit(1)
-                    ->toSql() . '), created_at)')
+        $orders = QueryBuilder::for(
+            Order::query()
+                ->with(self::WITH)
+                ->when($statusGroup !== '', function ($query) use ($filteredStatuses) {
+                    $query->whereIn('status', array_column($filteredStatuses, 'value'));
+                }),
+            ListQuery::request($request, ['search', 'status', 'status_group']),
+        )
+            ->allowedFilters(
+                AllowedFilter::custom('search', new SearchFilter(['reference'], ['client' => ['first_name', 'last_name', 'phone_number']])),
+                AllowedFilter::callback('status', fn () => null),
+                AllowedFilter::callback('status_group', fn () => null),
             )
-            ->paginate($perPage)
+            ->allowedSorts(
+                AllowedSort::callback('latest_activity', fn ($query, bool $descending) => $query->orderBy(
+                    DB::raw('coalesce((' . OrderStatusHistory::select('created_at')
+                        ->whereColumn('order_id', 'orders.id')
+                        ->latest('created_at')
+                        ->limit(1)
+                        ->toSql() . '), created_at)'),
+                    $descending ? 'desc' : 'asc',
+                )),
+                'created_at',
+                'reference',
+            )
+            ->defaultSort('-latest_activity')
+            ->paginate(ListQuery::perPage($request))
             ->withQueryString();
 
         $counts = $groupStatuses === []

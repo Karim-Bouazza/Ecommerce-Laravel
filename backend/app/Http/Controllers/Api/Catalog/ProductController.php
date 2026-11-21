@@ -10,21 +10,26 @@ use App\Models\Catalog\Product;
 use App\Services\Products\CreateProductService;
 use App\Services\Products\DeleteProductService;
 use App\Services\Products\UpdateProductService;
+use App\Support\Query\Filters\SearchFilter;
+use App\Support\Query\ListQuery;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Spatie\LaravelData\PaginatedDataCollection;
+use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\QueryBuilder;
 
 class ProductController extends Controller
 {
     public function index(Request $request): PaginatedDataCollection
     {
-        $perPage = (int) $request->input('per_page', 20);
-        $search = trim((string) $request->input('search', ''));
-
-        $products = Product::query()
-            ->with(['category', 'specs', 'variants'])
-            ->when($search !== '', fn ($query) => $query->where('name', 'like', "%{$search}%"))
-            ->paginate($perPage);
+        $products = QueryBuilder::for(
+            Product::query()->with(['category', 'specs', 'variants', 'media']),
+            ListQuery::request($request, ['search']),
+        )
+            ->allowedFilters(AllowedFilter::custom('search', new SearchFilter(['name'])))
+            ->allowedSorts('name', 'price', 'created_at')
+            ->paginate(ListQuery::perPage($request, 20))
+            ->withQueryString();
 
         $products->through(fn (Product $product) => ProductData::fromProduct($product));
 
