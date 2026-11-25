@@ -108,7 +108,6 @@ enum OrderStatus: string
                 self::Call3,
                 self::Unreachable,
                 self::ToCheck,
-                self::Duplicated,
                 self::Scheduled,
                 self::ConfirmedBot,
                 self::ConfirmedNoStock,
@@ -116,7 +115,7 @@ enum OrderStatus: string
             'confirmees' => [self::Confirmed, self::Assigned],
             'suivi' => [self::Shipped],
             'terminees' => [self::Delivered],
-            'annulees' => [self::Cancelled, self::Returned, self::ReturnInProgress, self::FakeOrder],
+            'annulees' => [self::Cancelled, self::Returned, self::ReturnInProgress, self::FakeOrder, self::Duplicated],
             default => [],
         };
     }
