@@ -3,8 +3,6 @@
 namespace App\Data\Order;
 
 use App\Enums\Order\DeliveryType;
-use App\Models\Inventory\Stock;
-use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Validation\Rule;
 use Spatie\LaravelData\Attributes\DataCollectionOf;
 use Spatie\LaravelData\Data;
@@ -71,35 +69,5 @@ class SaveManualOrderData extends Data
             'items.*.quantity' => ['required', 'integer', 'min:1'],
             'items.*.unit_price' => ['nullable', 'numeric', 'min:0'],
         ];
-    }
-
-    public static function withValidator(Validator $validator): void
-    {
-        $validator->after(function (Validator $validator): void {
-            $items = $validator->getData()['items'] ?? [];
-
-            if (! is_array($items)) {
-                return;
-            }
-
-            foreach ($items as $index => $item) {
-                $warehouseId = $item['warehouse_id'] ?? null;
-                $productId = $item['product_id'] ?? null;
-                $quantity = (int) ($item['quantity'] ?? 0);
-
-                if (! $warehouseId || ! $productId) {
-                    continue;
-                }
-
-                $available = Stock::inDepot((int) $warehouseId, (int) $productId);
-
-                if ($quantity > $available) {
-                    $validator->errors()->add(
-                        "items.{$index}.quantity",
-                        "La quantité dépasse le stock disponible ({$available})."
-                    );
-                }
-            }
-        });
     }
 }

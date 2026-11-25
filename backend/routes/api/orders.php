@@ -34,7 +34,7 @@ Route::controller(OrderController::class)
     ->name('orders.')
     ->group(function () {
         Route::get('/', 'index')
-            ->middleware('permission:orders.view|orders_nouvelles.view|orders_en_cours.view|orders_confirmees.view|orders_terminees.view|orders_annulees.view')
+            ->middleware('permission:orders.view')
             ->name('index');
 
         Route::get('/generate-name', 'generateName')
@@ -44,6 +44,10 @@ Route::controller(OrderController::class)
         Route::post('/manual', 'storeManual')
             ->middleware('can:orders.create')
             ->name('store-manual');
+
+        Route::get('/{order}', 'show')
+            ->middleware('can:orders.view')
+            ->name('show');
 
         Route::put('/{order}', 'update')
             ->middleware('can:orders.edit')

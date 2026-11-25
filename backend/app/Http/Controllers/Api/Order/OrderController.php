@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Order;
 
 use App\Data\Order\OrderData;
+use App\Data\Order\OrderDetailsData;
 use App\Data\Order\OrderStatusHistoryData;
 use App\Data\Order\SaveManualOrderData;
 use App\Data\Order\UpdateOrderStatusData;
@@ -76,21 +77,6 @@ class OrderController extends Controller
     public function index(Request $request): JsonResponse
     {
         $statusGroup = trim((string) $request->input('status_group', ''));
-
-        $groupPermission = match ($statusGroup) {
-            'nouvelles' => 'orders_nouvelles.view',
-            'en_cours' => 'orders_en_cours.view',
-            'confirmees' => 'orders_confirmees.view',
-            'terminees' => 'orders_terminees.view',
-            'annulees' => 'orders_annulees.view',
-            default => null,
-        };
-
-        abort_unless(
-            $request->user()->can('orders.view')
-                || ($groupPermission && $request->user()->can($groupPermission)),
-            403
-        );
 
         $groupStatuses = $statusGroup !== '' ? OrderStatus::forGroup($statusGroup) : [];
 
@@ -171,6 +157,11 @@ class OrderController extends Controller
         $name = $variant !== '' ? "{$product->name}-{$variant}" : $product->name;
 
         return response()->json(['name' => $name]);
+    }
+
+    public function show(Order $order, Request $request): OrderDetailsData
+    {
+        return OrderDetailsData::fromOrder($order->loadMissing(self::WITH), $this->canViewFraud($request));
     }
 
     public function storeManual(SaveManualOrderData $data, Request $request): OrderData

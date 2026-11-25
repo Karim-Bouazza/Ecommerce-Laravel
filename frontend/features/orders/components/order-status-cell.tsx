@@ -15,6 +15,7 @@ import { useUpdateOrderStatus } from "@/features/orders/hooks/use-update-order-s
 import type { BadgeColor, Order } from "@/features/orders/types"
 
 const REPORTED_STATUS = "reported"
+const CURRENT_STATUS = "__current__"
 
 export const statusBadgeClasses: Record<BadgeColor, string> = {
   success: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
@@ -44,7 +45,7 @@ export function OrderStatusCell({ order }: OrderStatusCellProps) {
           statusBadgeClasses[order.status_color]
         )}
       >
-        {order.status_label}
+        {order.status}
       </span>
     )
   }
@@ -52,10 +53,10 @@ export function OrderStatusCell({ order }: OrderStatusCellProps) {
   return (
     <>
       <Select
-        value={order.status}
+        value={CURRENT_STATUS}
         disabled={mutation.isPending}
         onValueChange={(value) => {
-          if (value === order.status) return
+          if (value === CURRENT_STATUS) return
           if (value === REPORTED_STATUS) {
             setReportDialogOpen(true)
             return
@@ -69,10 +70,10 @@ export function OrderStatusCell({ order }: OrderStatusCellProps) {
             statusBadgeClasses[order.status_color]
           )}
         >
-          <SelectValue>{order.status_label}</SelectValue>
+          <SelectValue>{order.status}</SelectValue>
         </SelectTrigger>
         <SelectContent align="start">
-          <SelectItem value={order.status}>{order.status_label}</SelectItem>
+          <SelectItem value={CURRENT_STATUS}>{order.status}</SelectItem>
           {order.status_transitions.map((transition) => (
             <SelectItem key={transition.value} value={transition.value}>
               {transition.label}

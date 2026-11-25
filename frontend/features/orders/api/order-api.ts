@@ -1,6 +1,7 @@
 import { api, toApiError } from "@/lib/api"
 import type {
   Order,
+  OrderDetails,
   OrderStatusGroup,
   OrderStatusHistoryEntry,
   PaginatedResponse,
@@ -17,6 +18,15 @@ export type GetOrdersParams = {
 export async function getOrders(params: GetOrdersParams): Promise<PaginatedResponse<Order>> {
   try {
     const { data } = await api.get<PaginatedResponse<Order>>("/api/v1/orders", { params })
+    return data
+  } catch (error) {
+    throw toApiError(error)
+  }
+}
+
+export async function getOrder(id: number): Promise<OrderDetails> {
+  try {
+    const { data } = await api.get<OrderDetails>(`/api/v1/orders/${id}`)
     return data
   } catch (error) {
     throw toApiError(error)

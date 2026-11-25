@@ -29,11 +29,6 @@ return [
                 'orders.create' => 'Créer des commandes',
                 'orders.edit' => 'Modifier les commandes',
                 'orders.delete' => 'Supprimer les commandes',
-                'orders_nouvelles.view' => 'Voir les nouvelles commandes',
-                'orders_en_cours.view' => 'Voir les commandes en cours',
-                'orders_confirmees.view' => 'Voir les commandes confirmées',
-                'orders_terminees.view' => 'Voir les commandes terminées',
-                'orders_annulees.view' => 'Voir les commandes annulées',
             ],
         ],
         'catalogue' => [

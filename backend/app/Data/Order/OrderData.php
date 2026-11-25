@@ -14,9 +14,9 @@ class OrderData extends Data
         public string $reference,
         public ?string $ip_address,
         public string $status,
-        public string $status_label,
         public string $status_color,
         public bool $is_editable,
+        public bool $can_ship,
         public bool $can_delete,
         public array $status_transitions,
         public string $payment_status,
@@ -62,10 +62,10 @@ class OrderData extends Data
             id: $order->id,
             reference: $order->reference,
             ip_address: $order->ip_address,
-            status: $order->status->getValue(),
-            status_label: $order->status->label(),
+            status: $order->status->label(),
             status_color: $order->status->color(),
             is_editable: $order->status->isEditable(),
+            can_ship: $order->status === OrderStatus::Assigned,
             can_delete: $order->status->canBeDeleted(),
             status_transitions: collect($order->status->allowedTransitions())
                 ->reject(fn (OrderStatus $status) => $status === OrderStatus::Scheduled)
