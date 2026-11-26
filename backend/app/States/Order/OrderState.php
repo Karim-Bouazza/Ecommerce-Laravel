@@ -94,6 +94,7 @@ abstract class OrderState extends State
             Assigned::class => [Shipped::class, Cancelled::class],
             Shipped::class => [Delivered::class, ReturnInProgress::class, Returned::class, Unreachable::class, Cancelled::class],
             ReturnInProgress::class => [Returned::class],
+            Cancelled::class => [Pending::class],
         ];
     }
 
