@@ -18,19 +18,15 @@ class UpdateWarehouseStockService
 
             $newQuantity = max(0, $current + $data->adjustment);
 
-            $product->update([
-                'purchase_price' => $data->purchase_price,
-            ]);
-
             $delta = $newQuantity - $current;
 
             if ($delta !== 0) {
-                $warehouse->stockMovements()->create([
-                    'product_id' => $product->id,
-                    'type' => $delta > 0 ? StockMovementType::In : StockMovementType::Out,
-                    'quantity' => abs($delta),
-                    'resulting_quantity' => $newQuantity,
-                ]);
+                app(RecordStockMovementService::class)->execute(
+                    $warehouse,
+                    $product->id,
+                    $delta > 0 ? StockMovementType::In : StockMovementType::Out,
+                    abs($delta),
+                );
             }
         });
     }

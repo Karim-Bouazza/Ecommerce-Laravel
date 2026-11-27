@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { Pencil } from "lucide-react"
+import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -13,6 +14,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { useProductOptions } from "@/features/products/hooks/use-product-options"
+import { getWarehouse } from "@/features/warehouses/api/warehouse-api"
+import { getErrorMessage } from "@/lib/api"
 import { useUpdateWarehouse } from "@/features/warehouses/hooks/use-update-warehouse"
 import { WarehouseFormFields } from "@/features/warehouses/components/warehouse-form-fields"
 import type { Warehouse } from "@/features/warehouses/types"
@@ -36,16 +39,20 @@ export function EditWarehouseDialog({ warehouse }: EditWarehouseDialogProps) {
       onOpenChange={(nextOpen) => {
         setOpen(nextOpen)
         if (nextOpen) {
-          reset({
-            name: warehouse.name,
-            phone: warehouse.phone ?? "",
-            remark: warehouse.remark ?? "",
-            address: warehouse.address ?? "",
-            all_wilayas: warehouse.all_wilayas,
-            all_products: warehouse.all_products,
-            wilaya_ids: warehouse.wilaya_ids,
-            product_ids: warehouse.product_ids,
-          })
+          void getWarehouse(warehouse.id)
+            .then((detail) =>
+              reset({
+                name: detail.name,
+                phone: detail.phone ?? "",
+                remark: detail.remark ?? "",
+                address: detail.address ?? "",
+                all_wilayas: detail.all_wilayas,
+                all_products: detail.all_products,
+                wilaya_ids: detail.wilaya_ids ?? [],
+                product_ids: detail.product_ids ?? [],
+              })
+            )
+            .catch((error) => toast.error(getErrorMessage(error)))
         }
       }}
     >

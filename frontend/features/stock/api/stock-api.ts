@@ -35,7 +35,6 @@ export async function getStockStats(params: GetStockStatsParams): Promise<StockS
 export type AdjustStockPayload = {
   warehouse_id: number
   adjustment: number
-  purchase_price: number
 }
 
 export async function adjustStock(productId: number, payload: AdjustStockPayload): Promise<StockItem> {

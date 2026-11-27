@@ -56,6 +56,17 @@ class RoleController extends Controller
         return response()->json($groups);
     }
 
+    public function roleOptions(): JsonResponse
+    {
+        return response()->json(
+            Role::query()->orderBy('name')->get(['id', 'name'])->map(fn (Role $role) => [
+                'id' => $role->id,
+                'name' => $role->name,
+                'is_system' => PermissionRegistry::isSystemRole($role->name),
+            ])
+        );
+    }
+
     public function store(SaveRoleData $data): RoleDetailData
     {
         $role = app(CreateRoleService::class)->execute($data);

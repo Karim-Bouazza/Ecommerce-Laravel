@@ -33,7 +33,7 @@ export function UpdateStockDialog({ product, warehouseId }: UpdateStockDialogPro
       onOpenChange={(nextOpen) => {
         setOpen(nextOpen)
         if (nextOpen) {
-          reset({ adjustment: 0, purchase_price: product.purchase_price ?? 0 })
+          reset({ adjustment: 0 })
         }
       }}
     >
@@ -48,7 +48,7 @@ export function UpdateStockDialog({ product, warehouseId }: UpdateStockDialogPro
 
           <p className="pb-2 text-sm font-medium">{product.name}</p>
 
-          <FieldGroup className="grid gap-4 sm:grid-cols-3">
+          <FieldGroup className="grid gap-4 sm:grid-cols-2">
             <Field>
               <FieldLabel htmlFor="update-stock-current">Stock Actuel</FieldLabel>
               <Input id="update-stock-current" value={product.stock_interne} disabled />
@@ -63,18 +63,6 @@ export function UpdateStockDialog({ product, warehouseId }: UpdateStockDialogPro
                 {...register("adjustment", { valueAsNumber: true })}
               />
               <FieldError errors={errors.adjustment ? [errors.adjustment] : undefined} />
-            </Field>
-
-            <Field data-invalid={!!errors.purchase_price}>
-              <FieldLabel htmlFor="update-stock-purchase-price">Prix d&apos;achat</FieldLabel>
-              <Input
-                id="update-stock-purchase-price"
-                type="number"
-                step="0.01"
-                aria-invalid={!!errors.purchase_price}
-                {...register("purchase_price", { valueAsNumber: true })}
-              />
-              <FieldError errors={errors.purchase_price ? [errors.purchase_price] : undefined} />
             </Field>
           </FieldGroup>
 

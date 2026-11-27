@@ -3,7 +3,6 @@
 namespace App\Models\Inventory;
 
 use App\Enums\Order\OrderStatus;
-use App\Enums\Stock\StockMovementType;
 use App\Models\Catalog\Product;
 use Closure;
 use Illuminate\Database\Eloquent\Model;
@@ -33,40 +32,21 @@ class Stock extends Model
         return $this->belongsTo(Product::class);
     }
 
-    /**
-     * Stock disponible: the on-hand quantity of one product in one depot (warehouse),
-     * derived from the stock movement ledger rather than a stored counter.
-     */
     public static function inDepot(int $warehouseId, int $productId): int
     {
-        return (int) WarehouseStockMovement::query()
+        return (int) DB::table('warehouse_product')
             ->where('warehouse_id', $warehouseId)
             ->where('product_id', $productId)
-            ->selectRaw(
-                'COALESCE(SUM(CASE WHEN type = ? THEN quantity ELSE -quantity END), 0) AS balance',
-                [StockMovementType::In->value]
-            )
-            ->value('balance');
+            ->value('quantite_interne');
     }
 
-    /**
-     * Total quantity of a product across every depot (warehouse).
-     */
     public static function total(int $productId): int
     {
-        return (int) WarehouseStockMovement::query()
+        return (int) DB::table('warehouse_product')
             ->where('product_id', $productId)
-            ->selectRaw(
-                'COALESCE(SUM(CASE WHEN type = ? THEN quantity ELSE -quantity END), 0) AS balance',
-                [StockMovementType::In->value]
-            )
-            ->value('balance');
+            ->sum('quantite_interne');
     }
 
-    /**
-     * Locks the warehouse/product row (inserting it if missing) so concurrent
-     * movements against the same pair serialize before their balance is read.
-     */
     public static function lockRow(int $warehouseId, int $productId): void
     {
         DB::table('warehouse_product')->insertOrIgnore([
@@ -81,9 +61,6 @@ class Stock extends Model
             ->first();
     }
 
-    /**
-     * Locks the row and returns the current depot balance in one step.
-     */
     public static function lockAndGetInDepot(int $warehouseId, int $productId): int
     {
         static::lockRow($warehouseId, $productId);
@@ -91,31 +68,16 @@ class Stock extends Model
         return static::inDepot($warehouseId, $productId);
     }
 
-    /**
-     * Aggregated available quantity per warehouse/product pair, for joining
-     * into listing queries instead of computing one row at a time.
-     */
     public static function inDepotSubquery(): QueryBuilder
     {
-        return DB::table('warehouse_stock_movements')
-            ->selectRaw(
-                'warehouse_id, product_id, SUM(CASE WHEN type = ? THEN quantity ELSE -quantity END) AS available_quantity',
-                [StockMovementType::In->value]
-            )
-            ->groupBy('warehouse_id', 'product_id');
+        return DB::table('warehouse_product')
+            ->select('warehouse_id', 'product_id', 'quantite_interne as available_quantity');
     }
 
-    /**
-     * Aggregated total quantity per product across every depot, for joining
-     * into listing queries instead of computing one row at a time.
-     */
     public static function totalSubquery(): QueryBuilder
     {
-        return DB::table('warehouse_stock_movements')
-            ->selectRaw(
-                'product_id, SUM(CASE WHEN type = ? THEN quantity ELSE -quantity END) AS total_quantity',
-                [StockMovementType::In->value]
-            )
+        return DB::table('warehouse_product')
+            ->selectRaw('product_id, SUM(quantite_interne) AS total_quantity')
             ->groupBy('product_id');
     }
 

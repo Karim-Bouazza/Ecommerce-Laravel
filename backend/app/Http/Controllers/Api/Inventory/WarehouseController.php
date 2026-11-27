@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Inventory;
 
 use App\Http\Controllers\Controller;
 use App\Data\Inventory\SaveWarehouseData;
+use App\Data\Inventory\UpdateWarehouseData;
 use App\Data\Inventory\WarehouseData;
 use App\Models\Inventory\Warehouse;
 use App\Services\Warehouses\CreateWarehouseService;
@@ -23,7 +24,7 @@ class WarehouseController extends Controller
     public function index(Request $request): PaginatedDataCollection
     {
         $warehouses = QueryBuilder::for(
-            Warehouse::query()->with(['wilayas:id', 'products:id'])->withCount('stockMovements'),
+            Warehouse::query()->with('products:id')->withCount('stockMovements'),
             ListQuery::request($request, ['search']),
         )
             ->allowedFilters(
@@ -37,6 +38,23 @@ class WarehouseController extends Controller
         return WarehouseData::collect($warehouses, PaginatedDataCollection::class);
     }
 
+    public function options(): JsonResponse
+    {
+        $warehouses = Warehouse::query()
+            ->where('active', true)
+            ->orderBy('name')
+            ->get(['id', 'name']);
+
+        return response()->json(['data' => $warehouses]);
+    }
+
+    public function show(Warehouse $warehouse): WarehouseData
+    {
+        return WarehouseData::fromWarehouse(
+            $warehouse->loadCount('stockMovements')->load(['wilayas:id', 'products:id']),
+        );
+    }
+
     public function store(SaveWarehouseData $data): WarehouseData
     {
         $warehouse = app(CreateWarehouseService::class)->execute($data);
@@ -44,7 +62,7 @@ class WarehouseController extends Controller
         return WarehouseData::fromWarehouse($warehouse->loadCount('stockMovements')->load(['wilayas:id', 'products:id']));
     }
 
-    public function update(SaveWarehouseData $data, Warehouse $warehouse): WarehouseData
+    public function update(UpdateWarehouseData $data, Warehouse $warehouse): WarehouseData
     {
         $warehouse = app(UpdateWarehouseService::class)->execute($warehouse, $data);
 

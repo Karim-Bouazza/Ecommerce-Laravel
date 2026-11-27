@@ -5,8 +5,8 @@ export type Warehouse = {
   address: string | null
   all_wilayas: boolean
   all_products: boolean
-  wilaya_ids: number[]
-  product_ids: number[]
+  wilaya_ids?: number[]
+  product_ids?: number[]
   remark: string | null
   active: boolean
   has_related_data: boolean

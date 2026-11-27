@@ -2,13 +2,13 @@
 
 namespace App\Services\Warehouses;
 
-use App\Data\Inventory\SaveWarehouseData;
+use App\Data\Inventory\UpdateWarehouseData;
 use App\Models\Inventory\Warehouse;
 use Illuminate\Support\Arr;
 
 class UpdateWarehouseService
 {
-    public function execute(Warehouse $warehouse, SaveWarehouseData $input): Warehouse
+    public function execute(Warehouse $warehouse, UpdateWarehouseData $input): Warehouse
     {
         $data = $input->toArray();
 

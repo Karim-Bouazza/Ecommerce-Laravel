@@ -7,7 +7,7 @@ export type WarehouseOption = {
 
 export async function getWarehouseOptions(): Promise<WarehouseOption[]> {
   try {
-    const { data } = await api.get<{ data: WarehouseOption[] }>("/api/v1/warehouse-options")
+    const { data } = await api.get<{ data: WarehouseOption[] }>("/api/v1/warehouses/options")
     return data.data
   } catch (error) {
     throw toApiError(error)

@@ -29,13 +29,18 @@ export function EditAdministratorDialog({ administrator }: EditAdministratorDial
   const { form, onSubmit, isSubmitting } = useUpdateAdministrator(administrator, () => setOpen(false))
   const { data: roles = [], isPending: isLoadingRoles } = useAdministratorRoleOptions(open)
 
+  React.useEffect(() => {
+    if (roles.length && !form.getValues("role_id")) {
+      form.setValue("role_id", administratorToFormValues(administrator, roles).role_id)
+    }
+  }, [roles, administrator, form])
+
   return (
     <Dialog
       open={open}
       onOpenChange={(nextOpen) => {
         setOpen(nextOpen)
-        // Always reopen on the latest saved values, discarding unsaved edits.
-        form.reset(administratorToFormValues(administrator))
+        form.reset(administratorToFormValues(administrator, roles))
       }}
     >
       <DialogTrigger render={<Button variant="ghost" size="icon" aria-label="Modifier" />}>

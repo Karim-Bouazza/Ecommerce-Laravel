@@ -12,9 +12,6 @@ class UpdateAdministrateurService
 {
     public function __construct(private readonly AdministrateurSafeguards $safeguards) {}
 
-    /**
-     * @throws RuntimeException when the change would lock the back office out
-     */
     public function execute(User $user, UpdateAdministratorData $input, ?User $actor = null): User
     {
         $data = $input->toArray();

@@ -3,7 +3,7 @@ import type { Category, CategoryOption, PaginatedResponse } from "@/features/cat
 
 export async function getCategoryOptions(): Promise<CategoryOption[]> {
   try {
-    const { data } = await api.get<CategoryOption[]>("/api/v1/category-options")
+    const { data } = await api.get<CategoryOption[]>("/api/v1/categories/options")
     return data
   } catch (error) {
     throw toApiError(error)
@@ -41,9 +41,12 @@ export async function createCategory(payload: CategoryPayload): Promise<Category
   }
 }
 
-export async function updateCategory(id: number, payload: CategoryPayload): Promise<Category> {
+export async function updateCategory(
+  id: number,
+  payload: Partial<CategoryPayload>
+): Promise<Category> {
   try {
-    const { data } = await api.put<Category>(`/api/v1/categories/${id}`, payload)
+    const { data } = await api.patch<Category>(`/api/v1/categories/${id}`, payload)
     return data
   } catch (error) {
     throw toApiError(error)

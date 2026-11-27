@@ -17,7 +17,6 @@ export function useAdjustStock(product: StockItem, warehouseId: number, onSucces
     resolver: zodResolver(adjustStockSchema),
     defaultValues: {
       adjustment: 0,
-      purchase_price: product.purchase_price ?? 0,
     },
   })
 
@@ -26,7 +25,6 @@ export function useAdjustStock(product: StockItem, warehouseId: number, onSucces
       adjustStock(product.id, {
         warehouse_id: warehouseId,
         adjustment: values.adjustment,
-        purchase_price: values.purchase_price,
       }),
     onSuccess: () => {
       toast.success("Stock mis à jour.")

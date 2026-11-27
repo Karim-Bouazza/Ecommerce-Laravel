@@ -10,9 +10,9 @@ use Spatie\LaravelData\Optional;
 class UpdateAdministratorData extends Data
 {
     public function __construct(
-        public string $name,
-        public string $email,
-        public int $role_id,
+        public string|Optional $name = new Optional(),
+        public string|Optional $email = new Optional(),
+        public int|Optional $role_id = new Optional(),
         public string|null|Optional $phone = new Optional(),
         public string|null|Optional $password = new Optional(),
         public bool|Optional $is_active = new Optional(),
@@ -21,15 +21,16 @@ class UpdateAdministratorData extends Data
     public static function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255'],
+            'name' => ['sometimes', 'required', 'string', 'max:255'],
             'email' => [
+                'sometimes',
                 'required',
                 'email:rfc',
                 'max:255',
                 Rule::unique('users', 'email')->ignore(request()->route('administrator')),
             ],
             'phone' => ['nullable', 'string', 'max:30'],
-            'role_id' => ['required', 'integer', 'exists:roles,id'],
+            'role_id' => ['sometimes', 'required', 'integer', 'exists:roles,id'],
             'password' => ['nullable', 'string', Password::min(8), 'confirmed'],
             'is_active' => ['sometimes', 'boolean'],
         ];

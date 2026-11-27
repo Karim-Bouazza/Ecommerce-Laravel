@@ -27,7 +27,7 @@ export function useUpdateSupplier(supplier: Supplier, onSuccess?: () => void) {
   })
 
   const mutation = useMutation({
-    mutationFn: (values: SupplierSchema) => updateSupplier(supplier.id, values),
+    mutationFn: (values: Partial<SupplierSchema>) => updateSupplier(supplier.id, values),
     onSuccess: () => {
       toast.success("Fournisseur modifié.")
       queryClient.invalidateQueries({ queryKey: ["suppliers"] })
@@ -39,7 +39,17 @@ export function useUpdateSupplier(supplier: Supplier, onSuccess?: () => void) {
   })
 
   const onSubmit = form.handleSubmit((values) => {
-    mutation.mutate(values)
+    const dirty = form.formState.dirtyFields
+    const changed = (Object.keys(dirty) as (keyof SupplierSchema)[]).reduce<
+      Partial<SupplierSchema>
+    >((acc, key) => ({ ...acc, [key]: values[key] }), {})
+
+    if (Object.keys(changed).length === 0) {
+      onSuccess?.()
+      return
+    }
+
+    mutation.mutate(changed)
   })
 
   return {

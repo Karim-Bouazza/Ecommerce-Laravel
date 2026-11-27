@@ -36,7 +36,7 @@ Route::controller(CategoryController::class)
             ->middleware('can:categories.create')
             ->name('store');
 
-        Route::put('/{category}', 'update')
+        Route::patch('/{category}', 'update')
             ->middleware('can:categories.edit')
             ->name('update');
 
@@ -47,9 +47,9 @@ Route::controller(CategoryController::class)
         Route::post('/{category}/toggle-active', 'toggleActive')
             ->middleware('can:categories.edit')
             ->name('toggle-active');
-    });
 
-Route::get('/category-options', [CategoryController::class, 'options'])->name('categories.options');
+        Route::get('/options', 'options')->name('options');
+    });
 
 Route::put('/wilayas/{wilaya}', [WilayaController::class, 'update'])
     ->middleware('can:wilayas.edit')

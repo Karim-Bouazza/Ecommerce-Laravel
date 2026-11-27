@@ -5,6 +5,7 @@ namespace App\Services\Transfers;
 use App\Enums\Stock\StockMovementType;
 use App\Models\Inventory\Stock;
 use App\Models\Inventory\WarehouseTransfer;
+use App\Services\Warehouses\RecordStockMovementService;
 use App\States\Transfer\Completed;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
@@ -39,24 +40,10 @@ class ConfirmTransferService
                     throw new RuntimeException("Stock insuffisant pour \"{$productName}\" dans l'entrepôt \"{$fromWarehouse->name}\".");
                 }
 
-                $newSourceQuantity = $sourceQuantity - $item->quantity;
+                $recorder = app(RecordStockMovementService::class);
 
-                $fromWarehouse->stockMovements()->create([
-                    'product_id' => $item->product_id,
-                    'type' => StockMovementType::Out,
-                    'quantity' => $item->quantity,
-                    'resulting_quantity' => $newSourceQuantity,
-                ]);
-
-                $destinationQuantity = Stock::inDepot($toWarehouse->id, $item->product_id);
-                $newDestinationQuantity = $destinationQuantity + $item->quantity;
-
-                $toWarehouse->stockMovements()->create([
-                    'product_id' => $item->product_id,
-                    'type' => StockMovementType::In,
-                    'quantity' => $item->quantity,
-                    'resulting_quantity' => $newDestinationQuantity,
-                ]);
+                $recorder->execute($fromWarehouse, $item->product_id, StockMovementType::Out, $item->quantity);
+                $recorder->execute($toWarehouse, $item->product_id, StockMovementType::In, $item->quantity);
             }
 
             $transfer->confirmed_at = now();

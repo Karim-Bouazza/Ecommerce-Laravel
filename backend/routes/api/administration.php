@@ -12,21 +12,22 @@ Route::controller(AdministratorController::class)
             ->middleware('can:administrateurs.view')
             ->name('index');
 
-        Route::get('/role-options', 'roleOptions')
-            ->middleware('permission:administrateurs.view|administrateurs.create|administrateurs.edit')
-            ->name('role-options');
-
         Route::post('/', 'store')
             ->middleware('can:administrateurs.create')
             ->name('store');
 
-        Route::put('/{administrator}', 'update')
-            ->middleware('can:administrateurs.edit')
-            ->name('update');
+        Route::get('/{administrator}', 'show')
+            ->middleware('permission:administrateurs.view|administrateurs.edit')
+            ->name('show');
 
         Route::post('/{administrator}/toggle-active', 'toggleActive')
             ->middleware('can:administrateurs.edit')
             ->name('toggle-active');
+
+        Route::patch('/{administrator}', 'update')
+            ->middleware('can:administrateurs.edit')
+            ->name('update');
+
 
         Route::delete('/{administrator}', 'destroy')
             ->middleware('can:administrateurs.delete')
@@ -48,6 +49,10 @@ Route::controller(RoleController::class)
         Route::get('/permissions', 'permissions')
             ->middleware('permission:roles.create|roles.edit')
             ->name('permissions');
+
+        Route::get('/role-options', 'roleOptions')
+            ->middleware('permission:administrateurs.view|administrateurs.create|administrateurs.edit')
+            ->name('role-options');
 
         Route::get('/{role}', 'show')
             ->middleware('can:roles.view')

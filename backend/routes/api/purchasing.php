@@ -17,7 +17,7 @@ Route::controller(FournisseurController::class)
             ->middleware('can:fournisseurs.create')
             ->name('store');
 
-        Route::put('/{fournisseur}', 'update')
+        Route::patch('/{fournisseur}', 'update')
             ->middleware('can:fournisseurs.edit')
             ->name('update');
 

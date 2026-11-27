@@ -33,7 +33,7 @@ class StockMovementController extends Controller
                 AllowedFilter::custom('date_to', DateFilter::to('created_at')),
                 AllowedFilter::custom('search', new SearchFilter([], ['product' => ['name'], 'creator' => ['name']])),
             )
-            ->allowedSorts('created_at', 'type', 'resulting_quantity')
+            ->allowedSorts('created_at', 'type')
             ->defaultSort('-created_at')
             ->paginate(ListQuery::perPage($request))
             ->withQueryString();

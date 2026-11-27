@@ -25,13 +25,13 @@ export function useUpdateWarehouse(warehouse: Warehouse, onSuccess?: () => void)
       address: warehouse.address ?? "",
       all_wilayas: warehouse.all_wilayas,
       all_products: warehouse.all_products,
-      wilaya_ids: warehouse.wilaya_ids,
-      product_ids: warehouse.product_ids,
+      wilaya_ids: warehouse.wilaya_ids ?? [],
+      product_ids: warehouse.product_ids ?? [],
     },
   })
 
   const mutation = useMutation({
-    mutationFn: (values: WarehouseSchema) => updateWarehouse(warehouse.id, values),
+    mutationFn: (values: Partial<WarehouseSchema>) => updateWarehouse(warehouse.id, values),
     onSuccess: () => {
       toast.success("Entrepôt modifié.")
       queryClient.invalidateQueries({ queryKey: ["warehouses"] })
@@ -43,7 +43,17 @@ export function useUpdateWarehouse(warehouse: Warehouse, onSuccess?: () => void)
   })
 
   const onSubmit = form.handleSubmit((values) => {
-    mutation.mutate(values)
+    const dirty = form.formState.dirtyFields
+    const changed = (Object.keys(dirty) as (keyof WarehouseSchema)[]).reduce<
+      Partial<WarehouseSchema>
+    >((acc, key) => ({ ...acc, [key]: values[key] }), {})
+
+    if (Object.keys(changed).length === 0) {
+      onSuccess?.()
+      return
+    }
+
+    mutation.mutate(changed)
   })
 
   return {

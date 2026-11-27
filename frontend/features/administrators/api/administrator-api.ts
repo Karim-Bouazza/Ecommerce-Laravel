@@ -43,7 +43,7 @@ export async function getAdministratorRoleOptions(): Promise<
 > {
   try {
     const { data } = await api.get<AdministratorRole[]>(
-      "/api/v1/administrators/role-options",
+      "/api/v1/roles/role-options",
     );
     return data;
   } catch (error) {
@@ -70,7 +70,7 @@ export async function updateAdministrator(
   payload: AdministratorPayload,
 ): Promise<Administrator> {
   try {
-    const { data } = await api.put<{ data: Administrator }>(
+    const { data } = await api.patch<{ data: Administrator }>(
       `/api/v1/administrators/${id}`,
       payload,
     );

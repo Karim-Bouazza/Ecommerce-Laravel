@@ -73,7 +73,7 @@ export const administratorColumns: ColumnDef<Administrator>[] = [
     cell: ({ row }) =>
       row.original.role ? (
         <span className="inline-flex items-center rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-foreground">
-          {row.original.role.name}
+          {row.original.role}
         </span>
       ) : (
         <span className="text-muted-foreground">—</span>

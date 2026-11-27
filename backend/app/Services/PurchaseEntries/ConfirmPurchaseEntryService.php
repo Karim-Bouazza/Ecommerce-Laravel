@@ -5,7 +5,7 @@ namespace App\Services\PurchaseEntries;
 use App\States\Purchase\Completed;
 use App\Enums\Stock\StockMovementType;
 use App\Models\Purchasing\PurchaseEntry;
-use App\Models\Inventory\Stock;
+use App\Services\Warehouses\RecordStockMovementService;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
@@ -21,15 +21,12 @@ class ConfirmPurchaseEntryService
             $warehouse = $entry->warehouse;
 
             foreach ($entry->items()->get() as $item) {
-                $current = Stock::lockAndGetInDepot($warehouse->id, $item->product_id);
-                $newQuantity = $current + $item->quantity;
-
-                $warehouse->stockMovements()->create([
-                    'product_id' => $item->product_id,
-                    'type' => StockMovementType::In,
-                    'quantity' => $item->quantity,
-                    'resulting_quantity' => $newQuantity,
-                ]);
+                app(RecordStockMovementService::class)->execute(
+                    $warehouse,
+                    $item->product_id,
+                    StockMovementType::In,
+                    $item->quantity,
+                );
             }
 
             $entry->confirmed_at = now();

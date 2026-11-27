@@ -34,9 +34,12 @@ export async function createSupplier(payload: SupplierPayload): Promise<Supplier
   }
 }
 
-export async function updateSupplier(id: number, payload: SupplierPayload): Promise<Supplier> {
+export async function updateSupplier(
+  id: number,
+  payload: Partial<SupplierPayload>
+): Promise<Supplier> {
   try {
-    const { data } = await api.put<{ data: Supplier }>(`/api/v1/fournisseurs/${id}`, payload)
+    const { data } = await api.patch<{ data: Supplier }>(`/api/v1/fournisseurs/${id}`, payload)
     return data.data
   } catch (error) {
     throw toApiError(error)

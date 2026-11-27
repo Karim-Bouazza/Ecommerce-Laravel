@@ -18,6 +18,15 @@ export async function getWarehouses(
   }
 }
 
+export async function getWarehouse(id: number): Promise<Warehouse> {
+  try {
+    const { data } = await api.get<{ data: Warehouse }>(`/api/v1/warehouses/${id}`)
+    return data.data
+  } catch (error) {
+    throw toApiError(error)
+  }
+}
+
 export type WarehousePayload = {
   name: string
   phone?: string
@@ -38,9 +47,12 @@ export async function createWarehouse(payload: WarehousePayload): Promise<Wareho
   }
 }
 
-export async function updateWarehouse(id: number, payload: WarehousePayload): Promise<Warehouse> {
+export async function updateWarehouse(
+  id: number,
+  payload: Partial<WarehousePayload>
+): Promise<Warehouse> {
   try {
-    const { data } = await api.put<{ data: Warehouse }>(`/api/v1/warehouses/${id}`, payload)
+    const { data } = await api.patch<{ data: Warehouse }>(`/api/v1/warehouses/${id}`, payload)
     return data.data
   } catch (error) {
     throw toApiError(error)

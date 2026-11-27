@@ -5,7 +5,6 @@ use App\Http\Controllers\Api\Inventory\StockController;
 use App\Http\Controllers\Api\Inventory\StockMovementController;
 use App\Http\Controllers\Api\Inventory\TransferController;
 use App\Http\Controllers\Api\Inventory\WarehouseController;
-use App\Http\Controllers\Api\Inventory\WarehouseOptionController;
 use App\Http\Controllers\Api\Inventory\WarehouseProductOptionController;
 use Illuminate\Support\Facades\Route;
 
@@ -17,11 +16,20 @@ Route::controller(WarehouseController::class)
             ->middleware('can:entrepots.view')
             ->name('index');
 
+        Route::get('/options', 'options')
+            ->middleware('permission:stock.view|suivi_stock.view|orders.create|orders.edit')
+            ->name('options');
+
+        Route::get('/{warehouse}', 'show')
+            ->middleware('can:entrepots.edit')
+            ->whereNumber('warehouse')
+            ->name('show');
+
         Route::post('/', 'store')
             ->middleware('can:entrepots.create')
             ->name('store');
 
-        Route::put('/{warehouse}', 'update')
+        Route::patch('/{warehouse}', 'update')
             ->middleware('can:entrepots.edit')
             ->name('update');
 
@@ -37,10 +45,6 @@ Route::controller(WarehouseController::class)
             ->middleware('permission:transferts.create|orders.create|orders.edit')
             ->name('product-options');
     });
-
-Route::get('/warehouse-options', [WarehouseOptionController::class, 'index'])
-    ->middleware('permission:stock.view|suivi_stock.view|orders.create|orders.edit')
-    ->name('warehouses.options');
 
 Route::controller(StockController::class)
     ->prefix('stock')

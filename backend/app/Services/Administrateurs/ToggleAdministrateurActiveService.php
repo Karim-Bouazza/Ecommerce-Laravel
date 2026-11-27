@@ -2,6 +2,7 @@
 
 namespace App\Services\Administrateurs;
 
+use App\Data\Auth\UpdateAdministratorData;
 use App\Models\Users\User;
 
 class ToggleAdministrateurActiveService
@@ -10,6 +11,6 @@ class ToggleAdministrateurActiveService
 
     public function execute(User $user, ?User $actor = null): User
     {
-        return $this->update->execute($user, ['is_active' => ! $user->is_active], $actor);
+        return $this->update->execute($user, new UpdateAdministratorData(is_active: ! $user->is_active), $actor);
     }
 }

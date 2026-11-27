@@ -12,7 +12,7 @@ export type Administrator = {
   avatar: string | null
   is_active: boolean
   is_current: boolean
-  role: AdministratorRole | null
+  role: string | null
   created_at: string | null
 }
 

@@ -5,7 +5,7 @@ namespace App\Services\ReturnEntries;
 use App\States\Return\Completed;
 use App\Enums\Stock\StockMovementType;
 use App\Models\Purchasing\ReturnEntry;
-use App\Models\Inventory\Stock;
+use App\Services\Warehouses\RecordStockMovementService;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
@@ -21,15 +21,12 @@ class ConfirmReturnEntryService
             $warehouse = $entry->warehouse;
 
             foreach ($entry->items()->get() as $item) {
-                $current = Stock::lockAndGetInDepot($warehouse->id, $item->product_id);
-                $newQuantity = max(0, $current - $item->quantity);
-
-                $warehouse->stockMovements()->create([
-                    'product_id' => $item->product_id,
-                    'type' => StockMovementType::Out,
-                    'quantity' => $item->quantity,
-                    'resulting_quantity' => $newQuantity,
-                ]);
+                app(RecordStockMovementService::class)->execute(
+                    $warehouse,
+                    $item->product_id,
+                    StockMovementType::Out,
+                    $item->quantity,
+                );
             }
 
             $entry->confirmed_at = now();

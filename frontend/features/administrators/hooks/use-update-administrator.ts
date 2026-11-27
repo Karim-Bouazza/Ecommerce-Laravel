@@ -10,15 +10,18 @@ import {
   updateAdministratorSchema,
   type AdministratorFormValues,
 } from "@/features/administrators/schemas/administrator-schema"
-import type { Administrator } from "@/features/administrators/types"
+import type { Administrator, AdministratorRole } from "@/features/administrators/types"
 import { ApiError, getErrorMessage } from "@/lib/api"
 
-export function administratorToFormValues(administrator: Administrator): AdministratorFormValues {
+export function administratorToFormValues(
+  administrator: Administrator,
+  roles: AdministratorRole[] = [],
+): AdministratorFormValues {
   return {
     name: administrator.name,
     email: administrator.email,
     phone: administrator.phone ?? "",
-    role_id: administrator.role?.id ?? 0,
+    role_id: roles.find((role) => role.name === administrator.role)?.id ?? 0,
     is_active: administrator.is_active,
     password: "",
     password_confirmation: "",

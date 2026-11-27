@@ -12,12 +12,10 @@ use App\Services\Administrateurs\CreateAdministrateurService;
 use App\Services\Administrateurs\DeleteAdministrateurService;
 use App\Services\Administrateurs\ToggleAdministrateurActiveService;
 use App\Services\Administrateurs\UpdateAdministrateurService;
-use App\Support\PermissionRegistry;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use RuntimeException;
 use Spatie\LaravelData\PaginatedDataCollection;
-use Spatie\Permission\Models\Role;
 
 class AdministratorController extends Controller
 {
@@ -30,15 +28,11 @@ class AdministratorController extends Controller
         return AdministratorData::collect($administrators, PaginatedDataCollection::class);
     }
 
-    public function roleOptions(): JsonResponse
+    public function show(User $administrator, Request $request): AdministratorData
     {
-        return response()->json(
-            Role::query()->orderBy('name')->get(['id', 'name'])->map(fn(Role $role) => [
-                'id' => $role->id,
-                'name' => $role->name,
-                'is_system' => PermissionRegistry::isSystemRole($role->name),
-            ])
-        );
+        $administrator->load(['roles:id,name', 'media']);
+
+        return AdministratorData::fromUser($administrator, $request->user());
     }
 
     public function store(StoreAdministratorData $data, Request $request): AdministratorData

@@ -22,7 +22,7 @@ export function useUpdateCategory(category: Category, onSuccess?: () => void) {
   })
 
   const mutation = useMutation({
-    mutationFn: (values: CategorySchema) => updateCategory(category.id, values),
+    mutationFn: (values: Partial<CategorySchema>) => updateCategory(category.id, values),
     onSuccess: () => {
       toast.success("Catégorie modifiée.")
       queryClient.invalidateQueries({ queryKey: ["categories"] })
@@ -34,7 +34,17 @@ export function useUpdateCategory(category: Category, onSuccess?: () => void) {
   })
 
   const onSubmit = form.handleSubmit((values) => {
-    mutation.mutate(values)
+    const dirty = form.formState.dirtyFields
+    const changed = (Object.keys(dirty) as (keyof CategorySchema)[]).reduce<
+      Partial<CategorySchema>
+    >((acc, key) => ({ ...acc, [key]: values[key] }), {})
+
+    if (Object.keys(changed).length === 0) {
+      onSuccess?.()
+      return
+    }
+
+    mutation.mutate(changed)
   })
 
   return {

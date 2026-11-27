@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Catalog;
 
 use App\Data\Catalog\CategoryData;
 use App\Data\Catalog\SaveCategoryData;
+use App\Data\Catalog\UpdateCategoryData;
 use App\Http\Controllers\Controller;
 use App\Models\Catalog\Category;
 use App\Support\Query\Filters\SearchFilter;
@@ -48,7 +49,7 @@ class CategoryController extends Controller
         return CategoryData::fromCategory($category->loadCount('products'));
     }
 
-    public function update(SaveCategoryData $data, Category $category): CategoryData
+    public function update(UpdateCategoryData $data, Category $category): CategoryData
     {
         $category->update($data->toArray());
 

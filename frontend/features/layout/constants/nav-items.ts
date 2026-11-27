@@ -94,7 +94,6 @@ export const NAV_SECTIONS: NavSection[] = [
             href: "/admin/inventory/return-entries",
             permission: "entrees_retour.view",
           },
-          { label: "StockPilot", href: "/admin/inventory/stockpilot" },
         ],
       },
     ],

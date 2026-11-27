@@ -2,13 +2,13 @@
 
 namespace App\Services\Fournisseurs;
 
-use App\Data\Purchasing\SaveFournisseurData;
+use App\Data\Purchasing\UpdateFournisseurData;
 use App\Models\Purchasing\Fournisseur;
 use Illuminate\Support\Arr;
 
 class UpdateFournisseurService
 {
-    public function execute(Fournisseur $fournisseur, SaveFournisseurData $input): Fournisseur
+    public function execute(Fournisseur $fournisseur, UpdateFournisseurData $input): Fournisseur
     {
         $data = $input->toArray();
 

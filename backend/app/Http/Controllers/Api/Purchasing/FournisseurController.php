@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Purchasing;
 
 use App\Data\Purchasing\FournisseurData;
 use App\Data\Purchasing\SaveFournisseurData;
+use App\Data\Purchasing\UpdateFournisseurData;
 use App\Http\Controllers\Controller;
 use App\Models\Purchasing\Fournisseur;
 use App\Services\Fournisseurs\CreateFournisseurService;
@@ -46,7 +47,7 @@ class FournisseurController extends Controller
         return FournisseurData::fromFournisseur($fournisseur);
     }
 
-    public function update(SaveFournisseurData $data, Fournisseur $fournisseur): FournisseurData
+    public function update(UpdateFournisseurData $data, Fournisseur $fournisseur): FournisseurData
     {
         $fournisseur = app(UpdateFournisseurService::class)->execute($fournisseur, $data);
 

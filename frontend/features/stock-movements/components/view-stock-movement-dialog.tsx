@@ -62,7 +62,6 @@ export function ViewStockMovementDialog({ movement }: ViewStockMovementDialogPro
             label="Quantité"
             value={`${movement.signed_quantity > 0 ? "+" : ""}${movement.signed_quantity}`}
           />
-          <DetailField label="Stock interne résultant" value={movement.resulting_quantity} />
           <DetailField label="Éditeur" value={movement.creator_name ?? "—"} />
           <DetailField label="Date de création" value={dateFormatter.format(new Date(movement.created_at))} />
         </div>

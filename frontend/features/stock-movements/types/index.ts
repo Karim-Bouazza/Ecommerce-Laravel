@@ -7,7 +7,6 @@ export type StockMovement = {
   warehouse: { id: number; name: string }
   quantity: number
   signed_quantity: number
-  resulting_quantity: number
   type: StockMovementTypeValue
   type_label: string
   type_color: BadgeColor

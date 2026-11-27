@@ -28,9 +28,6 @@ class Fournisseur extends Model
         return $this->purchaseEntries()->where('status', Completed::getMorphClass());
     }
 
-    /**
-     * Versements paid directly to this fournisseur, not tied to a specific purchase entry.
-     */
     public function versements(): HasMany
     {
         return $this->hasMany(WalletTransaction::class)
@@ -38,9 +35,6 @@ class Fournisseur extends Model
             ->where('category', WalletTransactionCategory::Versement);
     }
 
-    /**
-     * Versements paid against this fournisseur's completed purchase entries.
-     */
     public function completedPurchaseEntryVersements(): HasManyThrough
     {
         return $this->hasManyThrough(

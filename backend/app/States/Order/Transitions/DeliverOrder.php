@@ -3,9 +3,9 @@
 namespace App\States\Order\Transitions;
 
 use App\Enums\Stock\StockMovementType;
-use App\Models\Inventory\Stock;
 use App\Models\Inventory\Warehouse;
 use App\Models\Order\Order;
+use App\Services\Warehouses\RecordStockMovementService;
 use Spatie\ModelStates\DefaultTransition;
 
 class DeliverOrder extends DefaultTransition
@@ -28,14 +28,12 @@ class DeliverOrder extends DefaultTransition
                 continue;
             }
 
-            $current = Stock::lockAndGetInDepot($warehouse->id, $item->product_id);
-
-            $warehouse->stockMovements()->create([
-                'product_id' => $item->product_id,
-                'type' => StockMovementType::Out,
-                'quantity' => $item->quantity,
-                'resulting_quantity' => max(0, $current - $item->quantity),
-            ]);
+            app(RecordStockMovementService::class)->execute(
+                $warehouse,
+                $item->product_id,
+                StockMovementType::Out,
+                $item->quantity,
+            );
         }
     }
 }
