@@ -1,33 +1,7 @@
 <?php
 
-use App\Http\Controllers\Api\Order\ClientController;
 use App\Http\Controllers\Api\Order\OrderController;
 use Illuminate\Support\Facades\Route;
-
-Route::controller(ClientController::class)
-    ->prefix('clients')
-    ->name('clients.')
-    ->group(function () {
-        Route::get('/', 'index')
-            ->middleware('can:clients.view')
-            ->name('index');
-
-        Route::get('/blacklist', 'blacklisted')
-            ->middleware('can:clients_blacklist.view')
-            ->name('blacklist');
-
-        Route::put('/{client}', 'update')
-            ->middleware('can:clients.edit')
-            ->name('update');
-
-        Route::delete('/{client}', 'destroy')
-            ->middleware('can:clients.delete')
-            ->name('destroy');
-
-        Route::post('/{client}/toggle-blacklist', 'toggleBlacklist')
-            ->middleware('can:clients.edit')
-            ->name('toggle-blacklist');
-    });
 
 Route::controller(OrderController::class)
     ->prefix('orders')

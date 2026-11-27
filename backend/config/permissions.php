@@ -10,16 +10,6 @@ return [
                 'tableau_de_bord.view' => 'Voir le Tableau de Bord',
                 'performance_kpi.view' => 'Voir la Performance (KPI)',
                 'analytics_orders.view' => "Voir l'analyse des commandes",
-                'analytics_sales_channels.view' => "Voir l'analyse des canaux de vente",
-            ],
-        ],
-        'clients' => [
-            'label' => 'Clients',
-            'permissions' => [
-                'clients.view' => 'Voir les clients',
-                'clients.edit' => 'Modifier les clients',
-                'clients.delete' => 'Supprimer les clients',
-                'clients_blacklist.view' => 'Voir la liste noire',
             ],
         ],
         'commandes' => [
@@ -86,7 +76,6 @@ return [
             'permissions' => [
                 'stock.view' => 'Voir le stock',
                 'suivi_stock.view' => 'Voir le suivi de stock',
-                'alerte_stock.view' => 'Voir les alertes de stock',
             ],
         ],
         'transferts' => [
@@ -152,15 +141,6 @@ return [
                 'versements.create' => 'Créer des versements',
                 'versements.edit' => 'Modifier des versements',
                 'versements.delete' => 'Supprimer des versements',
-            ],
-        ],
-        'charges' => [
-            'label' => 'Charges',
-            'permissions' => [
-                'charges.view' => 'Voir les charges',
-                'charges.create' => 'Créer des charges',
-                'charges.edit' => 'Modifier des charges',
-                'charges.delete' => 'Supprimer des charges',
             ],
         ],
         'fraude' => [

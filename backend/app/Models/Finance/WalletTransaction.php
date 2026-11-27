@@ -18,7 +18,6 @@ class WalletTransaction extends Model
         'wallet_id',
         'purchase_entry_id',
         'return_entry_id',
-        'charge_id',
         'fournisseur_id',
         'delivery_company_integration_id',
         'reference',
@@ -71,11 +70,6 @@ class WalletTransaction extends Model
     public function returnEntry(): BelongsTo
     {
         return $this->belongsTo(ReturnEntry::class);
-    }
-
-    public function charge(): BelongsTo
-    {
-        return $this->belongsTo(Charge::class);
     }
 
     public function fournisseur(): BelongsTo

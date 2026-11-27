@@ -16,14 +16,6 @@ class Client extends Model
         'phone_number',
         'wilaya_id',
         'commune_id',
-        'is_blacklisted',
-        'blacklist_reason',
-        'blacklisted_at',
-    ];
-
-    protected $casts = [
-        'is_blacklisted' => 'boolean',
-        'blacklisted_at' => 'datetime',
     ];
 
     public function wilaya(): BelongsTo

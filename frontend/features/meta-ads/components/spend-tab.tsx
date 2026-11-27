@@ -123,9 +123,7 @@ export function SpendTab({ range }: { range: MetaDateRange }) {
       </Card>
 
       <p className="text-sm text-muted-foreground">
-        Taux appliqué : 1 $ = {data?.rate ?? 255} DZD. Cette dépense est ajoutée aux charges dans
-        les analyses produits ; ne la saisissez pas aussi comme charge marketing pour éviter un
-        double comptage.
+        Taux appliqué : 1 $ = {data?.rate ?? 255} DZD. Cette dépense est ajoutée aux analyses produits.
       </p>
     </div>
   )

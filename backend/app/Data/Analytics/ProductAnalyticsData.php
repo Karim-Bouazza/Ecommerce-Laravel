@@ -27,7 +27,6 @@ class ProductAnalyticsData extends Data
         public mixed $cout_total_produit,
         public mixed $marge_brute,
         public mixed $profit_pourcentage,
-        public float $charge_totale,
         public float $ad_spend,
         public mixed $benefice_net,
         public mixed $profit_net_pourcentage,
@@ -40,9 +39,8 @@ class ProductAnalyticsData extends Data
         $sales = (float) $product->delivered_sales_value;
         $cost = ProductAnalyticsCalculator::cost($deliveredQuantity, $product->purchase_price);
         $margin = ProductAnalyticsCalculator::margin($sales, $cost);
-        $chargeTotale = (float) ($product->charge_totale ?? 0);
         $adSpend = (float) ($product->ad_spend ?? 0);
-        $beneficeNet = $margin !== null ? $margin - $chargeTotale - $adSpend : null;
+        $beneficeNet = $margin !== null ? $margin - $adSpend : null;
 
         return new self(
             id: $product->id,
@@ -90,12 +88,10 @@ class ProductAnalyticsData extends Data
             cout_total_produit: $cost,
             marge_brute: $margin,
             profit_pourcentage: ProductAnalyticsCalculator::profitPercentage($margin, $sales),
-            charge_totale: $chargeTotale,
             ad_spend: $adSpend,
             benefice_net: $beneficeNet,
             profit_net_pourcentage: ProductAnalyticsCalculator::profitPercentage($beneficeNet, $sales),
             moyenne_par_piece: $deliveredQuantity > 0 ? [
-                'charge' => round($chargeTotale / $deliveredQuantity, 2),
                 'ad_spend' => round($adSpend / $deliveredQuantity, 2),
                 'benefice_net' => $beneficeNet !== null ? round($beneficeNet / $deliveredQuantity, 2) : null,
             ] : null,

@@ -175,8 +175,10 @@ export function DataTable<TData, TValue>({
             <TableBody>
               {isLoading ? (
                 <TableRow className="hover:bg-transparent">
-                  <TableCell colSpan={columns.length} className="h-24 text-center text-muted-foreground">
-                    Chargement…
+                  <TableCell colSpan={columns.length} className="p-0">
+                    <div className="sticky left-0 flex h-24 w-[100cqw] items-center justify-center text-muted-foreground">
+                      Chargement…
+                    </div>
                   </TableCell>
                 </TableRow>
               ) : table.getRowModel().rows.length ? (
@@ -212,8 +214,10 @@ export function DataTable<TData, TValue>({
                 ))
               ) : (
                 <TableRow className="hover:bg-transparent">
-                  <TableCell colSpan={columns.length} className="h-24 text-center text-muted-foreground">
-                    {emptyMessage}
+                  <TableCell colSpan={columns.length} className="p-0">
+                    <div className="sticky left-0 flex h-24 w-[100cqw] items-center justify-center text-muted-foreground">
+                      {emptyMessage}
+                    </div>
                   </TableCell>
                 </TableRow>
               )}

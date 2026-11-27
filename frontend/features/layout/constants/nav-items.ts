@@ -2,7 +2,6 @@ import {
   Boxes,
   ClipboardList,
   Gauge,
-  Landmark,
   LayoutDashboard,
   LineChart,
   Network,
@@ -12,7 +11,6 @@ import {
   Tag,
   Truck,
   User,
-  Users,
   Wallet,
 } from "lucide-react"
 
@@ -56,15 +54,6 @@ export const NAV_SECTIONS: NavSection[] = [
           { label: "Tous", href: "/admin/orders", permission: "orders.view" },
         ],
       },
-      {
-        label: "Clients",
-        href: "/admin/clients",
-        icon: Users,
-        items: [
-          { label: "Clients", href: "/admin/clients" },
-          { label: "Liste Noire", href: "/admin/clients/blacklist" },
-        ],
-      },
     ],
   },
   {
@@ -86,7 +75,6 @@ export const NAV_SECTIONS: NavSection[] = [
           { label: "Transferts", href: "/admin/inventory/transfers", permission: "transferts.view" },
           { label: "Stock", href: "/admin/inventory/stock" },
           { label: "Suivi de Stock", href: "/admin/inventory/stock-tracking" },
-          { label: "Alerte de Stock", href: "/admin/inventory/stock-alerts" },
           { label: "Fournisseurs", href: "/admin/inventory/suppliers" },
           { label: "Entrées d'achat", href: "/admin/inventory/purchase-entries" },
           {
@@ -111,7 +99,6 @@ export const NAV_SECTIONS: NavSection[] = [
           { label: "Paiements", href: "/admin/finances/payments" },
         ],
       },
-      { label: "Charges", href: "/admin/charges", icon: Landmark },
     ],
   },
   {
@@ -123,14 +110,7 @@ export const NAV_SECTIONS: NavSection[] = [
         icon: LineChart,
         items: [
           { label: "Commandes", href: "/admin/analytics/orders", permission: "analytics_orders.view" },
-          {
-            label: "Canaux de vente",
-            href: "/admin/analytics/sales-channels",
-            permission: "analytics_sales_channels.view",
-          },
           { label: "Produits", href: "/admin/analytics/products" },
-          { label: "Livraison", href: "/admin/analytics/delivery" },
-          { label: "Wilayas", href: "/admin/analytics/wilayas" },
         ],
       },
       {

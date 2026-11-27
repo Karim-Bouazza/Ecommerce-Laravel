@@ -38,7 +38,7 @@ export const orderColumns: ColumnDef<Order>[] = [
     accessorKey: "reference",
     header: "Réf",
     cell: ({ row }) => <span className="text-sm font-medium tabular-nums">{row.original.reference}</span>,
-    meta: { align: "left", className: "min-w-[130px]" },
+    meta: { className: "min-w-[130px]" },
   },
   {
     id: "client",
@@ -46,7 +46,7 @@ export const orderColumns: ColumnDef<Order>[] = [
     cell: ({ row }) => (
       <Stacked primary={row.original.client_name || "—"} secondary={row.original.phone_number} />
     ),
-    meta: { align: "left", className: "min-w-[170px]" },
+    meta: { className: "min-w-[170px]" },
   },
   {
     id: "product",
@@ -60,7 +60,7 @@ export const orderColumns: ColumnDef<Order>[] = [
         />
       )
     },
-    meta: { align: "left", className: "min-w-[180px] max-w-[240px]" },
+    meta: { className: "min-w-[180px] max-w-[240px]" },
   },
   {
     id: "location",
@@ -74,7 +74,7 @@ export const orderColumns: ColumnDef<Order>[] = [
         }
       />
     ),
-    meta: { align: "left", className: "min-w-[180px]" },
+    meta: { className: "min-w-[180px]" },
   },
   {
     id: "total_price",
@@ -84,13 +84,13 @@ export const orderColumns: ColumnDef<Order>[] = [
         {formatAmount(row.original.total_price)}
       </span>
     ),
-    meta: { align: "right", className: "min-w-[120px]" },
+    meta: { className: "min-w-[120px]" },
   },
   {
     id: "fraud_risk",
     header: "Risque",
     cell: ({ row }) => <FraudScoreCell risk={row.original.fraud_risk} />,
-    meta: { align: "left", className: "min-w-[140px]" },
+    meta: { className: "min-w-[140px]" },
   },
   {
     id: "elapsed",
@@ -100,13 +100,13 @@ export const orderColumns: ColumnDef<Order>[] = [
         <ElapsedTime since={row.original.status_changed_at} />
       </span>
     ),
-    meta: { align: "left", className: "min-w-[100px]" },
+    meta: { className: "min-w-[100px]" },
   },
   {
     id: "status",
     header: "Statut",
     cell: ({ row }) => <OrderStatusCell order={row.original} />,
-    meta: { align: "left", sticky: "right", stickyWidth: 180, className: "min-w-[180px]" },
+    meta: { className: "min-w-[180px]" },
   },
   {
     id: "actions",
@@ -120,6 +120,6 @@ export const orderColumns: ColumnDef<Order>[] = [
         <ViewOrderDialog order={row.original} />
       </div>
     ),
-    meta: { sticky: "right", stickyWidth: 148, className: "min-w-[148px]" },
+    meta: { className: "min-w-[148px]" },
   },
 ]

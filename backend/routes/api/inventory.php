@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\Api\Inventory\StockAlertController;
 use App\Http\Controllers\Api\Inventory\StockController;
 use App\Http\Controllers\Api\Inventory\StockMovementController;
 use App\Http\Controllers\Api\Inventory\TransferController;
@@ -66,10 +65,6 @@ Route::controller(StockController::class)
 Route::get('/stock-movements', [StockMovementController::class, 'index'])
     ->middleware('can:suivi_stock.view')
     ->name('stock-movements.index');
-
-Route::get('/stock-alerts', [StockAlertController::class, 'index'])
-    ->middleware('can:alerte_stock.view')
-    ->name('stock-alerts.index');
 
 Route::controller(TransferController::class)
     ->prefix('transfers')

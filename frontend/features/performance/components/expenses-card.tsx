@@ -18,7 +18,6 @@ export function ExpensesCard({
 
   return (
     <PerformanceCard title="Dépenses & Frais" icon={Landmark} tone="orange" busy={loading}>
-      <MetricRow label="Charges" value={money(data?.charges)} loading={loading} />
       <MetricRow label="Publicité (Meta)" value={money(data?.publicite)} loading={loading} />
       <MetricRow label="Coût des Produits" value={money(data?.cout_produits)} loading={loading} />
     </PerformanceCard>

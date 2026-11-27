@@ -46,7 +46,6 @@ class Product extends Model implements HasMedia
         'price',
         'purchase_price',
         'compare_price',
-        'stock_minimum',
         'is_active',
         'is_new',
     ];
@@ -54,7 +53,6 @@ class Product extends Model implements HasMedia
     protected $casts = [
         'is_active' => 'boolean',
         'is_new' => 'boolean',
-        'stock_minimum' => 'integer',
     ];
 
 

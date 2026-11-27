@@ -138,7 +138,7 @@ export function PerformanceFiltersSheet({ value, onApply }: PerformanceFiltersSh
 
           <div className="flex items-start gap-2 rounded-lg border-l-4 border-amber-400 bg-amber-500/10 px-3 py-2 text-xs text-muted-foreground">
             <Info className="mt-0.5 size-4 shrink-0 text-amber-500" />
-            Les filtres ci-dessous ne s&apos;appliquent pas aux charges, bénéfices et ROI.
+            Les filtres ci-dessous ne s&apos;appliquent pas aux bénéfices et ROI.
           </div>
 
           <Field>

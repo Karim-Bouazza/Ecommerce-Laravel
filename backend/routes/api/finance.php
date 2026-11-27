@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\Api\Finance\ChargeController;
 use App\Http\Controllers\Api\Finance\PaiementController;
 use App\Http\Controllers\Api\Finance\VersementController;
 use App\Http\Controllers\Api\Finance\WalletController;
@@ -70,43 +69,6 @@ Route::controller(VersementController::class)
         Route::delete('/{versement}', 'destroy')
             ->middleware('can:versements.delete')
             ->name('destroy');
-    });
-
-Route::controller(ChargeController::class)
-    ->prefix('charges')
-    ->name('charges.')
-    ->group(function () {
-        Route::get('/', 'index')
-            ->middleware('can:charges.view')
-            ->name('index');
-
-        Route::get('/stats', 'stats')
-            ->middleware('can:charges.view')
-            ->name('stats');
-
-        Route::post('/', 'store')
-            ->middleware('can:charges.create')
-            ->name('store');
-
-        Route::put('/{charge}', 'update')
-            ->middleware('can:charges.edit')
-            ->name('update');
-
-        Route::post('/{charge}/toggle-active', 'toggleActive')
-            ->middleware('can:charges.edit')
-            ->name('toggle-active');
-
-        Route::delete('/{charge}', 'destroy')
-            ->middleware('can:charges.delete')
-            ->name('destroy');
-
-        Route::get('/{charge}/versements', 'versements')
-            ->middleware('can:versements.view')
-            ->name('versements.index');
-
-        Route::post('/{charge}/versements', 'createVersement')
-            ->middleware('can:versements.create')
-            ->name('versements.store');
     });
 
 Route::controller(PaiementController::class)
