@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\Storefront\StorefrontSectionProductController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [AuthController::class, 'login'])->name('auth.login');
+Route::post('/mobile/login', [AuthController::class, 'tokenLogin'])->middleware('throttle:5,1')->name('auth.token-login');
 
 Route::get('/wilayas', [WilayaController::class, 'index'])->name('wilayas.index');
 Route::get('/provider-wilayas', [ProviderWilayaController::class, 'index'])->name('provider-wilayas.index');

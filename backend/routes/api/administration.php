@@ -53,7 +53,7 @@ Route::controller(RoleController::class)
             ->middleware('can:roles.view')
             ->name('show');
 
-        Route::put('/{role}', 'update')
+        Route::patch('/{role}', 'update')
             ->middleware('can:roles.edit')
             ->name('update');
 

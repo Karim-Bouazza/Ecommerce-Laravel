@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api\Auth;
 
 use App\Data\Auth\AdministratorData;
-use App\Data\Auth\IndexAdministratorData;
 use App\Data\Auth\StoreAdministratorData;
 use App\Data\Auth\UpdateAdministratorData;
 use App\Http\Controllers\Controller;
@@ -22,22 +21,19 @@ use Spatie\Permission\Models\Role;
 
 class AdministratorController extends Controller
 {
-    public function index(IndexAdministratorData $data, AdministratorIndexQuery $query, Request $request): PaginatedDataCollection
+    public function index(AdministratorIndexQuery $query, Request $request): PaginatedDataCollection
     {
         $administrators = $query->paginate($request);
 
-        $administrators->through(fn (User $user) => AdministratorData::fromUser($user, $request->user()));
+        $administrators->through(fn(User $user) => AdministratorData::fromUser($user, $request->user()));
 
         return AdministratorData::collect($administrators, PaginatedDataCollection::class);
     }
 
-    /**
-     * Roles an administrator can be assigned to.
-     */
     public function roleOptions(): JsonResponse
     {
         return response()->json(
-            Role::query()->orderBy('name')->get(['id', 'name'])->map(fn (Role $role) => [
+            Role::query()->orderBy('name')->get(['id', 'name'])->map(fn(Role $role) => [
                 'id' => $role->id,
                 'name' => $role->name,
                 'is_system' => PermissionRegistry::isSystemRole($role->name),

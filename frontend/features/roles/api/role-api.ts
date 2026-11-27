@@ -81,7 +81,7 @@ export async function updateRole(
   payload: UpdateRolePayload,
 ): Promise<RoleDetail> {
   try {
-    const { data } = await api.put<RoleDetail>(`/api/v1/roles/${id}`, payload);
+    const { data } = await api.patch<RoleDetail>(`/api/v1/roles/${id}`, payload);
     return data;
   } catch (error) {
     throw toApiError(error);

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Auth;
 use App\Data\Auth\RoleData;
 use App\Data\Auth\RoleDetailData;
 use App\Data\Auth\SaveRoleData;
+use App\Data\Auth\UpdateRoleData;
 use App\Http\Controllers\Controller;
 use App\Services\Roles\CreateRoleService;
 use App\Services\Roles\DeleteRoleService;
@@ -67,7 +68,7 @@ class RoleController extends Controller
         return RoleDetailData::fromRole($role);
     }
 
-    public function update(SaveRoleData $data, Role $role): RoleDetailData|JsonResponse
+    public function update(UpdateRoleData $data, Role $role): RoleDetailData|JsonResponse
     {
         try {
             $role = app(UpdateRoleService::class)->execute($role, $data);

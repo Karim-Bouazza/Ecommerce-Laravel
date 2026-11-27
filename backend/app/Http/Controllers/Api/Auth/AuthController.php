@@ -3,11 +3,14 @@
 namespace App\Http\Controllers\Api\Auth;
 
 use App\Data\Auth\LoginData;
+use App\Data\Auth\TokenLoginData;
 use App\Data\Auth\UpdateProfileData;
 use App\Data\Auth\UserData;
 use App\Http\Controllers\Controller;
+use App\Models\Users\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
@@ -30,6 +33,30 @@ class AuthController extends Controller
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+
+        return response()->noContent();
+    }
+
+    public function tokenLogin(TokenLoginData $data)
+    {
+        $user = User::where('email', $data->email)->first();
+
+        if (! $user || ! $user->is_active || ! Hash::check($data->password, $user->password)) {
+            return response()->json([
+                'message' => 'Invalid credentials.',
+            ], 401);
+        }
+
+        return response()->json([
+            'token' => $user->createToken($data->device_name)->plainTextToken,
+            'token_type' => 'Bearer',
+            'user' => UserData::fromUser($user->load('roles.permissions')),
+        ]);
+    }
+
+    public function tokenLogout(Request $request)
+    {
+        $request->user()->currentAccessToken()?->delete();
 
         return response()->noContent();
     }
